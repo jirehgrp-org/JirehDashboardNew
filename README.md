@@ -1,5 +1,5 @@
 # Business Management System
-A comprehensive business solution with role-based access for admins, sales, and warehouse staff, built with Next.js 14, TailwindCSS, and shadcn/ui, enabling efficient operations including inventory management, POS, and order fulfillment.
+A comprehensive business solution with role-based access for admins, sales, and warehouse staff, built with Next.js 14, TailwindCSS, shadcn/ui, and Aceternity UI, enabling efficient operations including inventory management, POS, and order fulfillment.
 
 ## Overview
 This system provides a complete solution for businesses to manage their operations across multiple locations. It features role-based access control, inventory management, sales tracking, and warehouse operations.
@@ -43,10 +43,6 @@ This system provides a complete solution for businesses to manage their operatio
 
 ## License
 This project is proprietary software owned by Jireh-Group. See [LICENSE.md](LICENSE.md) for details.
-
-## Developer
-Kenean Alemayhu Tilahun  
-Email: keneanalemayhu@jireh-group.tech  
 Jireh-Group, Ethiopia
 
 ## Acknowledgments

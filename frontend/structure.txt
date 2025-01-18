@@ -1,0 +1,53 @@
+frontend/
+├── next/
+├── node_modules/
+├── public/
+└── src/
+    ├── app/
+    │   ├── auth/
+    │   │   ├── forgotPassword/
+    │   │   │   └── page.tsx
+    │   │   ├── login/
+    │   │   │   └── page.tsx
+    │   │   ├── register/
+    │   │   │   └── page.tsx
+    │   │   ├── resetPassword/
+    │   │   │   └── page.tsx
+    │   │   ├── subscription/
+    │   │   │   └── page.tsx
+    │   │   └── layout.tsx
+    │   ├── favicon.ico
+    │   ├── globals.css
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   └── providers.tsx
+    ├── components/
+    │   ├── auth/
+    │   │   ├── LoginForm.tsx
+    │   │   └── RegisterForm.tsx
+    │   ├── common/
+    │   │   │   ├── AuthHeader.tsx
+    │   │   │   ├── Header.tsx
+    │   │   │   └── LanguageToggle.tsx
+    │   ├── context/
+    │   │   │   ├── LanguageContext.tsx
+    │   │   │   └── ThemeToggle.tsx
+    │   ├── ui/
+    │   │   └── Aceternity
+    ├── libs/
+    │   └── utils.ts
+    ├── translations/
+    │   ├── auth/
+    │   │   ├── am.ts
+    │   │   ├── en.ts
+    │   │   └── index.ts
+    │   ├── am.ts
+    │   ├── en.ts
+    │   └── index.ts
+    ├── .gitignore
+    ├── components.json
+    ├── eslint.config.mjs
+    ├── next-env.d.ts
+    ├── next.config.ts
+    ├── package-lock.json
+    └── package.json

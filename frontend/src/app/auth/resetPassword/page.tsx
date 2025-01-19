@@ -1,9 +1,9 @@
-import { LoginForm } from "@/components/auth/ResetPasswordForm";
+import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
 export default function Page() {
   return (
     <div className="flex h-screen w-full items-center justify-center px-4">
-      <LoginForm />
+      <ResetPasswordForm />
     </div>
   );
 }

@@ -16,7 +16,6 @@ export const TypewriterEffect = ({
   className?: string;
   cursorClassName?: string;
 }) => {
-  // split text inside of words into array of characters
   const wordsArray = words.map((word) => {
     return {
       ...word,
@@ -26,6 +25,7 @@ export const TypewriterEffect = ({
 
   const [scope, animate] = useAnimate();
   const isInView = useInView(scope);
+
   useEffect(() => {
     if (isInView) {
       animate(
@@ -42,7 +42,7 @@ export const TypewriterEffect = ({
         }
       );
     }
-  }, [isInView]);
+  }, [isInView, animate]);
 
   const renderWords = () => {
     return (

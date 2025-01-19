@@ -23,8 +23,10 @@ frontend/
     │   └── providers.tsx
     ├── components/
     │   ├── auth/
+    │   │   ├── ForgotPasswordForm.tsx
     │   │   ├── LoginForm.tsx
-    │   │   └── RegisterForm.tsx
+    │   │   ├── RegisterForm.tsx
+    │   │   └── ResetPasswordForm.tsx
     │   ├── common/
     │   │   │   ├── AuthHeader.tsx
     │   │   │   ├── Header.tsx

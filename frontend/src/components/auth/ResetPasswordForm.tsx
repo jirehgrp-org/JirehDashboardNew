@@ -7,9 +7,9 @@ import { translations } from "@/translations/auth";
 import AuthHeader from "@/components/common/AuthHeader";
 import { useLanguage } from "@/components/context/LanguageContext";
 
-export function LoginForm() {
+export function ResetPasswordForm() {
   const { language } = useLanguage();
-  const t = translations[language].login;
+  const t = translations[language].resetPassword;
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,21 +35,6 @@ export function LoginForm() {
         <form className="my-8" onSubmit={handleSubmit}>
           <LabelInputContainer className="mb-4">
             <Label
-              htmlFor="email"
-              className="text-neutral-700 dark:text-neutral-300"
-            >
-              {t.usernameOrPhone}
-            </Label>
-            <Input
-              id="email"
-              placeholder={t.usernamePlaceholder}
-              type="text"
-              disabled={isLoading}
-              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
-            />
-          </LabelInputContainer>
-          <LabelInputContainer className="mb-8">
-            <Label
               htmlFor="password"
               className="text-neutral-700 dark:text-neutral-300"
             >
@@ -57,43 +42,38 @@ export function LoginForm() {
             </Label>
             <Input
               id="password"
-              placeholder="••••••••"
-              type="password"
+              placeholder={t.passwordPlaceholder}
+              type="text"
               disabled={isLoading}
-              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
+          <LabelInputContainer className="mb-4">
+            <Label
+              htmlFor="password"
+              className="text-neutral-700 dark:text-neutral-300"
+            >
+              {t.confirmPassword}
+            </Label>
+            <Input
+              id="password"
+              placeholder={t.passwordPlaceholder}
+              type="text"
+              disabled={isLoading}
+              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+            />
+          </LabelInputContainer>
+          
+          <br />
 
           <button
             className="bg-neutral-900 dark:bg-neutral-100 relative group/btn block w-full text-white dark:text-neutral-900 rounded-md h-10 font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? t.loggingIn : t.login}
+            {isLoading ? t.submitting : t.resetButton}
             <BottomGradient />
           </button>
-
-          <div className="bg-gradient-to-r from-transparent via-neutral-200 dark:via-neutral-800 to-transparent my-8 h-[1px] w-full" />
-
-          <div className="text-center space-y-4">
-            <div>
-              <a
-                href="./forgotPassword"
-                className="text-neutral-700 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200 hover:underline text-sm"
-              >
-                {t.forgotPassword}
-              </a>
-            </div>
-            <div className="text-neutral-600 dark:text-neutral-400">
-              <span>{t.noAccount}</span>
-              <a
-                href="./register"
-                className="text-neutral-800 dark:text-neutral-200 font-medium ml-1 hover:underline"
-              >
-                {t.register}
-              </a>
-            </div>
-          </div>
         </form>
       </div>
     </>

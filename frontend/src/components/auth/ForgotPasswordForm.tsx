@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
@@ -7,17 +8,22 @@ import { translations } from "@/translations/auth";
 import AuthHeader from "@/components/common/AuthHeader";
 import { useLanguage } from "@/components/context/LanguageContext";
 
-export function LoginForm() {
+export function ForgotPasswordForm() {
   const { language } = useLanguage();
-  const t = translations[language].login;
+  const t = translations[language].forgotPassword;
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState(""); // Add state for email
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!email) return; // Extra validation check
+
     setIsLoading(true);
+    // Add your email validation and API call here
     setTimeout(() => {
       setIsLoading(false);
-      console.log("Form submitted");
+      router.push("/auth/resetPassword"); // Only navigate after successful submission
     }, 3000);
   };
 
@@ -38,62 +44,28 @@ export function LoginForm() {
               htmlFor="email"
               className="text-neutral-700 dark:text-neutral-300"
             >
-              {t.usernameOrPhone}
+              {t.email}
             </Label>
             <Input
               id="email"
-              placeholder={t.usernamePlaceholder}
-              type="text"
+              placeholder={t.emailPlaceholder}
+              type="email" // Changed to email type for better validation
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
-          <LabelInputContainer className="mb-8">
-            <Label
-              htmlFor="password"
-              className="text-neutral-700 dark:text-neutral-300"
-            >
-              {t.password}
-            </Label>
-            <Input
-              id="password"
-              placeholder="••••••••"
-              type="password"
-              disabled={isLoading}
-              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-            />
-          </LabelInputContainer>
-
+          
           <button
             className="bg-neutral-900 dark:bg-neutral-100 relative group/btn block w-full text-white dark:text-neutral-900 rounded-md h-10 font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? t.loggingIn : t.login}
+            {isLoading ? t.submitting : t.resetPassword}
             <BottomGradient />
           </button>
-
-          <div className="bg-gradient-to-r from-transparent via-neutral-200 dark:via-neutral-800 to-transparent my-8 h-[1px] w-full" />
-
-          <div className="text-center space-y-4">
-            <div>
-              <a
-                href="./forgotPassword"
-                className="text-neutral-700 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200 hover:underline text-sm"
-              >
-                {t.forgotPassword}
-              </a>
-            </div>
-            <div className="text-neutral-600 dark:text-neutral-400">
-              <span>{t.noAccount}</span>
-              <a
-                href="./register"
-                className="text-neutral-800 dark:text-neutral-200 font-medium ml-1 hover:underline"
-              >
-                {t.register}
-              </a>
-            </div>
-          </div>
         </form>
       </div>
     </>

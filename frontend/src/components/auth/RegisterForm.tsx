@@ -221,7 +221,7 @@ export function RegisterForm() {
             type="submit"
             disabled={isLoading}
           >
-            {isLoading ? t.registering : t.register} &rarr;
+            {isLoading ? t.registering : t.register}
             <BottomGradient />
           </button>
 

@@ -1,3 +1,5 @@
+// @/trasnlations/auth/am.tsx
+
 export const am = {
   login: {
     title: "ወደ አካውንትዎ ይግቡ", // Wede akawuntiwo yigbu

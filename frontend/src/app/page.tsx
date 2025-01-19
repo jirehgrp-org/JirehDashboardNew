@@ -1,3 +1,5 @@
+// @/app/page.tsx
+
 "use client";
 
 import { motion } from "framer-motion";
@@ -34,7 +36,7 @@ const Home = () => {
         }}
         className="relative flex flex-col gap-4 items-center justify-center min-h-screen px-4"
       >
-        <div className="text-3xl md:text-7xl font-bold text-slate-900 dark:text-white text-center">
+        <div className="text-3xl md:text-9xl font-bold text-slate-900 dark:text-white text-center">
           {t.welcome}
         </div>
         <div className="font-extralight text-base md:text-1xl text-slate-800 dark:text-neutral-200 py-4">

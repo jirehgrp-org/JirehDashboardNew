@@ -1,4 +1,5 @@
-// translations/auth/index.ts
+// @/trasnlations/auth/index.tsx
+
 import { en } from "./en";
 import { am } from "./am";
 

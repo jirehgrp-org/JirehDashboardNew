@@ -1,3 +1,5 @@
+// @/trasnlations/auth/en.tsx
+
 export const en = {
   login: {
     title: "Login to your account",

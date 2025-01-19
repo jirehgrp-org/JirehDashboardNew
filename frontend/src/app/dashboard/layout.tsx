@@ -1,9 +1,9 @@
-// @/app/auth/layout.tsx
+// @/app/dashboard/layout.tsx
 
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Authentication | JirehDashboard",
+  title: "SuperAdmin | JirehDashboard",
 };
 
 export default function AuthLayout({

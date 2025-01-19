@@ -1,4 +1,5 @@
-// components/common/LanguageToggle.tsx
+// @/components/common/LanguageToggle.tsx
+
 "use client";
 
 import * as React from "react";

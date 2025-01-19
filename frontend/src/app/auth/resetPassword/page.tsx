@@ -1,3 +1,5 @@
+// @/app/auth/resetPassword/page.tsx
+
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
 export default function Page() {

@@ -1,3 +1,5 @@
+// @/components/auth/ResetPasswordForm.tsx
+
 "use client";
 import React, { useState } from "react";
 import { Label } from "../ui/label";
@@ -63,7 +65,7 @@ export function ResetPasswordForm() {
               className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
-          
+
           <br />
 
           <button

@@ -2,17 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 30 20% 97%; /* Light warm gray */
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 30 20% 97%; /* Match background */
     --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
+    --popover: 30 20% 97%; /* Match background */
     --popover-foreground: 240 10% 3.9%;
     --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
@@ -35,11 +31,11 @@ body {
     --radius: 0.5rem;
   }
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 240 10% 8%; /* Softer dark gray */
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 240 10% 8%; /* Match background */
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 8%; /* Match background */
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
@@ -69,8 +65,34 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  :root {
+    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace, monospace;
+  }
+  *:lang(en) {
+    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace, monospace;
+  }
+  *:lang(am) {
+    font-family: var(--font-entoto), var(--font-geist-sans), system-ui, sans-serif;
+  }
+  @font-face {
+    font-family: 'System Font';
+    src: local('Entoto');
+    unicode-range: U+1200-137F;
+  }
+}
+
+@font-face {
+  font-family: 'Entoto';
+  src: url('/fonts/entoto.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 .transition-theme {
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.amharic-text {
+  font-family: 'Entoto', system-ui, -apple-system, sans-serif;
 }

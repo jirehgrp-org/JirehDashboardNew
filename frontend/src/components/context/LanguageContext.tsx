@@ -30,6 +30,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem("jireh-language", language);
+    // Set the lang attribute on the html tag
+    document.documentElement.lang = language;
   }, [language]);
 
   // Handle hydration mismatch
@@ -43,9 +45,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
-      {children}
-    </LanguageContext.Provider>
+    <div lang={language}>
+      <LanguageContext.Provider value={{ language, setLanguage }}>
+        {children}
+      </LanguageContext.Provider>
+    </div>
   );
 }
 

@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/dashboard/Sidebar.tsx
 
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarBody,
@@ -10,21 +12,31 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   IconBrandTabler,
-  IconUserBolt,
   IconChartHistogram,
   IconReportAnalytics,
-  IconFileDollar,
-  IconClipboardList,
-  IconCategory,
-  IconMapRoute,
+  IconDeviceAnalytics,
+  IconUsers,
+  IconCreditCardPay,
   IconReport,
 } from "@tabler/icons-react";
-import { } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Building2, Cog, Crown, LogOut } from "lucide-react";
+import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Dashboard from "./Dashboard";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 // Section Label component
 const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
@@ -43,24 +55,30 @@ const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
 
 export function SidebarSuperAdmin() {
   const [open, setOpen] = useState(false);
+  const { language } = useLanguage();
+  const router = useRouter();
+  const t = translations.superadmin[language].sidebar;
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/auth/login");
+  };
 
   // Organized links by sections
   const sidebarSections = [
     {
-      label: "Overview",
+      label: t.overview,
       links: [
         {
-          label: "Overview",
+          label: t.overview,
           href: "#",
-          description: "Overview of businesses",
           icon: (
             <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Activity Log",
+          label: t.activityLog,
           href: "#",
-          description: "Analytics data",
           icon: (
             <IconChartHistogram className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -68,70 +86,63 @@ export function SidebarSuperAdmin() {
       ],
     },
     {
-      label: "Stores",
+      label: t.businesses,
       links: [
         {
-          label: "All Businesses",
+          label: t.allBussinesses,
           href: "#",
-          description: "Manage orders",
           icon: (
-            <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <Building2 className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Subscriptions",
+          label: t.subscriptions,
           href: "#",
-          description: "View sales reports",
           icon: (
             <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Store Analytics",
+          label: t.businessAnalytics,
           href: "#",
-          description: "Track expenses",
           icon: (
-            <IconFileDollar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <IconDeviceAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
       ],
     },
     {
-      label: "Platform",
+      label: t.platform,
       links: [
         {
-          label: "System Settings",
+          label: t.systemSettings,
           href: "#",
-          description: "Manage items",
           icon: (
-            <IconClipboardList className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <Cog className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "User Management",
+          label: t.userManagement,
           href: "#",
-          description: "Manage categories",
           icon: (
-            <IconCategory className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Billing & Payments",
+          label: t.billingPayments,
           href: "#",
-          description: "Manage locations",
           icon: (
-            <IconMapRoute className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <IconCreditCardPay className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
       ],
     },
     {
-      label: "Other",
+      label: t.others,
       links: [
         {
-          label: "Reports",
+          label: t.reports,
           href: "#",
-          description: "View reports",
           icon: (
             <IconReport className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -149,11 +160,12 @@ export function SidebarSuperAdmin() {
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-8">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col">
+            {open ? <Logo t={t} /> : <LogoIcon />}
+            <Separator className="my-4 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
+            <div className="mt-0 flex flex-col">
               {sidebarSections.map((section, idx) => (
                 <React.Fragment key={idx}>
-                  {idx > 0 && <Separator className="my-4 opacity-50" />}
+                  {idx > 0 && <Separator className="my-2 opacity-50" />}
                   <SectionLabel label={section.label} open={open} />
                   <div className="flex flex-col gap-">
                     {section.links.map((link, linkIdx) => (
@@ -166,28 +178,41 @@ export function SidebarSuperAdmin() {
           </div>
           <Separator className="my-4 opacity-50" />
           <div>
-            <SidebarLink
-              link={{
-                label: (
-                  <div className="flex flex-col">
-                    <span>Abebe Kebede</span>
-                    <span className="text-xs text-neutral-500">
-                      abebe.kebede@example.com
-                    </span>
-                  </div>
-                ),
-                href: "#",
-                icon: (
-                  <Image
-                    src="/images/avatar/steve.jpg"
-                    className="h-7 w-7 flex-shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
+            <Separator className="my-1.5 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SidebarLink
+                  link={{
+                    label: t.logout,
+                    href: "#",
+                    icon: (
+                      <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+                    ),
+                  }}
+                />
+              </AlertDialogTrigger>
+              <AlertDialogContent
+                className="z-[1050]" // Ensure it appears above the sidebar
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.logoutConfirmation}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t.logoutDescription}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setOpen(false); // Close the sidebar before logout
+                      handleLogout();
+                    }}
+                  >
+                    {t.logout}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </SidebarBody>
       </Sidebar>
@@ -196,21 +221,22 @@ export function SidebarSuperAdmin() {
   );
 }
 
-// Keep existing Logo and LogoIcon components as they are
-export const Logo = () => {
+export const Logo: React.FC<{ t: any }> = ({ t }) => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <Crown className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-medium text-black dark:text-white whitespace-pre"
       >
-        <h1>Owner</h1>
-        <p className="text-xs text-neutral-500">Owner of the business</p>
+        <h1>{t.superAdmin}</h1>
+        <p className="text-xs text-neutral-500">
+          {t.superAdminOfThisDashboard}
+        </p>
       </motion.span>
     </Link>
   );
@@ -220,9 +246,9 @@ export const LogoIcon = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <Crown className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
     </Link>
   );
 };

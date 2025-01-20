@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/dashboard/Sidebar.tsx
 
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarBody,
@@ -19,13 +21,26 @@ import {
   IconCategory,
   IconMapRoute,
   IconReport,
+  IconTower
 } from "@tabler/icons-react";
-import { User, HardHat } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { User, HardHat, LogOut } from "lucide-react";
+import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Dashboard from "./Dashboard";
+import { useLanguage } from "@/components/context/LanguageContext";
 
 // Section Label component
 const SectionLabel: React.FC<{ label: string; open: boolean }> = ({ label, open }) => {
@@ -39,26 +54,33 @@ const SectionLabel: React.FC<{ label: string; open: boolean }> = ({ label, open 
   );
 };
 
+
 export function SidebarDashboard() {
   const [open, setOpen] = useState(false);
+  const { language } = useLanguage();
+  const router = useRouter();
+  const t = translations.dashboard[language].sidebar;
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/auth/login");
+  };
 
   // Organized links by sections
   const sidebarSections = [
     {
-      label: "Analytics",
+      label: t.analytics,
       links: [
         {
-          label: "Overview",
+          label: t.overview,
           href: "#",
-          description: "Overview of the dashboard",
           icon: (
             <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Analytics",
+          label: t.analytics,
           href: "#",
-          description: "Analytics data",
           icon: (
             <IconChartHistogram className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -66,36 +88,32 @@ export function SidebarDashboard() {
       ],
     },
     {
-      label: "Operations",
+      label: t.operations,
       links: [
         {
-          label: "Orders",
+          label: t.orders,
           href: "#",
-          description: "Manage orders",
           icon: (
             <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Sales Report",
+          label: t.salesReport,
           href: "#",
-          description: "View sales reports",
           icon: (
             <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Expenses",
+          label: t.expenses,
           href: "#",
-          description: "Track expenses",
           icon: (
             <IconFileDollar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Profit & loss",
+          label: t.profitLoss,
           href: "#",
-          description: "View profit and loss",
           icon: (
             <IconCashRegister className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -103,28 +121,25 @@ export function SidebarDashboard() {
       ],
     },
     {
-      label: "Inventory",
+      label: t.inventory,
       links: [
         {
-          label: "Items",
+          label: t.items,
           href: "#",
-          description: "Manage items",
           icon: (
             <IconClipboardList className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Categories",
+          label: t.categories,
           href: "#",
-          description: "Manage categories",
           icon: (
             <IconCategory className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Locations",
+          label: t.locations,
           href: "#",
-          description: "Manage locations",
           icon: (
             <IconMapRoute className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -132,20 +147,18 @@ export function SidebarDashboard() {
       ],
     },
     {
-      label: "People",
+      label: t.people,
       links: [
         {
-          label: "Employees",
+          label: t.employees,
           href: "#",
-          description: "Manage employees",
           icon: (
             <HardHat className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
-          label: "Users",
+          label: t.users,
           href: "#",
-          description: "Manage users",
           icon: (
             <User className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -153,12 +166,11 @@ export function SidebarDashboard() {
       ],
     },
     {
-      label: "Other",
+      label: t.others,
       links: [
         {
-          label: "Reports",
+          label: t.reports,
           href: "#",
-          description: "View reports",
           icon: (
             <IconReport className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -174,15 +186,16 @@ export function SidebarDashboard() {
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-8">
+        <SidebarBody className="justify-between">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col">
+            {open ? <Logo t={t} /> : <LogoIcon />}
+            <Separator className="my-4 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
+            <div className="mt-0 flex flex-col">
               {sidebarSections.map((section, idx) => (
                 <React.Fragment key={idx}>
-                  {idx > 0 && <Separator className="my-4 opacity-50" />}
+                  {idx > 0 && <Separator className="my-2 opacity-50" />}
                   <SectionLabel label={section.label} open={open} />
-                  <div className="flex flex-col gap-">
+                  <div className="flex flex-col">
                     {section.links.map((link, linkIdx) => (
                       <SidebarLink key={linkIdx} link={link} />
                     ))}
@@ -191,30 +204,42 @@ export function SidebarDashboard() {
               ))}
             </div>
           </div>
-          <Separator className="my-4 opacity-50" />
           <div>
-            <SidebarLink
-              link={{
-                label: (
-                  <div className="flex flex-col">
-                    <span>Abebe Kebede</span>
-                    <span className="text-xs text-neutral-500">
-                      abebe.kebede@example.com
-                    </span>
-                  </div>
-                ),
-                href: "#",
-                icon: (
-                  <Image
-                    src="/images/avatar/steve.jpg"
-                    className="h-7 w-7 flex-shrink-0 rounded-full"
-                    width={50}
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
+            <Separator className="my-1.5 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <SidebarLink
+                  link={{
+                    label: t.logout,
+                    href: "#",
+                    icon: (
+                      <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+                    ),
+                  }}
+                />
+              </AlertDialogTrigger>
+              <AlertDialogContent
+                className="z-[1050]" // Ensure it appears above the sidebar
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.logoutConfirmation}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t.logoutDescription}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setOpen(false); // Close the sidebar before logout
+                      handleLogout();
+                    }}
+                  >
+                    {t.logout}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </SidebarBody>
       </Sidebar>
@@ -223,21 +248,20 @@ export function SidebarDashboard() {
   );
 }
 
-// Keep existing Logo and LogoIcon components as they are
-export const Logo = () => {
+export const Logo: React.FC<{ t: any }> = ({ t }) => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-medium text-black dark:text-white whitespace-pre"
       >
-        <h1>Owner</h1>
-        <p className="text-xs text-neutral-500">Owner of the business</p>
+        <h1>{t.owner}</h1>
+        <p className="text-xs text-neutral-500">{t.ownerOfTheBusiness}</p>
       </motion.span>
     </Link>
   );
@@ -247,9 +271,9 @@ export const LogoIcon = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
     </Link>
   );
 };

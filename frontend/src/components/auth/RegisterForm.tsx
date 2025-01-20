@@ -12,13 +12,19 @@ import {
   SelectValue,
 } from "../ui/select";
 import { cn } from "@/lib/utils";
-import { translations } from "@/translations/auth";
-import AuthHeader from "@/components/common/AuthHeader";
+import { Eye, EyeClosed, Info } from "lucide-react";
+import { translations } from "@/translations";
+import { LinkPreview } from "@/components/ui/Aceternity/link-preview";
+import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
+
 
 export function RegisterForm() {
   const { language } = useLanguage();
-  const t = translations[language].register;
+  const t = translations.auth[language].register;
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -56,7 +62,7 @@ export function RegisterForm() {
 
   return (
     <>
-      <AuthHeader />
+      <Header />
       <div className="max-w-2xl mx-auto mt-12 p-4">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.welcome}
@@ -125,30 +131,67 @@ export function RegisterForm() {
               </LabelInputContainer>
               <LabelInputContainer className="mb-4">
                 <Label htmlFor="phone">{t.phone}</Label>
-                <Input
-                  id="phone"
-                  placeholder={t.phonePlaceholder}
-                  type="tel"
-                  disabled={isLoading}
-                />
+                <div className="flex">
+                  <div className="flex items-center justify-center px-3 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                    +251
+                  </div>
+                  <Input
+                    id="phone"
+                    placeholder={t.phonePlaceholder}
+                    type="tel"
+                    disabled={isLoading}
+                    className="rounded-l-none border-l-0"
+                  />
+                </div>
               </LabelInputContainer>
               <LabelInputContainer className="mb-4">
                 <Label htmlFor="password">{t.password}</Label>
-                <Input
-                  id="password"
-                  placeholder="••••••••"
-                  type="password"
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    placeholder="••••••••"
+                    type={showPassword ? "text" : "password"}
+                    disabled={isLoading}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? (
+                      <EyeClosed className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </LabelInputContainer>
+
               <LabelInputContainer className="mb-8">
                 <Label htmlFor="cpassword">{t.confirmPassword}</Label>
-                <Input
-                  id="cpassword"
-                  placeholder="••••••••"
-                  type="password"
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    id="cpassword"
+                    placeholder="••••••••"
+                    type={showConfirmPassword ? "text" : "password"}
+                    disabled={isLoading}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300"
+                    disabled={isLoading}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeClosed className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </LabelInputContainer>
             </div>
 
@@ -207,13 +250,19 @@ export function RegisterForm() {
                 />
               </LabelInputContainer>
               <LabelInputContainer className="mb-4">
-                <Label htmlFor="businessPhone">{t.businessPhone}</Label>
-                <Input
-                  id="businessPhone"
-                  placeholder={t.businessPhonePlaceholder}
-                  type="tel"
-                  disabled={isLoading}
-                />
+                <Label htmlFor="phone">{t.businessPhone}</Label>
+                <div className="flex">
+                  <div className="flex items-center justify-center px-3 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                    +251
+                  </div>
+                  <Input
+                    id="phone"
+                    placeholder={t.businessPhonePlaceholder}
+                    type="tel"
+                    disabled={isLoading}
+                    className="rounded-l-none border-l-0"
+                  />
+                </div>
               </LabelInputContainer>
             </div>
           </div>
@@ -226,13 +275,34 @@ export function RegisterForm() {
             {isLoading ? t.registering : t.register}
             <BottomGradient />
           </button>
+          <br />
+
+          <div className="text-center text-sm">
+            <div className="text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1 text-sm">
+              <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
+              {t.terms}{" "}
+              <LinkPreview
+                url="/legal/terms"
+                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+              >
+                {t.termsLink}
+              </LinkPreview>{" "}
+              {t.and}{" "}
+              <LinkPreview
+                url="/legal/privacy"
+                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+              >
+                {t.privacyLink}
+              </LinkPreview>
+            </div>
+          </div>
 
           <div className="bg-gradient-to-r from-transparent via-neutral-200 dark:via-neutral-800 to-transparent my-8 h-[1px] w-full" />
-          <div className="text-center text-neutral-600 dark:text-neutral-400">
-            <span>{t.haveAccount}</span>
+          <div className="text-center text-neutral-800 dark:text-neutral-200">
+            <span>{t.haveAccount} </span>
             <a
               href="./login"
-              className="text-neutral-800 dark:text-white font-medium ml-1 hover:underline"
+              className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
             >
               {t.login}
             </a>

@@ -13,7 +13,7 @@ import Header from "@/components/common/Header";
 
 const Home = () => {
   const { language } = useLanguage();
-  const t = translations[language].home;
+  const t = translations.root[language].home;
   const router = useRouter();
 
   const words = [

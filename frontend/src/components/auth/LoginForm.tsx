@@ -5,14 +5,17 @@ import React, { useState } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
-import { translations } from "@/translations/auth";
-import AuthHeader from "@/components/common/AuthHeader";
+import { Eye, EyeClosed } from "lucide-react";
+import { translations } from "@/translations";
+import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
 
 export function LoginForm() {
   const { language } = useLanguage();
-  const t = translations[language].login;
+  const t = translations.auth[language].login;
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,7 +28,7 @@ export function LoginForm() {
 
   return (
     <>
-      <AuthHeader />
+      <Header />
       <div className="max-w-md mx-auto mt-12 p-4">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.title}
@@ -50,20 +53,29 @@ export function LoginForm() {
               className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
-          <LabelInputContainer className="mb-8">
-            <Label
-              htmlFor="password"
-              className="text-neutral-700 dark:text-neutral-300"
-            >
-              {t.password}
-            </Label>
-            <Input
-              id="password"
-              placeholder="••••••••"
-              type="password"
-              disabled={isLoading}
-              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-            />
+          <LabelInputContainer className="mb-4">
+            <Label htmlFor="password">{t.password}</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                placeholder="••••••••"
+                type={showPassword ? "text" : "password"}
+                disabled={isLoading}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-600 dark:text-neutral-400 dark:hover:text-neutral-300"
+                disabled={isLoading}
+              >
+                {showPassword ? (
+                  <EyeClosed className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </LabelInputContainer>
 
           <button
@@ -75,22 +87,22 @@ export function LoginForm() {
             <BottomGradient />
           </button>
 
-          <div className="bg-gradient-to-r from-transparent via-neutral-200 dark:via-neutral-800 to-transparent my-8 h-[1px] w-full" />
+          <br />
 
           <div className="text-center space-y-4">
             <div>
               <a
                 href="./forgotPassword"
-                className="text-neutral-700 dark:text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-200 hover:underline text-sm"
+                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80 text-sm"
               >
                 {t.forgotPassword}
               </a>
             </div>
             <div className="text-neutral-600 dark:text-neutral-400">
-              <span>{t.noAccount}</span>
+              <span>{t.noAccount} </span>
               <a
                 href="./register"
-                className="text-neutral-800 dark:text-neutral-200 font-medium ml-1 hover:underline"
+                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
               >
                 {t.register}
               </a>

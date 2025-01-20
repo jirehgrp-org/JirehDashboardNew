@@ -1,14 +1,28 @@
-// @/trasnlations/am.tsx
+// @/trasnlations/dashboard/am.tsx
 
 export const am = {
-  home: {
-    words: {
-      modern: "ዘመናዊ",
-      dashboard: "ዳሽቦርድ",
-      forYourBusinessFrom: "ለእርስዎ ስራዎች ከ",
-      jireh: "ጃይረ",
-    },
-    welcome: "እንኳን ወደ ጃይረ ዳሽቦርድ መጣችሁ",
-    getStarted: "ይጀመሩ",
+  sidebar: {
+    owner: "ባለቤት ",
+    ownerOfTheBusiness: "የስራው ባለቤት",
+    analytics: "ትንተናዊ",
+    overview: "አጠቃላይ እይታ",
+    operations: "ክንዋኔዎች",
+    orders: "ትእዛዞች",
+    salesReport: "የሽያጭ ሪፖርት",
+    expenses: "ወጪ",
+    profitLoss: "የትርፍና ኪሳራ ማሳያ",
+    inventory: "የእቃ ዝርዝር እና ብዛት",
+    items: "እቃዎች",
+    categories: "ምደቦች",
+    locations: "አድራሻዎች",
+    people: "ሰዎች",
+    employees: "ሰራተኞች",
+    users: "ተጠቃሚዎች",
+    others: "ሌሎች",
+    reports: "ሪፖርቶች",
+    logout: "ይውጡ",
+    logoutConfirmation: "እርግጠኛ ነዎት መውጣት ይፈልጋሉ?",
+    logoutDescription: "ከአካውንትዎ ይወጣሉ እና ወደ መግቢያ ገጽ ይመለሳሉ።",
+    cancel: "ይቅር",
   },
 };

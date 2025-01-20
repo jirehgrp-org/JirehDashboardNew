@@ -2,6 +2,10 @@ frontend/
 ├── next/
 ├── node_modules/
 ├── public/
+│   ├── fonts/
+│   │   ├── entoto.ttf
+│   │   └── fantuwua.ttf
+│   └── images/
 └── src/
     ├── app/
     │   ├── auth/
@@ -15,7 +19,19 @@ frontend/
     │   │   │   └── page.tsx
     │   │   ├── subscription/
     │   │   │   └── page.tsx
+    │   │   ├── layout.tsx
+    │   ├── dashboard/
+    │   │   ├── layout.tsx
+    │   │   └── page.tsx
+    │   ├── legal/
+    │   │   ├── privacy/
+    │   │   │   └── page.tsx
+    │   │   ├── terms/
+    │   │   │   └── page.tsx
     │   │   └── layout.tsx
+    │   ├── superadmin/
+    │   │   │   ├── layout.tsx
+    │   │   │   └── page.tsx
     │   ├── favicon.ico
     │   ├── globals.css
     │   ├── layout.tsx
@@ -28,21 +44,37 @@ frontend/
     │   │   ├── RegisterForm.tsx
     │   │   └── ResetPasswordForm.tsx
     │   ├── common/
-    │   │   │   ├── AuthHeader.tsx
-    │   │   │   ├── Header.tsx
-    │   │   │   └── LanguageToggle.tsx
+    │   │   ├── Header.tsx
+    │   │   └── LanguageToggle.tsx
     │   ├── context/
-    │   │   │   ├── LanguageContext.tsx
-    │   │   │   └── ThemeToggle.tsx
+    │   │   ├── LanguageContext.tsx
+    │   │   └── ThemeContext.tsx
+    │   ├── dashboard/
+    │   │   ├── Dashboard.tsx
+    │   │   └── Sidebar.tsx
+    │   ├── Legal/
+    │   │   ├── Privacy.tsx
+    │   │   └── Terms.tsx
+    │   ├── superadmin/
+    │   │   ├── Dashboard.tsx
+    │   │   └── Sidebar.tsx
     │   ├── ui/
-    │   │   └── Aceternity
+    │   │   └── Aceternity/
     ├── libs/
     │   └── utils.ts
     ├── translations/
     │   ├── auth/
     │   │   ├── am.ts
-    │   │   ├── en.ts
-    │   │   └── index.ts
+    │   │   └── en.ts
+    │   ├── dashboard/
+    │   │   ├── am.ts
+    │   │   └── en.ts
+    │   ├── legal/
+    │   │   ├── am.ts
+    │   │   └── en.ts
+    │   ├── superadmin/
+    │   │   ├── am.ts
+    │   │   └── en.ts
     │   ├── am.ts
     │   ├── en.ts
     │   └── index.ts

@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { cn } from "@/lib/utils";
-import { translations } from "@/translations/auth";
-import AuthHeader from "@/components/common/AuthHeader";
+import { translations } from "@/translations";
+import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
 
 export function ForgotPasswordForm() {
   const { language } = useLanguage();
-  const t = translations[language].forgotPassword;
+  const t = translations.auth[language].forgotPassword;
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState(""); // Add state for email
   const router = useRouter();
@@ -31,7 +31,7 @@ export function ForgotPasswordForm() {
 
   return (
     <>
-      <AuthHeader />
+      <Header />
       <div className="max-w-md mx-auto mt-12 p-4">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.title}
@@ -59,7 +59,7 @@ export function ForgotPasswordForm() {
               className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
-          
+
           <button
             className="bg-neutral-900 dark:bg-neutral-100 relative group/btn block w-full text-white dark:text-neutral-900 rounded-md h-10 font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors"
             type="submit"

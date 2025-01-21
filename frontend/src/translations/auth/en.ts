@@ -51,6 +51,7 @@ export const en = {
     registering: "Registering...",
     register: "Register",
     haveAccount: "Already have an account?",
+    ነው: "",
     login: "Login",
   },
   forgotPassword: {

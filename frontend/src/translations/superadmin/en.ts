@@ -5,7 +5,7 @@ export const en = {
     overview: "Overview",
     activityLog: "Activity Log",
     businesses: "Businesses",
-    allBussinesses: "All Bussinesses",
+    allBusinesses: "All Businesses",
     subscriptions: "Subscriptions",
     businessAnalytics: "Business Analytics",
     platform: "Platform",

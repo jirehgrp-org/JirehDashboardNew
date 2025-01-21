@@ -63,7 +63,7 @@ export function RegisterForm() {
   return (
     <>
       <Header />
-      <div className="max-w-2xl mx-auto mt-12 p-4">
+      <div className="max-w-4xl mx-auto mt-12 p-4">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.welcome}
         </h2>
@@ -282,18 +282,19 @@ export function RegisterForm() {
               <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
               {t.terms}{" "}
               <LinkPreview
-                url="/legal/terms"
+                url="https://rbms.jirehgrp.com/legal/terms"
                 className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
               >
                 {t.termsLink}
               </LinkPreview>{" "}
               {t.and}{" "}
               <LinkPreview
-                url="/legal/privacy"
+                url="https://rbms.jirehgrp.com/legal/privacy"
                 className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
               >
                 {t.privacyLink}
               </LinkPreview>
+              {t.ነው}
             </div>
           </div>
 
@@ -335,3 +336,5 @@ const LabelInputContainer = ({
     </div>
   );
 };
+
+export default LinkPreview;

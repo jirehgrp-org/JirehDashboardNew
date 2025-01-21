@@ -19,8 +19,32 @@ frontend/
     │   │   │   └── page.tsx
     │   │   ├── subscription/
     │   │   │   └── page.tsx
-    │   │   ├── layout.tsx
+    │   │   └── layout.tsx
     │   ├── dashboard/
+    │   │   ├── analytics/
+    │   │   │   └── page.tsx
+    │   │   ├── categories/
+    │   │   │   └── page.tsx
+    │   │   ├── employees/
+    │   │   │   └── page.tsx
+    │   │   ├── expenses/
+    │   │   │   └── page.tsx
+    │   │   ├── items/
+    │   │   │   └── page.tsx
+    │   │   ├── locations/
+    │   │   │   └── page.tsx
+    │   │   ├── orders/
+    │   │   │   └── page.tsx
+    │   │   ├── overview/
+    │   │   │   └── page.tsx
+    │   │   ├── profitLoss/
+    │   │   │   └── page.tsx
+    │   │   ├── reports/
+    │   │   │   └── page.tsx
+    │   │   ├── salesReport/
+    │   │   │   └── page.tsx
+    │   │   ├── users/
+    │   │   │   └── page.tsx
     │   │   ├── layout.tsx
     │   │   └── page.tsx
     │   ├── legal/
@@ -30,6 +54,23 @@ frontend/
     │   │   │   └── page.tsx
     │   │   └── layout.tsx
     │   ├── superadmin/
+    │   │   ├── activityLog/
+    │   │   │   └── page.tsx
+    │   │   ├── allBusinesses/
+    │   │   │   └── page.tsx
+    │   │   ├── billingPayments/
+    │   │   │   └── page.tsx
+    │   │   ├── businessAnalytics/
+    │   │   │   └── page.tsx
+    │   │   ├── overview/
+    │   │   │   └── page.tsx
+    │   │   ├── reports/
+    │   │   │   └── page.tsx
+    │   │   ├── subscriptions/
+    │   │   │   └── page.tsx
+    │   │   ├── systemSettings/
+    │   │   │   └── page.tsx
+    │   │   ├── userManagement/
     │   │   │   ├── layout.tsx
     │   │   │   └── page.tsx
     │   ├── favicon.ico
@@ -38,29 +79,86 @@ frontend/
     │   ├── page.tsx
     │   └── providers.tsx
     ├── components/
-    │   ├── auth/
-    │   │   ├── ForgotPasswordForm.tsx
-    │   │   ├── LoginForm.tsx
-    │   │   ├── RegisterForm.tsx
-    │   │   └── ResetPasswordForm.tsx
     │   ├── common/
+    │   │   ├── DashboardHeader.tsx
     │   │   ├── Header.tsx
     │   │   └── LanguageToggle.tsx
     │   ├── context/
     │   │   ├── LanguageContext.tsx
     │   │   └── ThemeContext.tsx
-    │   ├── dashboard/
-    │   │   ├── Dashboard.tsx
-    │   │   └── Sidebar.tsx
+    │   ├── features/
+    │   │   ├── auth/
+    │   │   │   ├── subscription/
+    │   │   │   │   ├── BillingDetails.tsx
+    │   │   │   │   └── SubscriptionForm.tsx
+    │   │   │   ├── ForgotPasswordForm.tsx
+    │   │   │   ├── LoginForm.tsx
+    │   │   │   ├── RegisterForm.tsx
+    │   │   │   └── ResetPasswordForm.tsx
+    │   │   ├── dashboard/
+    │   │   │   ├── Analytics/
+    │   │   │   │   ├── BusinessMetrics.tsx
+    │   │   │   │   └── RevenueAnalytics.tsx
+    │   │   │   ├── finance/
+    │   │   │   │   ├── Expenses.tsx
+    │   │   │   │   ├── Orders.tsx
+    │   │   │   │   ├── ProfitLoss.tsx
+    │   │   │   │   └── SalesProfit.tsx
+    │   │   │   ├── inventory/
+    │   │   │   │   ├── Categories.tsx
+    │   │   │   │   ├── Items.tsx
+    │   │   │   │   └── Locations.tsx
+    │   │   │   ├── personnel/
+    │   │   │   │   ├── Employee.tsx
+    │   │   │   │   └── Users.tsx
+    │   │   ├── superadmin/
+    │   │   │   ├── businesses/
+    │   │   │   │   ├── BusinessDetails.tsx
+    │   │   │   │   ├── BusinessList.tsx
+    │   │   │   │   └── SubscriptionManagement.tsx
+    │   │   │   ├── system/
+    │   │   │   │   └── SystemSettings.tsx
+    │   │   │   └── users/
+    │   ├── layout/
+    │   │   ├── dashboard/
+    │   │   │   ├── Dashboard.tsx
+    │   │   │   └── Sidebar.tsx
+    │   │   ├── superadmin/
+    │   │   │   ├── Dashboard.tsx
+    │   │   │   └── Sidebar.tsx
     │   ├── Legal/
     │   │   ├── Privacy.tsx
     │   │   └── Terms.tsx
-    │   ├── superadmin/
-    │   │   ├── Dashboard.tsx
-    │   │   └── Sidebar.tsx
+    │   ├── Providers/
+    │   │   ├── PermissionsProvider.tsx
+    │   │   ├── SubscriptionProvider.tsx
+    │   │   └── TenantProvider.tsx
+    │   ├── Shared/
+    │   │   ├── charts/
+    │   │   │   ├── BarChart.tsx
+    │   │   │   ├── LineChart.tsx
+    │   │   │   └── PieChart.tsx
+    │   │   ├── forms/
+    │   │   │   ├── DateForm.tsx
+    │   │   │   └── FormField.tsx
+    │   │   └── tables/
+    │   │       ├── DataTable.tsx
+    │   │       ├── TableHeader.tsx
+    │   │       ├── TablePagination.tsx
+    │   │       └── TableRow.tsx
     │   ├── ui/
     │   │   └── Aceternity/
-    ├── libs/
+    ├── hooks/
+    │   ├── features/
+    │   │   └── useSubscription.ts
+    │   └── shared/
+    ├── lib/
+    │   ├── api/
+    │   │   └── subscription.ts
+    │   ├── utils/
+    │   │   ├── permissions.ts
+    │   │   ├── subscription.ts
+    │   │   └── tenant.ts
     │   └── utils.ts
     ├── translations/
     │   ├── auth/
@@ -78,6 +176,10 @@ frontend/
     │   ├── am.ts
     │   ├── en.ts
     │   └── index.ts
+    ├── types/
+    │   ├── features/
+    │   │   └── subscription.ts
+    │   └── shared/
     ├── .gitignore
     ├── components.json
     ├── eslint.config.mjs

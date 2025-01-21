@@ -8,7 +8,7 @@ export const am = {
       forYourBusinessFrom: "ለእርስዎ ስራዎች ከ",
       jireh: "ጃይረ",
     },
-    welcome: "እንኳን ወደ ጃይረ ሰሌዳ መጣችሁ",
+    welcome: "እንኳን ወደ ጃይረ ገፅ መጣችሁ",
     getStarted: "ይጀመሩ",
   },
   header: {

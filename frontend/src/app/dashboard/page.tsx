@@ -1,6 +1,6 @@
 // @/app/dashboard/page.tsx
 
-import { SidebarDashboard } from "@/components/dashboard/Sidebar";
+import { SidebarDashboard } from "@/components/layout/dashboard/Sidebar";
 
 export default function Page() {
   return (

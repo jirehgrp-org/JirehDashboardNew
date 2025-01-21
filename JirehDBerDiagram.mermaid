@@ -1,0 +1,185 @@
+erDiagram
+    %% Owner Level
+    OWNER ||--o{ BUSINESS : owns
+
+    %% Core Business Structure
+    BUSINESS ||--o{ SUBSCRIPTION : has
+    BUSINESS ||--o{ USER : has
+    BUSINESS ||--o{ LOCATION : has
+    BUSINESS ||--o{ EMPLOYEE : has
+
+    %% Location Relations
+    LOCATION ||--o{ CATEGORY : has
+    LOCATION ||--o{ ITEM : contains
+    LOCATION ||--o{ ORDER : processed_at
+    LOCATION ||--o{ EXPENSE : has
+    LOCATION ||--o{ EMPLOYEE : assigned_to
+
+    %% Product Structure
+    CATEGORY ||--o{ ITEM : contains
+
+    %% Order Structure
+    ORDER ||--o{ ITEM : contains
+    ORDER ||--o{ CATEGORY : has
+    ORDER ||--o{ EMPLOYEE : handled_by
+    ORDER ||--o{ USER : placed_by
+
+    %% Subscription Management
+    SUBSCRIPTION ||--o{ PAYMENT : includes
+
+    %% Expense Details
+    EXPENSE ||--o{ USER : created_by
+
+    OWNER {
+        int id PK
+        string fullname
+        string username
+        string phone
+        string email
+        string password_hash
+        datetime last_login
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    BUSINESS {
+        int id PK
+        int owner_id FK
+        string name
+        string address
+        string contact_number
+        string registration_number
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    SUBSCRIPTION {
+        int id PK
+        int business_id FK
+        date start_date
+        date end_date
+        decimal amount
+        string payment_status
+        string subscription_status
+        datetime last_payment_date
+        datetime next_billing_date
+        datetime created_at
+        datetime updated_at
+    }
+
+    USER {
+        int id PK
+        int business_id FK
+        int location_id FK
+        string fullname
+        string username
+        string email
+        string phone
+        string password_hash
+        string user_role
+        boolean is_active
+        datetime last_login
+        datetime created_at
+        datetime updated_at
+    }
+
+    EMPLOYEE {
+        int id PK
+        int business_id FK
+        int location_id FK
+        string fullname
+        string phone
+        string position
+        string email
+        date hire_date
+        boolean is_active
+        decimal salary
+        string employment_status
+        datetime created_at
+        datetime updated_at
+    }
+
+    LOCATION {
+        int id PK
+        int business_id FK
+        string name
+        string address
+        string contact_number
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    CATEGORY {
+        int id PK
+        int location_id FK
+        string name
+        string description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    ITEM {
+        int id PK
+        int category_id FK
+        string name
+        decimal price
+        int quantity
+        datetime last_inventory_update
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    ORDER {
+        int id PK
+        int business_id FK
+        int location_id FK
+        int user_id FK
+        int employee_id FK
+        int item_id FK
+        int category_id FK
+        string order_number
+        int quantity
+        decimal unit_price
+        decimal subtotal
+        string customer_name
+        string customer_phone
+        datetime order_date
+        string status
+        decimal total_amount
+        string payment_status
+        string payment_method
+        decimal paid_amount
+        decimal remaining_amount
+        datetime created_at
+        datetime updated_at
+    }
+
+    EXPENSE {
+        int id PK
+        int business_id FK
+        int location_id FK
+        int category_id FK
+        decimal amount
+        string description
+        date expense_date
+        string payment_method
+        string recurring_frequency
+        date recurring_end_date
+        int created_by FK
+        datetime created_at
+        datetime updated_at
+    }
+
+    PAYMENT {
+        int id PK
+        int subscription_id FK
+        decimal amount_paid
+        datetime payment_date
+        string payment_method
+        string payment_status
+    }

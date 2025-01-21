@@ -38,10 +38,10 @@ export const am = {
     businessAddressPlaceholder: "አዲስ አበባ፣ ኢትዮጵያ",
     businessPhone: "የንግድ ስልክ",
     businessPhonePlaceholder: "+251912345678",
-    terms: "'ይመዝገቡ' የሚለውን በተጫኑ ጊዜ እየተስማሙ ያሉት የእኛን",
+    terms: "'ይመዝገቡ' የሚለውን በተጫኑ ጊዜ እየተስማሙ ያሉት ከእኛ",
     termsLink: "የአገልግሎት ውል",
     and: "እና",
-    privacyLink: "የግላዊነት ፖሊሲ ነው",
+    privacyLink: "የግላዊነት ፖሊሲ",
     termsOfService:
       "አገልግሎቱን ለመጠቀም የተረጋገጠ የደንበኝነት ምዝገባ ያስፈልጋል። ያልተፈቀደ መዳረሻ፣ ቅጂ ማንሳት ወይም ማሻሻል የተከለከለ ነው። ውሂቡ ደህንነቱ የተጠበቀ ነው፣ ነገር ግን ሶፍትዌሩ 'እንደነበረው' ይቀርባል።",
     privacyPolicy:
@@ -50,6 +50,7 @@ export const am = {
     registering: "በመመዝገብ ላይ...",
     register: "ይመዝገቡ",
     haveAccount: "አካውንት አላችሁ?",
+    ነው: "ጋር ነው።",
     login: "ግባ",
   },
   forgotPassword: {

@@ -5,7 +5,7 @@ export const am = {
     overview: "አጠቃላይ እይታ",
     activityLog: "እንቅስቃሴ መዝገብ",
     businesses: "ስራዎች ወይም ንግዶች",
-    allBussinesses: "ሁሉም ስራዎች ወይም ንግዶች",
+    allBusinesses: "ሁሉም ስራዎች ወይም ንግዶች",
     subscriptions: "የክፍያ ምዝገባዎች ",
     businessAnalytics: "የስራዎች ወይም የንግዶች ትንተና",
     platform: "መድረክ ",

@@ -1,6 +1,6 @@
 // @/app/auth/resetPassword/page.tsx
 
-import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import { ResetPasswordForm } from "@/components/features/auth/ResetPasswordForm";
 
 export default function Page() {
   return (

@@ -1,6 +1,6 @@
 // @/app/superadmin/page.tsx
 
-import { SidebarSuperAdmin } from "@/components/superadmin/Sidebar";
+import { SidebarSuperAdmin } from "@/components/layout/superadmin/Sidebar";
 
 export default function Page() {
   return (

@@ -1,0 +1,37 @@
+# Ignore node_modules globally
+**/node_modules/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Ignore environment files
+.env
+*.env
+
+# Ignore build artifacts
+**/.next/
+**/.out/
+**/build/
+**/coverage/
+
+# Ignore IDE settings
+.idea/
+.vscode/
+
+# Python-specific ignores (from backend)
+*.py[cod]
+*$py.class
+__pycache__/
+*.egg-info/
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# Ignore .pnp and Yarn-related
+**/.pnp
+.pnp.*
+.yarn/*

@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { motion, stagger, useAnimate } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ export const TextGenerateEffect = ({
   duration?: number;
 }) => {
   const [scope, animate] = useAnimate();
-  const wordsArray = words.split(" "); // Changed to const
+  const wordsArray = words.split(" ");
 
   useEffect(() => {
     animate(
@@ -29,35 +30,29 @@ export const TextGenerateEffect = ({
         delay: stagger(0.2),
       }
     );
-  }, [scope.current, animate, duration, filter]); // Added missing dependencies
+  }, [animate, duration, filter]); // Removed scope.current from dependencies
 
   const renderWords = () => {
     return (
-      <motion.div ref={scope}>
-        {wordsArray.map((word, idx) => {
-          return (
-            <motion.span
-              key={word + idx}
-              className="dark:text-white text-black opacity-0"
-              style={{
-                filter: filter ? "blur(10px)" : "none",
-              }}
-            >
-              {word}{" "}
-            </motion.span>
-          );
-        })}
+      <motion.div ref={scope} className={cn("", className)}>
+        <div className="duration-1000">
+          {wordsArray.map((word, idx) => {
+            return (
+              <motion.span
+                key={idx}
+                className="opacity-0"
+                style={{
+                  filter: filter ? "blur(8px)" : "none",
+                }}
+              >
+                {word}{" "}
+              </motion.span>
+            );
+          })}
+        </div>
       </motion.div>
     );
   };
 
-  return (
-    <div className={cn("font-bold", className)}>
-      <div className="mt-4">
-        <div className="dark:text-white text-black text-2xl leading-snug tracking-wide">
-          {renderWords()}
-        </div>
-      </div>
-    </div>
-  );
+  return renderWords();
 };

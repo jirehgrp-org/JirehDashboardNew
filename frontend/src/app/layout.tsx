@@ -27,8 +27,32 @@ const entoto = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://rbms.jirehgrp.com"),
   title: "JirehDashboard",
-  description: "JirehDashboard is a modern dashboard for your business.",
+  description:
+    "A comprehensive and intuitive dashboard designed to manage your business operations. JirehDashboard empowers owners, employees, and managers to oversee, track orders, manage expenses, and optimize inventory across multiple locations. With role-based access and real-time analytics, it offers a seamless user experience for efficient decision-making and growth.",
+  openGraph: {
+    title: "JirehDashboard",
+    description:
+      "A modern dashboard to manage your business operations with efficiency. Track subscriptions, orders, inventory, and expenses.",
+    url: "/", 
+    siteName: "JirehDashboard",
+    images: [
+      {
+        url: "/images/previewImage.png",
+        width: 1200,
+        height: 630,
+        alt: "JirehDashboard Preview Image",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "JirehDashboard",
+    description:
+      "A modern dashboard for your business operations, with features for tracking and managing your subscriptions, orders, and expenses.",
+    images: ["/images/previewImage.png"],
+  },
 };
 
 export default function RootLayout({

@@ -1,11 +1,10 @@
 // @/trasnlations/auth/en.tsx
-
 export const en = {
   login: {
     title: "Login to your account",
     description: "Enter your credentials to access your account",
     usernameOrPhone: "Username or Phone",
-    usernamePlaceholder: "abebe.kebede",
+    usernameOrPhonePlaceholder: "abebe.kebede or 0911121314", // Often kept the same
     password: "Password",
     loggingIn: "Logging in...",
     login: "Login",
@@ -72,5 +71,55 @@ export const en = {
     resetButton: "Update Password",
     backToLogin: "Back to Login",
     submitting: "resetting...",
+  },
+  subscription: {
+    page: {
+      back: "Back",
+      choose: "Choose Your Plan",
+      allPrices: "* All prices are exclusive of 15% TOT",
+      monthlyBilling: "Monthly billing",
+      annualBilling: "Annual billing",
+      month: "month",
+      features: "Features",
+      br: "Br",
+      subscribe: "Subscribe Now",
+      save16: "Save 16%",
+      days: "days",
+      startFreeTrial: "Start Your Free Trial",
+      tryAllFeatures: "Try all features free for 15 days",
+      comingSoon: "Coming Soon",
+      contactSupport: "Contact Support",
+    },
+    paymentDialog: {
+      complete: "Complete Your Subscription",
+      completeYour: "Complete Your",
+      annual: "Annual",
+      monthly: "Monthly",
+      subscription: "Subscription",
+      chooseYourPreferred:
+        "Choose your preferred payment method and complete the transaction",
+      priceBreakdown: "Price Breakdown",
+      subtotal: "Subtotal",
+      tot: "TOT",
+      br: "Br",
+      total: "Total",
+      referenceNumber: "Reference Number",
+      referenceNumberPlaceholder: "Enter payment reference number",
+      selectPaymentMethod: "Select Payment Method",
+      teleBirr: "TeleBirr",
+      cbe: "Commercial Bank of Ethiopia",
+      awashBank: "Awash Bank",
+      confirmPayment: "Confirm Payment",
+    },
+    trialDialog: {
+      startTrial: "Start Your Free Trial",
+      description:
+        "You're about to start your free trial with full access to all features. (No payment required) ",
+      includes: "Your trial includes",
+      fullAccess: "Full access to all features for 15 days",
+      noCost: "No cost during trial period",
+      cancel: "Cancel anytime",
+      start: "Start",
+    },
   },
 };

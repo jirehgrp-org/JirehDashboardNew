@@ -5,8 +5,8 @@
 import { motion } from "framer-motion";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { TypewriterEffectSmooth } from "@/components/ui/Aceternity/typewriter-effect";
-import { AuroraBackground } from "@/components/ui/Aceternity/aurora-background";
+import { TypewriterEffectSmooth } from "@/components/ui/aceternity/typewriter-effect";
+import { AuroraBackground } from "@/components/ui/aceternity/aurora-background";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import Header from "@/components/common/Header";

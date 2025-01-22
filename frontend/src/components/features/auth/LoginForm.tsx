@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { Eye, EyeClosed } from "lucide-react";
 import { translations } from "@/translations";
 import Header from "@/components/common/Header";
@@ -47,7 +47,7 @@ export function LoginForm() {
             </Label>
             <Input
               id="email"
-              placeholder={t.usernamePlaceholder}
+              placeholder={t.usernameOrPhonePlaceholder}
               type="text"
               disabled={isLoading}
               className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"

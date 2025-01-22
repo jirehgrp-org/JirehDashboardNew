@@ -11,10 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { Eye, EyeClosed, Info } from "lucide-react";
 import { translations } from "@/translations";
-import { LinkPreview } from "@/components/ui/Aceternity/link-preview";
+import { LinkPreview } from "@/components/ui/aceternity/link-preview";
 import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
 

@@ -4,8 +4,8 @@ export const am = {
   sidebar: {
     overview: "አጠቃላይ እይታ",
     activityLog: "እንቅስቃሴ መዝገብ",
-    businesses: "ስራዎች ወይም ንግዶች",
-    allBusinesses: "ሁሉም ስራዎች ወይም ንግዶች",
+    businesses: "ቢዝነሶች",
+    allBusinesses: "ሁሉም ቢዝነሶች",
     subscriptions: "የክፍያ ምዝገባዎች ",
     businessAnalytics: "የስራዎች ወይም የንግዶች ትንተና",
     platform: "መድረክ ",

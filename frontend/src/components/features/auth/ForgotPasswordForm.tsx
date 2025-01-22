@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import { translations } from "@/translations";
 import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";

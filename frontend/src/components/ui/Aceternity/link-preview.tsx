@@ -11,7 +11,7 @@ import {
   useSpring,
 } from "framer-motion";
 import Link from "next/link";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 
 type LinkPreviewProps = {
   children: React.ReactNode;

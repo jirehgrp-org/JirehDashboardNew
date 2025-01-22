@@ -9,7 +9,7 @@ CREATE TABLE owner (
     fullname VARCHAR(100) NOT NULL,
     username VARCHAR(100) NOT NULL,
     phone VARCHAR(15) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NULL,
     password_hash VARCHAR(255) NOT NULL,
     last_login DATETIME,
     is_active BOOLEAN DEFAULT true,
@@ -31,13 +31,41 @@ CREATE TABLE business (
     FOREIGN KEY (owner_id) REFERENCES owner(id)
 );
 
+-- Create PLAN table
+CREATE TABLE plan (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name_en VARCHAR(100) NOT NULL,
+    name_am VARCHAR(100) NOT NULL,
+    monthly_price DECIMAL(10, 2) CHECK (monthly_price >= 0),
+    yearly_price DECIMAL(10, 2) CHECK (yearly_price >= 0),
+    duration INT NOT NULL CHECK (duration > 0),
+    description_en TEXT,
+    description_am TEXT,
+    is_active BOOLEAN DEFAULT true,
+    is_hidden BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create FEATURE table
+CREATE TABLE feature (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    plan_id INT NOT NULL,
+    title_en VARCHAR(255) NOT NULL,
+    title_am VARCHAR(255) NOT NULL,
+    included BOOLEAN DEFAULT false,
+    FOREIGN KEY (plan_id) REFERENCES plan(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+);
+
 -- Create SUBSCRIPTION table
 CREATE TABLE subscription (
     id INT PRIMARY KEY AUTO_INCREMENT,
     business_id INT NOT NULL,
+    plan_id INT NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
     payment_status ENUM('PENDING', 'PAID', 'EXPIRED') NOT NULL DEFAULT 'PENDING',
     subscription_status ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED') NOT NULL DEFAULT 'INACTIVE',
     last_payment_date DATETIME,
@@ -46,7 +74,8 @@ CREATE TABLE subscription (
     last_retry_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (business_id) REFERENCES business(id)
+    FOREIGN KEY (business_id) REFERENCES business(id),
+    FOREIGN KEY (plan_id) REFERENCES plan(id)
 );
 
 -- Create LOCATION table
@@ -226,6 +255,9 @@ CREATE INDEX idx_employee_contact ON employee(phone, email);  -- For contact loo
 -- Category & Item Management Indices
 CREATE INDEX idx_category_location ON category(location_id, is_active);  -- For location's categories
 CREATE INDEX idx_item_inventory ON item(category_id, quantity);  -- For inventory management
+
+-- Add index on plan_id for better performance
+CREATE INDEX idx_plan_id ON feature(plan_id);
 
 -- Order Management Indices
 CREATE INDEX idx_order_lookup ON `order`(

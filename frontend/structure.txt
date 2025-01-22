@@ -88,13 +88,12 @@ frontend/
     │   │   └── ThemeContext.tsx
     │   ├── features/
     │   │   ├── auth/
-    │   │   │   ├── subscription/
-    │   │   │   │   ├── BillingDetails.tsx
-    │   │   │   │   └── SubscriptionForm.tsx
+    │   │   │   ├── BillingDetails.tsx
     │   │   │   ├── ForgotPasswordForm.tsx
     │   │   │   ├── LoginForm.tsx
     │   │   │   ├── RegisterForm.tsx
-    │   │   │   └── ResetPasswordForm.tsx
+    │   │   │   ├── ResetPasswordForm.tsx
+    │   │   │   └── SubscriptionForm.tsx
     │   │   ├── dashboard/
     │   │   │   ├── Analytics/
     │   │   │   │   ├── BusinessMetrics.tsx

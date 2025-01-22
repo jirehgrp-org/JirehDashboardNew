@@ -8,7 +8,7 @@ import {
   Sidebar,
   SidebarBody,
   SidebarLink,
-} from "@/components/ui/Aceternity/Sidebar";
+} from "@/components/ui/aceternity/Sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
   IconBrandTabler,
@@ -38,7 +38,7 @@ import { User, HardHat, LogOut } from "lucide-react";
 import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { cn } from "@/libs/utils";
+import { cn } from "@/lib/utils";
 import Dashboard from "./Dashboard";
 import { useLanguage } from "@/components/context/LanguageContext";
 

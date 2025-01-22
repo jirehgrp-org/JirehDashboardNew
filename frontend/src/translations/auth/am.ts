@@ -3,9 +3,9 @@
 export const am = {
   login: {
     title: "ወደ አካውንትዎ ይግቡ", // Wede akawuntiwo yigbu
-    description: "ወደ አካውንትዎ ለመግባት ምስክርነቶችዎን ያስገቡ", // Wede akawuntiwo lemegebati misikirinetochiwin yasigebu
-    usernameOrPhone: "የተጠቃሚ ስም ወይም ስልክ ቁጥር", // Yetetekami simi oweymi siliki k’ut’iri
-    usernamePlaceholder: "abebe.kebede", // Often kept the same
+    description: "ወደ አካውንትዎ ለመግባት ምስክርነቶችዎን ያስገቡ",
+    usernameOrPhone: "የተጠቃሚ ስም ወይም ስልክ ቁጥር",
+    usernameOrPhonePlaceholder: "abebe.kebede ወይም 0911121314", // Often kept the same
     password: "የይለፍ ቃል", // Yeyilefi k’ali
     loggingIn: "በመግባት ላይ...", // Bemegibati layi...
     login: "ይግቡ", // Yigbu
@@ -24,7 +24,7 @@ export const am = {
     email: "ኢሜል",
     emailPlaceholder: "abebekebede@example.com",
     phone: "ስልክ",
-    phonePlaceholder: "+251912345678",
+    phonePlaceholder: "912345678",
     password: "የሚስጥር ቃል",
     confirmPassword: "የሚስጥር ቃል ያረጋግጡ",
     businessInfo: "የንግድ መረጃ",
@@ -37,7 +37,7 @@ export const am = {
     businessAddress: "የንግድ አድራሻ",
     businessAddressPlaceholder: "አዲስ አበባ፣ ኢትዮጵያ",
     businessPhone: "የንግድ ስልክ",
-    businessPhonePlaceholder: "+251912345678",
+    businessPhonePlaceholder: "912345678",
     terms: "'ይመዝገቡ' የሚለውን በተጫኑ ጊዜ እየተስማሙ ያሉት ከእኛ",
     termsLink: "የአገልግሎት ውል",
     and: "እና",
@@ -70,5 +70,53 @@ export const am = {
     confirmPassword: "የይለፍ ቃል አረጋግጥ", // Yeyilefi k’ali aragagit’i
     resetButton: "የይለፍ ቃል ቀይር", // Yeyilefi k’al azemini
     submitting: "በመቀየር ላይ...", // Dagimi bemasitekakeli layi...
+  },
+  subscription: {
+    page: {
+      back: "ይመለሱ",
+      choose: "እቅዶን ይምረጡ",
+      allPrices: "* ሁሉም ዋጋዎች 15% ተጨማሪ እሴት ታክስን አያካትቱም",
+      monthlyBilling: "ወራዊ ክፍያ",
+      annualBilling: "አመታዊ ክፍያ",
+      month: "በወር",
+      features: "ባህሪያት",
+      br: "ብር",
+      subscribe: "አሁን ይመዝገቡ",
+      save16: "16% ተመላሽ",
+      days: "ቀናት",
+      startFreeTrial: "ነጻ ሙከራዎን ይጀመሩ",
+      tryAllFeatures: "ሁሉንም የገፁን ባህሪያት ለ15 ቀናት ይሞክሩ",
+      contactSupport: "መረጃ ክፍል ይገናኙ",
+      comingSoon: "በቅርብ ቀናት",
+    },
+    paymentDialog: {
+      complete: "ምዝገባዎን ይጨርሱ",
+      completeYour: "የእርሶን",
+      annual: "አመታዊ",
+      monthly: "ወራዊ",
+      subscription: "ምዝገባ ያጠናቁ",
+      chooseYourPreferred: "የሚመቾትን የክፍያ መንገድ መርጠው ክፍያውን ያጠናቁ",
+      priceBreakdown: "የዋጋ መረጃዎች",
+      subtotal: "ከፊል ድምር",
+      tot: "ተጨማሪ እሴት ታክስን",
+      br: "ብር",
+      total: "በጠቅላላ",
+      referenceNumber: "ማጣቀሻ ቁጥር",
+      referenceNumberPlaceholder: "የክፍያውን ማጣቀሻ ቁጥር ያስገቡ",
+      selectPaymentMethod: "የክፍያ መንገድ ይምረጡ",
+      teleBirr: "ቴሌብር",
+      cbe: "የኢትዮጵያ ንግድ ባንክ",
+      awashBank: "አዋሽ ባንክ",
+      confirmPayment: "ክፍያውን አረጋግጡ",
+    },
+    trialDialog: {
+      startTrial: "ነጻ ሙከራዎን ይጀመሩ",
+      description: "አሁን የሚጀምሩት ሙሉ መዳረሻ ያለውን ነጻ ሙከራ ነው። (ምንም ክፍያ አያስፈልግም)",
+      includes: "ነጻ ሙከራ የሚያካተው",
+      fullAccess: "ሙሉ በሙሉ መዳረሻ ያለውን ለ15 ቀናት",
+      noCost: "በነፃ ሙከራ ጊዜ ምንም ወጪ የለውም",
+      cancel: "ምንግዜም ማቋረጥ ይችላሉ",
+      start: "ይጀመሩ",
+    },
   },
 };

@@ -21,7 +21,7 @@ export function PaymentDialog({
   isTrial = false,
 }: PaymentDialogProps) {
   const { language } = useLanguage();
-  const t = translations.auth[language].subscription;
+  const t = translations[language].auth.subscription;
   const [paymentMethod, setPaymentMethod] = useState("");
   const [reference, setReference] = useState("");
   const { getPlan } = usePlans();

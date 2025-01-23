@@ -20,7 +20,7 @@ import { PaymentDialog } from "./PaymentDialog";
 
 export function SubscriptionForm() {
   const { language } = useLanguage();
-  const t = translations.auth[language].subscription;
+  const t = translations[language].auth.subscription;
   const { createSubscription } = useSubscription();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { plans, isLoading, error } = usePlans();

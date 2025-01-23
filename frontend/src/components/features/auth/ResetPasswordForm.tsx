@@ -12,7 +12,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 
 export function ResetPasswordForm() {
   const { language } = useLanguage();
-  const t = translations.auth[language].resetPassword;
+  const t = translations[language].auth.resetPassword;
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

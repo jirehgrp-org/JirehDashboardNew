@@ -52,7 +52,7 @@ const MOCK_PLANS: Plan[] = [
     description_en:
       "Full-featured solution for large enterprises with businesses support.",
     description_am: "ማበርከት የምንችለውን ሙሉ ባህሪያት ይዞ ለትልቅ ኩባንያዎች ከፕሪሚየም ድጋፍ ጋር",
-    isActive: false,
+    isActive: true,
     isHidden: false,
     features_en: [
       { title: "Everything in Business", included: true },

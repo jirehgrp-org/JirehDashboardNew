@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/aceternity/Sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
-  IconBrandTabler,
+  IconBinoculars,
   IconChartHistogram,
   IconReportAnalytics,
   IconDeviceAnalytics,
@@ -57,7 +57,7 @@ export function SidebarSuperAdmin() {
   const [open, setOpen] = useState(false);
   const { language } = useLanguage();
   const router = useRouter();
-  const t = translations.superadmin[language].sidebar;
+  const t = translations[language].superadmin.sidebar;
 
   const handleLogout = () => {
     localStorage.clear();
@@ -73,7 +73,7 @@ export function SidebarSuperAdmin() {
           label: t.overview,
           href: "#",
           icon: (
-            <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            <IconBinoculars className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
         {
@@ -81,6 +81,13 @@ export function SidebarSuperAdmin() {
           href: "#",
           icon: (
             <IconChartHistogram className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+          ),
+        },
+        {
+          label: t.businessAnalytics,
+          href: "#",
+          icon: (
+            <IconDeviceAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
       ],
@@ -100,13 +107,6 @@ export function SidebarSuperAdmin() {
           href: "#",
           icon: (
             <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.businessAnalytics,
-          href: "#",
-          icon: (
-            <IconDeviceAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
         },
       ],

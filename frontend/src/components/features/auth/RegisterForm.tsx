@@ -20,7 +20,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 
 export function RegisterForm() {
   const { language } = useLanguage();
-  const t = translations.auth[language].register;
+  const t = translations[language].auth.register;
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);

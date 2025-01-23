@@ -2,7 +2,7 @@
 // @/components/dashboard/Sidebar.tsx
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sidebar,
@@ -10,19 +10,6 @@ import {
   SidebarLink,
 } from "@/components/ui/aceternity/Sidebar";
 import { Separator } from "@/components/ui/separator";
-import {
-  IconBrandTabler,
-  IconUserBolt,
-  IconChartHistogram,
-  IconReportAnalytics,
-  IconFileDollar,
-  IconCashRegister,
-  IconClipboardList,
-  IconCategory,
-  IconMapRoute,
-  IconReport,
-  IconTower,
-} from "@tabler/icons-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,13 +21,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, HardHat, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Dashboard from "./Dashboard";
 import { useLanguage } from "@/components/context/LanguageContext";
+import type { UserRole, UserRoleInfo, Section } from "@/types/shared/auth";
+import { roleIcons, roleAccess } from "@/constants/shared/roleConstants";
 
 // Section Label component
 const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
@@ -61,125 +50,60 @@ export function SidebarDashboard() {
   const [open, setOpen] = useState(false);
   const { language } = useLanguage();
   const router = useRouter();
-  const t = translations.dashboard[language].sidebar;
+  const t: Record<string, string> = translations[language].dashboard.sidebar;
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
+
+  // Organized links by sections
+
+  const filteredSections = useMemo(() => {
+    const pages = roleAccess[userRole] || {};
+    const groupedBySection = Object.entries(pages).reduce(
+      (acc, [key, page]) => {
+        const section = acc[page.section] || {
+          label: t[page.section],
+          links: [],
+        };
+        section.links.push({
+          label: t[key] || key, // Fallback if translation missing
+          href: `/${key}`,
+          icon: (
+            <page.icon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+          ),
+        });
+        acc[page.section] = section;
+        return acc;
+      },
+      {} as Record<string, Section>
+    );
+
+    return Object.values(groupedBySection);
+  }, [userRole, t]);
 
   const handleLogout = () => {
     localStorage.clear();
     router.push("/auth/login");
   };
 
-  // Organized links by sections
-  const sidebarSections = [
-    {
-      label: t.analytics,
-      links: [
-        {
-          label: t.overview,
-          href: "#",
-          icon: (
-            <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.analytics,
-          href: "#",
-          icon: (
-            <IconChartHistogram className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-      ],
-    },
-    {
-      label: t.operations,
-      links: [
-        {
-          label: t.orders,
-          href: "#",
-          icon: (
-            <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.salesReport,
-          href: "#",
-          icon: (
-            <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.expenses,
-          href: "#",
-          icon: (
-            <IconFileDollar className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.profitLoss,
-          href: "#",
-          icon: (
-            <IconCashRegister className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-      ],
-    },
-    {
-      label: t.inventory,
-      links: [
-        {
-          label: t.items,
-          href: "#",
-          icon: (
-            <IconClipboardList className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.categories,
-          href: "#",
-          icon: (
-            <IconCategory className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.locations,
-          href: "#",
-          icon: (
-            <IconMapRoute className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-      ],
-    },
-    {
-      label: t.people,
-      links: [
-        {
-          label: t.employees,
-          href: "#",
-          icon: (
-            <HardHat className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-        {
-          label: t.users,
-          href: "#",
-          icon: (
-            <User className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-      ],
-    },
-    {
-      label: t.others,
-      links: [
-        {
-          label: t.reports,
-          href: "#",
-          icon: (
-            <IconReport className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-          ),
-        },
-      ],
-    },
-  ];
+  const RoleSwitcher = () => {
+    const roles: UserRole[] = ["owner", "admin", "sales", "warehouse"];
+
+    return (
+      <select
+        onChange={(e) => {
+          localStorage.setItem("userRole", e.target.value);
+          window.location.reload();
+        }}
+        value={localStorage.getItem("userRole") || "owner"}
+        className="absolute top-2 right-2 z-50"
+      >
+        {roles.map((role) => (
+          <option key={role} value={role}>
+            {role}
+          </option>
+        ))}
+      </select>
+    );
+  };  
 
   return (
     <div
@@ -190,10 +114,10 @@ export function SidebarDashboard() {
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo t={t} /> : <LogoIcon />}
+            {open ? <Logo t={t} /> : roleIcons[userRole]}
             <Separator className="my-4 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
             <div className="mt-0 flex flex-col">
-              {sidebarSections.map((section, idx) => (
+              {filteredSections.map((section, idx) => (
                 <React.Fragment key={idx}>
                   {idx > 0 && <Separator className="my-2 opacity-50" />}
                   <SectionLabel label={section.label} open={open} />
@@ -244,6 +168,7 @@ export function SidebarDashboard() {
             </AlertDialog>
           </div>
         </SidebarBody>
+        <RoleSwitcher />
       </Sidebar>
       <Dashboard />
     </div>
@@ -251,31 +176,29 @@ export function SidebarDashboard() {
 }
 
 export const Logo: React.FC<{ t: any }> = ({ t }) => {
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
+
+  const getRoleInfo = (role: UserRole): UserRoleInfo => ({
+    title: t[role],
+    description: t[`${role}Description`],
+  });
+
+  const roleInfo = getRoleInfo(userRole);
+
   return (
     <Link
       href="#"
       className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
     >
-      <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
+      {roleIcons[userRole]}
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="font-medium text-black dark:text-white whitespace-pre"
       >
-        <h1>{t.owner}</h1>
-        <p className="text-xs text-neutral-500">{t.ownerOfTheBusiness}</p>
+        <h1>{roleInfo.title}</h1>
+        <p className="text-xs text-neutral-500">{roleInfo.description}</p>
       </motion.span>
-    </Link>
-  );
-};
-
-export const LogoIcon = () => {
-  return (
-    <Link
-      href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-0 relative z-20"
-    >
-      <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
     </Link>
   );
 };

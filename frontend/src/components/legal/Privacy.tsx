@@ -9,7 +9,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 
 export function PrivacyPolicy() {
   const { language } = useLanguage();
-  const t = translations.legal[language].privacy;
+  const t = translations[language].legal.privacy;
 
   return (
     <>

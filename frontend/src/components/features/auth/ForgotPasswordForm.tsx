@@ -12,7 +12,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 
 export function ForgotPasswordForm() {
   const { language } = useLanguage();
-  const t = translations.auth[language].forgotPassword;
+  const t = translations[language].auth.forgotPassword;
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState(""); // Add state for email
   const router = useRouter();

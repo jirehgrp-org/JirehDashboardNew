@@ -9,7 +9,7 @@ import { useLanguage } from "@/components/context/LanguageContext";
 
 export function TermsOfService() {
   const { language } = useLanguage();
-  const t = translations.legal[language].terms;
+  const t = translations[language].legal.terms;
 
   return (
     <>

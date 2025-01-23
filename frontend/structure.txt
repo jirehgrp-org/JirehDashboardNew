@@ -70,9 +70,9 @@ frontend/
     │   │   │   └── page.tsx
     │   │   ├── systemSettings/
     │   │   │   └── page.tsx
-    │   │   ├── userManagement/
-    │   │   │   ├── layout.tsx
-    │   │   │   └── page.tsx
+    │   │   └── userManagement/
+    │   │       ├── layout.tsx
+    │   │       └── page.tsx
     │   ├── favicon.ico
     │   ├── globals.css
     │   ├── layout.tsx
@@ -88,9 +88,9 @@ frontend/
     │   │   └── ThemeContext.tsx
     │   ├── features/
     │   │   ├── auth/
-    │   │   │   ├── BillingDetails.tsx
     │   │   │   ├── ForgotPasswordForm.tsx
     │   │   │   ├── LoginForm.tsx
+    │   │   │   ├── PaymentDialog.tsx
     │   │   │   ├── RegisterForm.tsx
     │   │   │   ├── ResetPasswordForm.tsx
     │   │   │   └── SubscriptionForm.tsx
@@ -107,31 +107,29 @@ frontend/
     │   │   │   │   ├── Categories.tsx
     │   │   │   │   ├── Items.tsx
     │   │   │   │   └── Locations.tsx
-    │   │   │   ├── personnel/
-    │   │   │   │   ├── Employee.tsx
-    │   │   │   │   └── Users.tsx
-    │   │   ├── superadmin/
-    │   │   │   ├── businesses/
-    │   │   │   │   ├── BusinessDetails.tsx
-    │   │   │   │   ├── BusinessList.tsx
-    │   │   │   │   └── SubscriptionManagement.tsx
-    │   │   │   ├── system/
-    │   │   │   │   └── SystemSettings.tsx
-    │   │   │   └── users/
+    │   │   │   └── personnel/
+    │   │   │       ├── Employee.tsx
+    │   │   │       └── Users.tsx
+    │   │   └── superadmin/
+    │   │       ├── businesses/
+    │   │       │   ├── BusinessDetails.tsx
+    │   │       │   ├── BusinessList.tsx
+    │   │       │   └── SubscriptionManagement.tsx
+    │   │       ├── system/
+    │   │       │   └── SystemSettings.tsx
+    │   │       └── users/
     │   ├── layout/
     │   │   ├── dashboard/
     │   │   │   ├── Dashboard.tsx
     │   │   │   └── Sidebar.tsx
-    │   │   ├── superadmin/
-    │   │   │   ├── Dashboard.tsx
-    │   │   │   └── Sidebar.tsx
+    │   │   └── superadmin/
+    │   │       ├── Dashboard.tsx
+    │   │       └── Sidebar.tsx
     │   ├── Legal/
     │   │   ├── Privacy.tsx
     │   │   └── Terms.tsx
     │   ├── Providers/
-    │   │   ├── PermissionsProvider.tsx
-    │   │   ├── SubscriptionProvider.tsx
-    │   │   └── TenantProvider.tsx
+    │   │   └── SubscriptionProvider.tsx
     │   ├── Shared/
     │   │   ├── charts/
     │   │   │   ├── BarChart.tsx
@@ -145,40 +143,35 @@ frontend/
     │   │       ├── TableHeader.tsx
     │   │       ├── TablePagination.tsx
     │   │       └── TableRow.tsx
-    │   ├── ui/
-    │   │   └── Aceternity/
+    │   └── ui/
+    │       └── Aceternity/
+    ├── constants/
+    │   ├── features/
+    │   └── shared/
+    │       └── roleConstants.tsx
     ├── hooks/
     │   ├── features/
+    │   │   ├── usePlan.ts
     │   │   └── useSubscription.ts
     │   └── shared/
+    │       ├── useOutsideClick.ts
+    │       └── useToast.ts
     ├── lib/
     │   ├── api/
     │   │   └── subscription.ts
     │   ├── utils/
-    │   │   ├── permissions.ts
-    │   │   ├── subscription.ts
-    │   │   └── tenant.ts
+    │   │   └── subscription.ts
     │   └── utils.ts
     ├── translations/
-    │   ├── auth/
-    │   │   ├── am.ts
-    │   │   └── en.ts
-    │   ├── dashboard/
-    │   │   ├── am.ts
-    │   │   └── en.ts
-    │   ├── legal/
-    │   │   ├── am.ts
-    │   │   └── en.ts
-    │   ├── superadmin/
-    │   │   ├── am.ts
-    │   │   └── en.ts
     │   ├── am.ts
     │   ├── en.ts
     │   └── index.ts
     ├── types/
     │   ├── features/
+    │   │   ├── plan,ts
     │   │   └── subscription.ts
     │   └── shared/
+    │       └── auth.ts
     ├── .gitignore
     ├── components.json
     ├── eslint.config.mjs

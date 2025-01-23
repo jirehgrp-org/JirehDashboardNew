@@ -2,6 +2,7 @@
 
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
@@ -9,21 +10,59 @@ import { Eye, EyeClosed } from "lucide-react";
 import { translations } from "@/translations";
 import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
+import type { LoginCredentials, LoginResponse } from "@/types/shared/auth";
 
 export function LoginForm() {
+  const router = useRouter();
   const { language } = useLanguage();
-  const t = translations.auth[language].login;
+  const t = translations[language].auth.login;
+
   const [isLoading, setIsLoading] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
+  const [credentials, setCredentials] = useState<LoginCredentials>({
+    username: "",
+    password: "",
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      // Replace with your actual API call
+      const response: LoginResponse = await new Promise((resolve) =>
+        setTimeout(
+          () =>
+            resolve({
+              success: true,
+              data: {
+                role: "admin",
+                token: "fake-token",
+                userId: "123",
+              },
+            }),
+          1000
+        )
+      );
+
+      if (response.success) {
+        localStorage.setItem("userRole", response.data.role);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.userId);
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
       setIsLoading(false);
-      console.log("Form submitted");
-    }, 3000);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCredentials({
+      ...credentials,
+      [e.target.id]: e.target.value,
+    });
   };
 
   return (
@@ -46,11 +85,12 @@ export function LoginForm() {
               {t.usernameOrPhone}
             </Label>
             <Input
-              id="email"
+              id="username"
+              value={credentials.username}
+              onChange={handleInputChange}
               placeholder={t.usernameOrPhonePlaceholder}
               type="text"
               disabled={isLoading}
-              className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
             />
           </LabelInputContainer>
           <LabelInputContainer className="mb-4">
@@ -58,10 +98,11 @@ export function LoginForm() {
             <div className="relative">
               <Input
                 id="password"
+                value={credentials.password}
+                onChange={handleInputChange}
                 placeholder="••••••••"
                 type={showPassword ? "text" : "password"}
                 disabled={isLoading}
-                className="pr-10"
               />
               <button
                 type="button"

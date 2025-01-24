@@ -34,6 +34,7 @@ This system provides a complete solution for businesses to manage their operatio
 - Next.js 14
 - TailwindCSS
 - shadcn/ui components
+- Aceternity UI components
 - TypeScript
 
 ### Backend
@@ -46,4 +47,4 @@ This project is proprietary software owned by Jireh-Group. See [LICENSE.md](LICE
 Jireh-Group, Ethiopia
 
 ## Acknowledgments
-Built with [shadcn/ui](https://ui.shadcn.com/) components
+Built with [shadcn/ui](https://ui.shadcn.com/) and [Aceternity UI](https://ui.aceternity.com/) components

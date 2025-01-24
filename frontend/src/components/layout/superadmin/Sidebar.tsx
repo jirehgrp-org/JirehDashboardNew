@@ -35,7 +35,7 @@ import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Dashboard from "./Dashboard";
+import Dashboard from "../shared/Dashboard";
 import { useLanguage } from "@/components/context/LanguageContext";
 
 // Section Label component

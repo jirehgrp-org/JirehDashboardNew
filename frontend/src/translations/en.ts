@@ -150,6 +150,18 @@ export const en = {
     },
   },
   dashboard: {
+    header: {
+      profileDetails: "Profile Details",
+      manage: "Manage your profile information.",
+      editProfile: "Edit Profile",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      saveChanges: "Save Changes",
+      saving: "Saving...",
+      confirmSave: "Confirm Save",
+      areYouSure:
+        "Are you sure you want to save these changes to your profile?",
+    },
     sidebar: {
       owner: "Owner",
       ownerDescription: "Owner of the business",
@@ -180,6 +192,59 @@ export const en = {
       logoutDescription:
         "You will be signed out of your account and redirected to the login page.",
       cancel: "Cancel",
+    },
+    inventory: {
+      locations: {
+        page: {
+          locations: "Locations",
+          manageYourStore: "Manage your store locations and branches",
+          addLocation: "Add Location",
+          editLocation: "Edit Location",
+          searchLocations: "Search locations",
+          totalLocations: "Total Locations",
+          areYouSure: "Are you sure?",
+          thisWillPermanentlyDelete: "This will permanently delete",
+          actionCannotBeUndone:
+            "and all its data. This action cannot be undone.",
+          cancel: "Cancel",
+          delete: "Delete",
+        },
+        form: {
+          name: "Name",
+          namePlaceholder: "Location name",
+          address: "Address",
+          addressPlaceholder: "Location Address",
+          contactNumber: "Contact Number",
+          contactNumberplaceholder: "912345678",
+          active: "Active",
+          create: "Create",
+          update: "Update",
+          cancel: "Cancel",
+        },
+        table: {
+          name: "Name",
+          address: "Address",
+          contact: "Contact",
+          status: "Status",
+          lastUpdated: "Last Updated",
+          actions: "Actions",
+        },
+        hook: {
+          locationAdded: "Location Added",
+          locationCreatedSuccessfully: "has been successfully created.",
+          locationUpdated: "Location Updated",
+          locationUpdatedSuccessfully: "has been successfully updated.",
+          locationDeleted: "Location Deleted",
+          locationDeletedSuccessfully: "has been successfully deleted.",
+        },
+        schemas: {
+          locationSchema: {
+            nameIsRequired: "Name is required",
+            addressIsRequired: "Address is required",
+            contactNumberIsRequired: "Contact number is required",
+          },
+        },
+      },
     },
   },
   legal: {
@@ -560,5 +625,5 @@ export const en = {
         "You will be signed out of your account and redirected to the login page.",
       cancel: "Cancel",
     },
-  }
+  },
 };

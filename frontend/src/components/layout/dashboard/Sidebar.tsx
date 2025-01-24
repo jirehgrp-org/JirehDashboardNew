@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/components/dashboard/Sidebar.tsx
+// @/components/layout/dashboard/Sidebar.tsx
 
 "use client";
+
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -26,34 +27,22 @@ import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import Dashboard from "./Dashboard";
 import { useLanguage } from "@/components/context/LanguageContext";
 import type { UserRole, UserRoleInfo, Section } from "@/types/shared/auth";
 import { roleIcons, roleAccess } from "@/constants/shared/roleConstants";
+import DashboardHeader from "@/components/common/DashboardHeader";
 
-// Section Label component
-const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
-  label,
-  open,
-}) => {
-  if (!open) return null;
-  return (
-    <div className="px-3 py-2">
-      <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
-        {label}
-      </p>
-    </div>
-  );
-};
+interface SidebarDashboardProps {
+  children: React.ReactNode;
+}
 
-export function SidebarDashboard() {
+export function SidebarDashboard({ children }: SidebarDashboardProps) {
   const [open, setOpen] = useState(false);
   const { language } = useLanguage();
   const router = useRouter();
   const t: Record<string, string> = translations[language].dashboard.sidebar;
   const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
-
-  // Organized links by sections
+  
 
   const filteredSections = useMemo(() => {
     const pages = roleAccess[userRole] || {};
@@ -64,8 +53,8 @@ export function SidebarDashboard() {
           links: [],
         };
         section.links.push({
-          label: t[key] || key, // Fallback if translation missing
-          href: `/${key}`,
+          label: t[key] || key,
+          href: `/dashboard/${key}`,
           icon: (
             <page.icon className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
           ),
@@ -83,27 +72,6 @@ export function SidebarDashboard() {
     localStorage.clear();
     router.push("/auth/login");
   };
-
-  const RoleSwitcher = () => {
-    const roles: UserRole[] = ["owner", "admin", "sales", "warehouse"];
-
-    return (
-      <select
-        onChange={(e) => {
-          localStorage.setItem("userRole", e.target.value);
-          window.location.reload();
-        }}
-        value={localStorage.getItem("userRole") || "owner"}
-        className="absolute top-2 right-2 z-50"
-      >
-        {roles.map((role) => (
-          <option key={role} value={role}>
-            {role}
-          </option>
-        ))}
-      </select>
-    );
-  };  
 
   return (
     <div
@@ -144,9 +112,7 @@ export function SidebarDashboard() {
                   }}
                 />
               </AlertDialogTrigger>
-              <AlertDialogContent
-                className="z-[1050]" // Ensure it appears above the sidebar
-              >
+              <AlertDialogContent className="z-[1050]">
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t.logoutConfirmation}</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -157,7 +123,7 @@ export function SidebarDashboard() {
                   <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
-                      setOpen(false); // Close the sidebar before logout
+                      setOpen(false);
                       handleLogout();
                     }}
                   >
@@ -170,19 +136,54 @@ export function SidebarDashboard() {
         </SidebarBody>
         <RoleSwitcher />
       </Sidebar>
-      <Dashboard />
+      <div className="flex flex-1 h-full flex-col">
+        <DashboardHeader variant="dashboard" />
+        {children}
+      </div>
     </div>
   );
 }
 
+const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
+  label,
+  open,
+}) => {
+  if (!open) return null;
+  return (
+    <div className="px-3 py-2">
+      <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+        {label}
+      </p>
+    </div>
+  );
+};
+
+const RoleSwitcher = () => {
+  const roles: UserRole[] = ["owner", "admin", "sales", "warehouse"];
+  return (
+    <select
+      onChange={(e) => {
+        localStorage.setItem("userRole", e.target.value);
+        window.location.reload();
+      }}
+      value={localStorage.getItem("userRole") || "owner"}
+      className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50"
+    >
+      {roles.map((role) => (
+        <option key={role} value={role}>
+          {role}
+        </option>
+      ))}
+    </select>
+  );
+};
+
 export const Logo: React.FC<{ t: any }> = ({ t }) => {
   const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
-
   const getRoleInfo = (role: UserRole): UserRoleInfo => ({
     title: t[role],
     description: t[`${role}Description`],
   });
-
   const roleInfo = getRoleInfo(userRole);
 
   return (

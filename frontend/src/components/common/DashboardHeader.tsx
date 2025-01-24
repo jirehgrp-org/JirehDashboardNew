@@ -50,7 +50,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const { language } = useLanguage();
-  const t = translations.root[language].root.header;
+  const t = translations[language].dashboard.header;
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

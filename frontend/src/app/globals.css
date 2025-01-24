@@ -66,24 +66,27 @@
     @apply bg-background text-foreground;
   }
   :root {
-    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace, monospace;
+    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace,
+      monospace;
   }
   *:lang(en) {
-    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace, monospace;
+    font-family: var(--font-roboto-mono), var(--font-geist-mono), ui-monospace,
+      monospace;
   }
   *:lang(am) {
-    font-family: var(--font-entoto), var(--font-geist-sans), system-ui, sans-serif;
+    font-family: var(--font-roboto-mono), var(--font-entoto), system-ui,
+      sans-serif;
   }
   @font-face {
-    font-family: 'System Font';
-    src: local('Entoto');
+    font-family: "System Font";
+    src: local("Entoto");
     unicode-range: U+1200-137F;
   }
 }
 
 @font-face {
-  font-family: 'Entoto';
-  src: url('/fonts/entoto.ttf') format('truetype');
+  font-family: "Entoto";
+  src: url("/fonts/entoto.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -94,5 +97,5 @@
 }
 
 .amharic-text {
-  font-family: 'Entoto', system-ui, -apple-system, sans-serif;
+  font-family: "Entoto", system-ui, -apple-system, sans-serif;
 }

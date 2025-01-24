@@ -145,6 +145,17 @@ export const am = {
     },
   },
   dashboard: {
+    header: {
+      profileDetails: "የመለያ ዝርዝሮች",
+      manage: "የመለያ መረጃዎችን መቆጣጠሩ",
+      editProfile: "መለያዎን ያስተካክሉ",
+      confirm: "አረጋግጠዋል",
+      cancel: "ያቋርጡ",
+      saveChanges: "ለውጦችን ይያዝ",
+      saving: "በመያዝ ላይ...",
+      confirmSave: "ይዘት ያረጋግጡ",
+      areYouSure: "እነዚህን ለውጦች መለያዎት ላይ ለመያዝ እርግጠኛ ነዎት?",
+    },
     sidebar: {
       owner: "ባለቤት ",
       ownerDescription: "የስራው ባለቤት",
@@ -174,6 +185,59 @@ export const am = {
       logoutConfirmation: "እርግጠኛ ነዎት መውጣት ይፈልጋሉ?",
       logoutDescription: "ከአካውንትዎ ይወጣሉ እና ወደ መግቢያ ገጽ ይመለሳሉ።",
       cancel: "ይቅር",
+    },
+    inventory: {
+      locations: {
+        page: {
+          locations: "አድራሻዎች",
+          manageYourStore: "የቢዝነሶን አድራሾችና ቅርንጫፍ ያስተዳድሩ",
+          addLocation: "አድራሻ ጨምር",
+          editLocation: "አድራሻ ያስተካክሉ",
+          searchLocations: "አድራሻዎችን ይፈልጉ",
+          totalLocations: "የአድራሻዎች ብዛት",
+          areYouSure: "እርግጠኛ ኖት?",
+          thisWillPermanentlyDelete: "እስከመጨረሻው",
+          actionCannotBeUndone:
+            "አጥፍቶ እና ከሱ ጋር የሚገናኙትንም ነገሮች በሙሉ ይጠፋሉ፤ ይህ ድርጊት ተመላሽ አይሆንም።",
+          cancel: "ያቋርጡ",
+          delete: "ያጥፉ",
+        },
+        form: {
+          name: "ስም",
+          namePlaceholder: "አድራሻ ስም",
+          address: "አድራሻ",
+          addressPlaceholder: "አድራሻ",
+          contactNumber: "ስልክ ቁጥር",
+          contactNumberplaceholder: "912345678",
+          active: "በስራ ላይ",
+          create: "ይፍጠሩ",
+          update: "ያስተካክሉ",
+          cancel: "ይቅር",
+        },
+        table: {
+          name: "ስም",
+          address: "አድራሻ",
+          contact: "ስልክ",
+          status: "ሁኔታ",
+          lastUpdated: "የታደሰው",
+          actions: "ድርጊት",
+        },
+        hook: {
+          locationAdded: "አድራሻ ተጨምሯል",
+          locationCreatedSuccessfully: "በተሳካ ሁኔታ ተፈጥሯል።",
+          locationUpdated: "አድራሻ ተሻሽሏል",
+          locationUpdatedSuccessfully: "በተሳካ ሁኔታ ተሻሽሏል።",
+          locationDeleted: "አድራሻ ተሰርዧል",
+          locationDeletedSuccessfully: "በተሳካ ሁኔታ ተሰርዧል።.",
+        },
+        schemas: {
+          locationSchema: {
+            nameIsRequired: "ስም ይመፃፉ",
+            addressIsRequired: "አድራሻ ይመፃፉ",
+            contactNumberIsRequired: "ስልክ ቁጥር ይመፃፉ",
+          },
+        },
+      },
     },
   },
   legal: {

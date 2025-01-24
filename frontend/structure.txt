@@ -6,6 +6,8 @@ frontend/
 │   │   ├── entoto.ttf
 │   │   └── fantuwua.ttf
 │   └── images/
+│       └── previewImage.png
+│
 └── src/
     ├── app/
     │   ├── auth/
@@ -20,6 +22,7 @@ frontend/
     │   │   ├── subscription/
     │   │   │   └── page.tsx
     │   │   └── layout.tsx
+    │   │
     │   ├── dashboard/
     │   │   ├── analytics/
     │   │   │   └── page.tsx
@@ -47,12 +50,14 @@ frontend/
     │   │   │   └── page.tsx
     │   │   ├── layout.tsx
     │   │   └── page.tsx
+    │   │
     │   ├── legal/
     │   │   ├── privacy/
     │   │   │   └── page.tsx
     │   │   ├── terms/
     │   │   │   └── page.tsx
     │   │   └── layout.tsx
+    │   │
     │   ├── superadmin/
     │   │   ├── activityLog/
     │   │   │   └── page.tsx
@@ -73,19 +78,23 @@ frontend/
     │   │   └── userManagement/
     │   │       ├── layout.tsx
     │   │       └── page.tsx
+    │   │
     │   ├── favicon.ico
     │   ├── globals.css
     │   ├── layout.tsx
     │   ├── page.tsx
     │   └── providers.tsx
+    │
     ├── components/
     │   ├── common/
     │   │   ├── DashboardHeader.tsx
     │   │   ├── Header.tsx
     │   │   └── LanguageToggle.tsx
+    │   │
     │   ├── context/
     │   │   ├── LanguageContext.tsx
     │   │   └── ThemeContext.tsx
+    │   │
     │   ├── features/
     │   │   ├── auth/
     │   │   │   ├── ForgotPasswordForm.tsx
@@ -94,6 +103,7 @@ frontend/
     │   │   │   ├── RegisterForm.tsx
     │   │   │   ├── ResetPasswordForm.tsx
     │   │   │   └── SubscriptionForm.tsx
+    │   │   │
     │   │   ├── dashboard/
     │   │   │   ├── Analytics/
     │   │   │   │   ├── BusinessMetrics.tsx
@@ -110,6 +120,7 @@ frontend/
     │   │   │   └── personnel/
     │   │   │       ├── Employee.tsx
     │   │   │       └── Users.tsx
+    │   │   │
     │   │   └── superadmin/
     │   │       ├── businesses/
     │   │       │   ├── BusinessDetails.tsx
@@ -118,18 +129,22 @@ frontend/
     │   │       ├── system/
     │   │       │   └── SystemSettings.tsx
     │   │       └── users/
+    │   │
     │   ├── layout/
     │   │   ├── dashboard/
-    │   │   │   ├── Dashboard.tsx
     │   │   │   └── Sidebar.tsx
+    │   │   ├── shared/
+    │   │   │   └── Dashboard.tsx
     │   │   └── superadmin/
-    │   │       ├── Dashboard.tsx
     │   │       └── Sidebar.tsx
+    │   │
     │   ├── Legal/
     │   │   ├── Privacy.tsx
     │   │   └── Terms.tsx
+    │   │
     │   ├── Providers/
     │   │   └── SubscriptionProvider.tsx
+    │   │
     │   ├── Shared/
     │   │   ├── charts/
     │   │   │   ├── BarChart.tsx
@@ -143,35 +158,43 @@ frontend/
     │   │       ├── TableHeader.tsx
     │   │       ├── TablePagination.tsx
     │   │       └── TableRow.tsx
+    │   │
     │   └── ui/
     │       └── Aceternity/
+    │   
     ├── constants/
     │   ├── features/
     │   └── shared/
     │       └── roleConstants.tsx
+    │   
     ├── hooks/
     │   ├── features/
     │   │   ├── usePlan.ts
     │   │   └── useSubscription.ts
+    │   │
     │   └── shared/
     │       ├── useOutsideClick.ts
     │       └── useToast.ts
+    │   
     ├── lib/
     │   ├── api/
     │   │   └── subscription.ts
     │   ├── utils/
     │   │   └── subscription.ts
     │   └── utils.ts
+    │   
     ├── translations/
     │   ├── am.ts
     │   ├── en.ts
     │   └── index.ts
+    │   
     ├── types/
     │   ├── features/
     │   │   ├── plan,ts
     │   │   └── subscription.ts
     │   └── shared/
     │       └── auth.ts
+    │
     ├── .gitignore
     ├── components.json
     ├── eslint.config.mjs

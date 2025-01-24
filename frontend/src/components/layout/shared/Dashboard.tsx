@@ -1,13 +1,12 @@
-// @/components/dashboard/Dashboard.tsx
+// @/components/layout/shared/Dashboard.tsx
 
 "use client";
 import React from "react";
 import DashboardHeader from "@/components/common/DashboardHeader";
 
-const SuperAdmin = () => {
+const Dashboard = () => {
   return (
     <div className="flex flex-1 h-full flex-col">
-      {/* Use the common Header with dashboard variant */}
       <DashboardHeader variant="dashboard" />
 
       {/* dashboard content */}
@@ -35,4 +34,4 @@ const SuperAdmin = () => {
   );
 };
 
-export default SuperAdmin;
+export default Dashboard;

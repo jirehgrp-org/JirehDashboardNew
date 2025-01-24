@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { Geist, Geist_Mono, Roboto_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
 
 const geistSans = Geist({
@@ -67,6 +68,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

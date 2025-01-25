@@ -1,0 +1,176 @@
+frontend/
+├── next/
+├── node_modules/
+├── public/
+│   ├── fonts/
+│   │   ├── entoto.ttf
+│   │   └── fantuwua.ttf
+│   └── images/
+│       └── previewImage.png
+│
+└── src/
+    ├── app/
+    │   ├── auth/
+    │   │   ├── forgotPassword/
+    │   │   │   └── page.tsx
+    │   │   ├── login/
+    │   │   │   └── page.tsx
+    │   │   ├── register/
+    │   │   │   └── page.tsx
+    │   │   ├── resetPassword/
+    │   │   │   └── page.tsx
+    │   │   ├── subscription/
+    │   │   │   └── page.tsx
+    │   │   └── layout.tsx
+    │   │
+    │   ├── dashboard/
+    │   │   ├── analytics/
+    │   │   │   └── page.tsx
+    │   │   ├── categories/
+    │   │   │   └── page.tsx
+    │   │   ├── employees/
+    │   │   │   └── page.tsx
+    │   │   ├── expenses/
+    │   │   │   └── page.tsx
+    │   │   ├── items/
+    │   │   │   └── page.tsx
+    │   │   ├── locations/
+    │   │   │   └── page.tsx
+    │   │   ├── orders/
+    │   │   │   └── page.tsx
+    │   │   ├── overview/
+    │   │   │   └── page.tsx
+    │   │   ├── profitLoss/
+    │   │   │   └── page.tsx
+    │   │   ├── reports/
+    │   │   │   └── page.tsx
+    │   │   ├── salesReport/
+    │   │   │   └── page.tsx
+    │   │   ├── users/
+    │   │   │   └── page.tsx
+    │   │   ├── layout.tsx
+    │   │   └── page.tsx
+    │   │
+    │   ├── legal/
+    │   │   ├── privacy/
+    │   │   │   └── page.tsx
+    │   │   ├── terms/
+    │   │   │   └── page.tsx
+    │   │   └── layout.tsx
+    │   │
+    │   ├── superadmin/
+    │   │   ├── activityLog/
+    │   │   │   └── page.tsx
+    │   │   ├── allBusinesses/
+    │   │   │   └── page.tsx
+    │   │   ├── billingPayments/
+    │   │   │   └── page.tsx
+    │   │   ├── businessAnalytics/
+    │   │   │   └── page.tsx
+    │   │   ├── overview/
+    │   │   │   └── page.tsx
+    │   │   ├── reports/
+    │   │   │   └── page.tsx
+    │   │   ├── subscriptions/
+    │   │   │   └── page.tsx
+    │   │   ├── systemSettings/
+    │   │   │   └── page.tsx
+    │   │   └── userManagement/
+    │   │       ├── layout.tsx
+    │   │       └── page.tsx
+    │   │
+    │   ├── favicon.ico
+    │   ├── globals.css
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   └── providers.tsx
+    │
+    ├── components/
+    │   ├── common/
+    │   │   ├── DashboardHeader.tsx
+    │   │   ├── Header.tsx
+    │   │   └── LanguageToggle.tsx
+    │   │
+    │   ├── context/
+    │   │   ├── LanguageContext.tsx
+    │   │   └── ThemeContext.tsx
+    │   │
+    │   ├── features/
+    │   │   └── auth/
+    │   │       ├── ForgotPasswordForm.tsx
+    │   │       ├── LoginForm.tsx
+    │   │       ├── PaymentDialog.tsx
+    │   │       ├── RegisterForm.tsx
+    │   │       ├── ResetPasswordForm.tsx
+    │   │       └── SubscriptionForm.tsx
+    │   │
+    │   ├── layout/
+    │   │   ├── dashboard/
+    │   │   │   ├── Dashboard.tsx
+    │   │   │   └── Sidebar.tsx
+    │   │   └── superadmin/
+    │   │       ├── Dashboard.tsx
+    │   │       └── Sidebar.tsx
+    │   │
+    │   ├── Legal/
+    │   │   ├── Privacy.tsx
+    │   │   └── Terms.tsx
+    │   │
+    │   ├── Shared/
+    │   │   ├── charts/
+    │   │   │   ├── BarChart.tsx
+    │   │   │   ├── LineChart.tsx
+    │   │   │   └── PieChart.tsx
+    │   │   ├── forms/
+    │   │   │   ├── DateForm.tsx
+    │   │   │   └── FormField.tsx
+    │   │   └── tables/
+    │   │       ├── DataTable.tsx
+    │   │       ├── TableHeader.tsx
+    │   │       ├── TablePagination.tsx
+    │   │       └── TableRow.tsx
+    │   │
+    │   └── ui/
+    │       ├── Aceternity/
+    │       └── other uis ...
+    │   
+    ├── constants/
+    │   ├── features/
+    │   └── shared/
+    │       └── roleConstants.tsx
+    │   
+    ├── hooks/
+    │   ├── features/
+    │   │   ├── useInventory.ts
+    │   │   ├── usePlan.ts
+    │   │   └── useSubscription.ts
+    │   │
+    │   └── shared/
+    │       ├── useOutsideClick.ts
+    │       └── useToast.ts
+    │   
+    ├── lib/
+    │   ├── schemas/
+    │   │   └── subscription.ts
+    │   └── utils.ts
+    │   
+    ├── translations/
+    │   ├── am.ts
+    │   ├── en.ts
+    │   └── index.ts
+    │   
+    ├── types/
+    │   ├── features/
+    │   │   ├── inventory.ts
+    │   │   ├── plan,ts
+    │   │   └── subscription.ts
+    │   └── shared/
+    │       └── auth.ts
+    │
+    ├── .gitignore
+    ├── components.json
+    ├── eslint.config.mjs
+    ├── next-env.d.ts
+    ├── next.config.ts
+    ├── package-lock.json
+    └── package.json

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/shared/tables/DataTable.tsx
-"use client";
 
+"use client";
 import React, { useState } from "react";
 import type { DataTableProps } from "@/types/features/inventory";
 import { TableRow } from "./TableRow";

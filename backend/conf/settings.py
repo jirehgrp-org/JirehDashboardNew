@@ -35,8 +35,11 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'accounts.apps.AccountsConfig',
+    'accounts',
     'apis',
+    'business',
+
+    'rest_framework',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -129,3 +132,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASS':[
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}

@@ -13,7 +13,7 @@ export const LocationSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
 
   return z.object({
-    name: z.string().min(1, t.locationSchema.nameIsRequired),
+    locationName: z.string().min(1, t.locationSchema.nameIsRequired),
     address: z.string().min(1, t.locationSchema.addressIsRequired),
     contactNumber: z.string().min(1, t.locationSchema.contactNumberIsRequired),
     active: z.boolean().default(true),
@@ -24,7 +24,7 @@ export const CategorySchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
 
   return z.object({
-    name: z
+    categoryName: z
       .string()
       .min(2, t.categorySchema?.nameIsRequired || "Name is required"),
     description: z.string().optional(),
@@ -39,13 +39,13 @@ export const ItemSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
 
   return z.object({
-    name: z
-      .string()
-      .min(2, t.itemSchema?.nameMin || "Name must be at least 2 characters"),
-    description: z.string().optional(),
+    itemName: z.string().min(2, t.itemSchema?.nameIsRequired || "Name is required"),
     price: z
       .number()
       .min(0, t.itemSchema?.pricePositive || "Price must be positive"),
+    quantity: z
+      .number()
+      .min(0, t.itemSchema?.quantityIsRequired || "Quantity is required"),
     categoryId: z
       .string()
       .min(1, t.itemSchema?.categoryRequired || "Category is required"),

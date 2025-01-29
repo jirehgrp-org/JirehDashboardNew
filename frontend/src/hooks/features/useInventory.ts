@@ -109,8 +109,8 @@ const mockLocations: Location[] = [
     address: "New Street A, Addis Ababa",
     contactNumber: "0101123456",
     active: true,
-    createdAt: "2023-04-15T12:00:00Z",
-    updatedAt: "2023-05-10T12:00:00Z",
+    createdAt: "2023-09-07T12:00:00Z", // ጷግሜ 2, 2015
+    updatedAt: "2023-09-10T12:00:00Z", // ጷግሜ 4, 2015
   },
   {
     id: "12",
@@ -118,8 +118,8 @@ const mockLocations: Location[] = [
     address: "New Street B, Addis Ababa",
     contactNumber: "0102123456",
     active: false,
-    createdAt: "2023-03-30T12:00:00Z",
-    updatedAt: "2023-04-20T12:00:00Z",
+    createdAt: "2025-01-25T12:00:00Z",
+    updatedAt: "2025-01-25T12:00:00Z",
   },
 ];
 

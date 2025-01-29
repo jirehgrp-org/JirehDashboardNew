@@ -1,5 +1,3 @@
-# .htaccess file
-
 # Enable rewrite engine
 RewriteEngine On
 
@@ -10,16 +8,11 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Route all other requests to the respective HTML files
-RewriteRule ^auth/login/?$ auth/login.html [L]
-RewriteRule ^auth/register/?$ auth/register.html [L]
-RewriteRule ^auth/forgotPassword/?$ auth/forgotPassword.html [L]
-RewriteRule ^auth/resetPassword/?$ auth/resetPassword.html [L]
-RewriteRule ^auth/subscription/?$ auth/subscription.html [L]
-RewriteRule ^dashboard/?$ dashboard.html [L]
-RewriteRule ^legal/privacy/?$ legal/privacy.html [L]
-RewriteRule ^legal/terms/?$ legal/terms.html [L]
-RewriteRule ^superadmin/?$ superadmin.html [L]
+# Main section routing - let subdirectories handle their specific routes
+RewriteRule ^auth(/.*)?$ auth$1 [L]
+RewriteRule ^dashboard(/.*)?$ dashboard$1 [L]
+RewriteRule ^legal(/.*)?$ legal$1 [L]
+RewriteRule ^superadmin(/.*)?$ superadmin$1 [L]
 
 # Handle the home page
 RewriteRule ^$ index.html [L]
@@ -44,3 +37,6 @@ ErrorDocument 404 /404.html
 <FilesMatch "\.(css|js|jpg|jpeg|png|gif|ico|svg|woff2|ttf)$">
     Header set Cache-Control "max-age=31536000, public"
 </FilesMatch>
+
+# Disable directory listing
+Options -Indexes

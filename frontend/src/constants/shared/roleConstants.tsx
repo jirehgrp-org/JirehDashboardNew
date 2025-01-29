@@ -117,7 +117,6 @@ export const roleAccess = {
   },
   warehouse: {
     overview: pages.overview,
-    items: pages.items,
     orders: pages.orders,
   },
 } as const;

@@ -1,5 +1,5 @@
 -- Create database
-CREATE DATABASE IF NOT EXISTS jireh_db;
+CREATE DATABASE IF NOT EXISTS jireh_retail_db;
 USE jireh_db;
 SET GLOBAL event_scheduler = ON;
 

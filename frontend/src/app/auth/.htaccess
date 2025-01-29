@@ -1,0 +1,16 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Don't rewrite files or directories that exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route auth requests
+RewriteRule ^login/?$ login.html [L]
+RewriteRule ^register/?$ register.html [L]
+RewriteRule ^forgotPassword/?$ forgotPassword.html [L]
+RewriteRule ^resetPassword/?$ resetPassword.html [L]
+RewriteRule ^subscription/?$ subscription.html [L]
+
+# Disable directory listing
+Options -Indexes

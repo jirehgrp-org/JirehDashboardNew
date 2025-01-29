@@ -5,6 +5,7 @@ export type FormVariant = "location" | "category" | "item";
 export interface BaseInventoryItem {
   id: string;
   name: string;
+  description?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -16,7 +17,6 @@ export interface Location extends BaseInventoryItem {
 }
 
 export interface Category extends BaseInventoryItem {
-  description?: string;
   locationId: string;
 }
 

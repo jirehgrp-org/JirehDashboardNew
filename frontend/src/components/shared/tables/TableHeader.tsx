@@ -1,8 +1,11 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 // @/components/shared/tables/TableHeader.ts
+
 import type { Column } from "@/types/features/inventory";
 import { translations } from "@/translations";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCalendar } from "@/hooks/shared/useCalendar";
 
 interface HeaderProps {
   column: Column;
@@ -14,6 +17,7 @@ export const getColumns = (
   language: keyof typeof translations
 ): Column[] => {
   const t = translations[language].dashboard.inventory.locations.table;
+  const { toEthiopian } = useCalendar();
 
   const baseColumns: { [key: string]: Column[] } = {
     location: [
@@ -50,15 +54,14 @@ export const getColumns = (
                 : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
             }`}
           >
-            {row.original.active ? "Active" : "Inactive"}
+            {row.original.active ? t.active : t.inactive}
           </span>
         ),
       },
       {
         accessorKey: "updatedAt",
         header: t.lastUpdated,
-        cell: ({ row }) =>
-          new Date(row.original.updatedAt).toLocaleDateString(),
+        cell: ({ row }) => toEthiopian(new Date(row.original.updatedAt)),
       },
       {
         id: "actions",

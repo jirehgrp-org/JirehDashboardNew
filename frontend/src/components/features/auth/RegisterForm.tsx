@@ -4,19 +4,25 @@
 import React, { useState, useEffect } from "react";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
 import { cn } from "@/lib/utils";
-import { Eye, EyeClosed, Info } from "lucide-react";
+import { Eye, EyeClosed, Info, MapPin } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { translations } from "@/translations";
 import { LinkPreview } from "@/components/ui/aceternity/link-preview";
 import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
+
+interface Address {
+  street: string;
+  city: string;
+  country: string;
+}
 
 export function RegisterForm() {
   const { language } = useLanguage();
@@ -28,6 +34,19 @@ export function RegisterForm() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [addressDetails, setAddress] = useState<Address>({
+    street: "",
+    city: "",
+    country: "",
+  });
+
+  const handleAddressChange = (field: keyof Address, value: string) => {
+    setAddress((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const generateUsername = (fullName: string) => {
     const formattedName = fullName
@@ -53,9 +72,22 @@ export function RegisterForm() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const address =
+      `${addressDetails.street}, ${addressDetails.city}, ${addressDetails.country}`.trim();
+
+    console.log("Individual fields:", addressDetails);
+    console.log("Full address:", address);
+
+    const formData = {
+      address: address, // combined address
+      addressDetails: addressDetails, // individual fields
+    };
+
+    console.log("Form submitted:", formData);
+
     setTimeout(() => {
       setIsLoading(false);
-      console.log("Form submitted");
     }, 3000);
   };
 
@@ -204,7 +236,7 @@ export function RegisterForm() {
               <h3 className="font-semibold text-lg mb-4 text-neutral-800 dark:text-neutral-200">
                 {t.businessInfo}
               </h3>
-              <LabelInputContainer className="mb-4">
+              <LabelInputContainer className="mb-6">
                 <Label
                   htmlFor="businessName"
                   className="text-neutral-700 dark:text-neutral-300"
@@ -219,35 +251,76 @@ export function RegisterForm() {
                   className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
                 />
               </LabelInputContainer>
-              <LabelInputContainer className="mb-4">
+              <div className="flex items-center justify-between mb-1">
                 <Label
-                  htmlFor="businessType"
+                  htmlFor="street"
                   className="text-neutral-700 dark:text-neutral-300"
                 >
-                  {t.businessType}
+                  {t.businessAddress}
                 </Label>
-                <Select disabled defaultValue="retail">
-                  <SelectTrigger className="bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 dark:text-neutral-300">
-                    <SelectValue
-                      placeholder={t.businessTypePlaceholder.retail}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="retail">
-                      {t.businessTypePlaceholder.retail}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </LabelInputContainer>
-              <LabelInputContainer className="mb-4">
-                <Label htmlFor="businessAddress">{t.businessAddress}</Label>
-                <Input
-                  id="businessAddress"
-                  placeholder={t.businessAddressPlaceholder}
-                  type="text"
-                  disabled={isLoading}
-                />
-              </LabelInputContainer>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    >
+                      <MapPin className="h-4 w-4" />
+                      <span>Pick on map</span>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Business Location</DialogTitle>
+                    </DialogHeader>
+                    <div className="h-24 w-full bg-neutral-100 dark:bg-neutral-800 rounded-lg flex items-center justify-center">
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        Sorry, Map feature is coming soon
+                      </span>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <LabelInputContainer>
+                  <Input
+                    id="street"
+                    placeholder="Street Address"
+                    value={addressDetails.street}
+                    onChange={(e) =>
+                      handleAddressChange("street", e.target.value)
+                    }
+                    disabled={isLoading}
+                    className="border-neutral-200 dark:border-neutral-800"
+                  />
+                </LabelInputContainer>
+
+                <LabelInputContainer>
+                  <Input
+                    id="city"
+                    placeholder="City"
+                    value={addressDetails.city}
+                    onChange={(e) =>
+                      handleAddressChange("city", e.target.value)
+                    }
+                    disabled={isLoading}
+                    className="border-neutral-200 dark:border-neutral-800"
+                  />
+                </LabelInputContainer>
+
+                <LabelInputContainer>
+                  <Input
+                    id="country"
+                    placeholder="Country"
+                    value={addressDetails.country}
+                    onChange={(e) =>
+                      handleAddressChange("country", e.target.value)
+                    }
+                    disabled={isLoading}
+                    className="border-neutral-200 dark:border-neutral-800"
+                  />
+                </LabelInputContainer>
+              </div>
               <LabelInputContainer className="mb-4">
                 <Label htmlFor="phone">{t.businessPhone}</Label>
                 <div className="flex">

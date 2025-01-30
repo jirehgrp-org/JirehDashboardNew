@@ -1,23 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/hooks/features/useInventory.ts
 
 import { useState } from "react";
 import { useToast } from "@/hooks/shared/useToast";
 import type {
-  Location,
-  Category,
-  Item,
+  InventoryItem,
   UseInventoryOptions,
 } from "@/types/features/inventory";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 
-const mockLocations: Location[] = [
+const mockLocations: InventoryItem[] = [
   {
     id: "1",
     name: "Main Store",
     address: "123 Main St, Addis Ababa",
-    contactNumber: "0911234567",
+    contactNumber: "911234567",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
@@ -26,7 +23,7 @@ const mockLocations: Location[] = [
     id: "2",
     name: "Branch Office",
     address: "456 Market St, Addis Ababa",
-    contactNumber: "0922345678",
+    contactNumber: "922345678",
     active: true,
     createdAt: "2023-12-20T12:00:00Z",
     updatedAt: "2024-01-10T12:00:00Z",
@@ -35,7 +32,7 @@ const mockLocations: Location[] = [
     id: "3",
     name: "Warehouse",
     address: "789 Industrial Ave, Addis Ababa",
-    contactNumber: "0933456789",
+    contactNumber: "933456789",
     active: false,
     createdAt: "2023-11-15T12:00:00Z",
     updatedAt: "2023-12-05T12:00:00Z",
@@ -44,7 +41,7 @@ const mockLocations: Location[] = [
     id: "4",
     name: "Airport Branch",
     address: "Bole Road, Addis Ababa",
-    contactNumber: "0944567890",
+    contactNumber: "944567890",
     active: true,
     createdAt: "2023-10-30T12:00:00Z",
     updatedAt: "2023-11-20T12:00:00Z",
@@ -53,106 +50,180 @@ const mockLocations: Location[] = [
     id: "5",
     name: "City Center",
     address: "Kirkos District, Addis Ababa",
-    contactNumber: "0955678901",
+    contactNumber: "955678901",
     active: true,
     createdAt: "2023-09-15T12:00:00Z",
     updatedAt: "2023-10-10T12:00:00Z",
   },
+  // ... other locations
+];
+
+const mockCategories: InventoryItem[] = [
   {
-    id: "6",
-    name: "Bole District Office",
-    address: "Bole Sub-city, Addis Ababa",
-    contactNumber: "0966789012",
+    id: "1",
+    name: "Electronics",
+    description: "Electronic devices and accessories",
+    locationId: "1",
     active: true,
-    createdAt: "2023-08-30T12:00:00Z",
-    updatedAt: "2023-09-20T12:00:00Z",
+    createdAt: "2024-01-01T12:00:00Z",
+    updatedAt: "2024-01-15T12:00:00Z",
   },
   {
-    id: "7",
-    name: "Nifas Silk Lafto",
-    address: "Nifas Silk Lafto, Addis Ababa",
-    contactNumber: "0977890123",
+    id: "2",
+    name: "Office Supplies",
+    description: "General office materials and supplies",
+    locationId: "2",
+    active: true,
+    createdAt: "2024-01-02T12:00:00Z",
+    updatedAt: "2024-01-16T12:00:00Z",
+  },
+  {
+    id: "3",
+    name: "Furniture",
+    description: "Office and home furniture",
+    locationId: "1",
     active: false,
-    createdAt: "2023-07-15T12:00:00Z",
-    updatedAt: "2023-08-10T12:00:00Z",
+    createdAt: "2024-01-03T12:00:00Z",
+    updatedAt: "2024-01-17T12:00:00Z",
   },
   {
-    id: "8",
-    name: "Yeka Sub-city",
-    address: "Yeka Sub-city, Addis Ababa",
-    contactNumber: "0988901234",
-    active: false,
-    createdAt: "2023-06-30T12:00:00Z",
-    updatedAt: "2023-07-20T12:00:00Z",
-  },
-  {
-    id: "9",
-    name: "Arada District",
-    address: "Arada District, Addis Ababa",
-    contactNumber: "0999012345",
+    id: "4",
+    name: "Clothing",
+    description: "",
+    locationId: "2",
     active: true,
-    createdAt: "2023-05-15T12:00:00Z",
-    updatedAt: "2023-06-10T12:00:00Z",
+    createdAt: "2024-01-04T12:00:00Z",
+    updatedAt: "2024-01-18T12:00:00Z",
   },
   {
-    id: "10",
-    name: "Piassa Branch",
-    address: "Piassa, Addis Ababa",
-    contactNumber: "0100123456",
+    id: "5",
+    name: "Home Decor",
+    description: "",
+    locationId: "1",
     active: true,
-    createdAt: "2023-04-30T12:00:00Z",
-    updatedAt: "2023-05-20T12:00:00Z",
-  },
-  {
-    id: "11",
-    name: "New Branch A",
-    address: "New Street A, Addis Ababa",
-    contactNumber: "0101123456",
-    active: true,
-    createdAt: "2023-09-07T12:00:00Z", // ጷግሜ 2, 2015
-    updatedAt: "2023-09-10T12:00:00Z", // ጷግሜ 4, 2015
-  },
-  {
-    id: "12",
-    name: "New Branch B",
-    address: "New Street B, Addis Ababa",
-    contactNumber: "0102123456",
-    active: false,
-    createdAt: "2025-01-25T12:00:00Z",
-    updatedAt: "2025-01-25T12:00:00Z",
+    createdAt: "2024-01-05T12:00:00Z",
+    updatedAt: "2024-01-19T12:00:00Z",
   },
 ];
 
-export function useInventory<T extends Location | Category | Item>({
-  endpoint,
-}: UseInventoryOptions) {
+const mockItems: InventoryItem[] = [
+  {
+    id: "1",
+    name: "Laptop",
+    price: 1500,
+    quantity: 5,
+    categoryId: "1",
+    active: true,
+    createdAt: "2024-01-01T12:00:00Z",
+    updatedAt: "2024-01-15T12:00:00Z",
+  },
+  {
+    id: "2",
+    name: "Printer",
+    price: 500,
+    quantity: 3,
+    categoryId: "2",
+    active: true,
+    createdAt: "2024-01-02T12:00:00Z",
+    updatedAt: "2024-01-16T12:00:00Z",
+  },
+  {
+    id: "3",
+    name: "Monitor",
+    price: 800,
+    quantity: 2,
+    categoryId: "1",
+    active: false,
+    createdAt: "2024-01-03T12:00:00Z",
+    updatedAt: "2024-01-17T12:00:00Z",
+  },
+  {
+    id: "4",
+    name: "Keyboard",
+    price: 200,
+    quantity: 4,
+    categoryId: "2",
+    active: false,
+    createdAt: "2024-01-04T12:00:00Z",
+    updatedAt: "2024-01-18T12:00:00Z",
+  },
+  {
+    id: "5",
+    name: "Mouse",
+    price: 100,
+    quantity: 6,
+    categoryId: "1",
+    active: true,
+    createdAt: "2024-01-05T12:00:00Z",
+    updatedAt: "2024-01-19T12:00:00Z",
+  },
+];
+
+export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const { language } = useLanguage();
-  const t = translations[language].dashboard.inventory.locations.hook;
+  const t = translations[language].dashboard.inventory;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<T[]>(
-    endpoint === "locations" ? (mockLocations as T[]) : []
-  );
+  const [data, setData] = useState<InventoryItem[]>(() => {
+    if (endpoint === "locations") return mockLocations;
+    if (endpoint === "categories") return mockCategories;
+    if (endpoint === "items") return mockItems;
+    return [];
+  });
+
   const { toast } = useToast();
 
-  const handleCreate = async (newData: Partial<T>) => {
+  const getToastMessages = (variant: string) => {
+    const messages = {
+      locations: {
+        added: t.locations.hook.locationAdded,
+        updated: t.locations.hook.locationUpdated,
+        deleted: t.locations.hook.locationDeleted,
+        createdSuccess: t.locations.hook.locationCreatedSuccessfully,
+        updatedSuccess: t.locations.hook.locationUpdatedSuccessfully,
+        deletedSuccess: t.locations.hook.locationDeletedSuccessfully,
+      },
+      categories: {
+        added: t.categories.hook.categoryAdded,
+        updated: t.categories.hook.categoryUpdated,
+        deleted: t.categories.hook.categoryDeleted,
+        createdSuccess: t.categories.hook.categoryCreatedSuccessfully,
+        updatedSuccess: t.categories.hook.categoryUpdatedSuccessfully,
+        deletedSuccess: t.categories.hook.categoryDeletedSuccessfully,
+      },
+      items: {
+        added: t.items.hook.itemAdded,
+        updated: t.items.hook.itemUpdated,
+        deleted: t.items.hook.itemDeleted,
+        createdSuccess: t.items.hook.itemCreatedSuccessfully,
+        updatedSuccess: t.items.hook.itemUpdatedSuccessfully,
+        deletedSuccess: t.items.hook.itemDeletedSuccessfully,
+      },
+    };
+    return messages[variant as keyof typeof messages] || messages.locations;
+  };
+
+  const handleCreate = async (newData: Partial<InventoryItem>) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = {
+      const result: InventoryItem = {
         ...newData,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      } as T;
+      } as InventoryItem;
 
       setData((prev) => [...prev, result]);
+
+      const messages = getToastMessages(endpoint);
       toast({
-        title: t.locationAdded,
-        description: `${(result as any).name} ${t.locationCreatedSuccessfully}`,
+        title: messages.added,
+        description: `${result.name} ${messages.createdSuccess}`,
       });
 
+      onSuccess?.();
       return result;
     } catch (err) {
       handleError(err);
@@ -161,28 +232,31 @@ export function useInventory<T extends Location | Category | Item>({
     }
   };
 
-  const handleUpdate = async (id: string, updateData: Partial<T>) => {
+  const handleUpdate = async (
+    id: string,
+    updateData: Partial<InventoryItem>
+  ) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = {
+      const result: InventoryItem = {
         ...updateData,
         id,
         updatedAt: new Date().toISOString(),
-      } as T;
+      } as InventoryItem;
 
       setData((prev) =>
-        prev.map((item) =>
-          (item as any).id === id ? { ...item, ...result } : item
-        )
+        prev.map((item) => (item.id === id ? { ...item, ...result } : item))
       );
 
+      const messages = getToastMessages(endpoint);
       toast({
-        title: t.locationUpdated,
-        description: `${(result as any).name} ${t.locationUpdatedSuccessfully}`,
+        title: messages.updated,
+        description: `${result.name} ${messages.updatedSuccess}`,
       });
 
+      onSuccess?.();
       return result;
     } catch (err) {
       handleError(err);
@@ -196,15 +270,16 @@ export function useInventory<T extends Location | Category | Item>({
     setError(null);
 
     try {
-      const itemToDelete = data.find((item) => (item as any).id === id);
-      setData((prev) => prev.filter((item) => (item as any).id !== id));
+      const itemToDelete = data.find((item) => item.id === id);
+      setData((prev) => prev.filter((item) => item.id !== id));
 
+      const messages = getToastMessages(endpoint);
       toast({
-        title: t.locationDeleted,
-        description: `${
-          (itemToDelete as any).name
-        } ${t.locationDeletedSuccessfully}`,
+        title: messages.deleted,
+        description: `${itemToDelete?.name} ${messages.deletedSuccess}`,
       });
+
+      onSuccess?.();
     } catch (err) {
       handleError(err);
     } finally {
@@ -222,7 +297,7 @@ export function useInventory<T extends Location | Category | Item>({
     });
   };
 
-  const handleSubmit = async (data: Partial<T>, id?: string) => {
+  const handleSubmit = async (data: Partial<InventoryItem>, id?: string) => {
     if (id) {
       return handleUpdate(id, data);
     }

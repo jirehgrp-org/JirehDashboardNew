@@ -1,6 +1,6 @@
 // @/types/shared/auth.ts
 
-export type UserRole = "owner" | "admin" | "sales" | "warehouse";
+export type UserRole = "manager" | "admin" | "sales" | "warehouse";
 
 export interface SectionLink {
   label: string;

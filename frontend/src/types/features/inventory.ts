@@ -1,66 +1,42 @@
 // @/types/features/inventory.ts
 
+import { Column } from "@/types/shared/tables";
 export type FormVariant = "location" | "category" | "item";
 
-export interface BaseInventoryItem {
+export interface InventoryItem {
   id: string;
   name: string;
-  description?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
-}
 
-export interface Location extends BaseInventoryItem {
-  address: string;
-  contactNumber: string;
-}
+  // Location fields
+  address?: string;
+  contactNumber?: string;
 
-export interface Category extends BaseInventoryItem {
-  locationId: string;
-}
-
-export interface Item extends BaseInventoryItem {
+  // Category fields
   description?: string;
-  price: number;
-  categoryId: string;
-  quantity: number;
-  minQuantity: number;
-  maxQuantity: number;
+  locationId?: string;
+
+  // Item fields
+  categoryId?: string;
+  price?: number;
+  quantity?: number;
 }
 
 export interface InventoryFormProps {
   variant: FormVariant;
-  initialData?: Partial<Location | Category | Item> | null;
-  onSubmit: (data: Partial<Location | Category | Item>) => void;
+  initialData?: Partial<InventoryItem> | null;
+  onSubmit: (data: Partial<InventoryItem>) => void;
   onCancel: () => void;
 }
 
-export interface Column {
-  accessorKey?: string;
-  id?: string;
-  header:
-    | string
-    | ((props: {
-        column: Column;
-        onSort: (key: string) => void;
-      }) => React.ReactNode);
-  cell?: (props: {
-    row: { original: Location | Category | Item };
-  }) => React.ReactNode;
-}
-
-export interface DataTableProps<T> {
-  columns: Column[];
-  data: T[];
-  onEdit?: (row: T) => void;
-  onDelete?: (row: T) => void;
-}
+export type InventoryColumn = Column<InventoryItem>;
 
 export interface InventoryState {
-  items: Item[];
-  categories: Category[];
-  locations: Location[];
+  items: InventoryItem[];
+  categories: InventoryItem[];
+  locations: InventoryItem[];
   isLoading: boolean;
   error: string | null;
 }
@@ -70,8 +46,53 @@ export interface InventoryAction {
   payload: Partial<InventoryState>;
 }
 
-
 export interface UseInventoryOptions {
   endpoint: string;
   onSuccess?: () => void;
 }
+
+// Type guards to check what type of inventory item we're dealing with
+export const isLocation = (item: InventoryItem): boolean => {
+  return Boolean(item.address && item.contactNumber);
+};
+
+export const isCategory = (item: InventoryItem): boolean => {
+  return Boolean(item.locationId);
+};
+
+export const isItem = (item: InventoryItem): boolean => {
+  return Boolean(item.categoryId && typeof item.price === "number");
+};
+
+// Helper types for more specific type checking when needed
+export type LocationItem = Required<
+  Pick<
+    InventoryItem,
+    | "id"
+    | "name"
+    | "active"
+    | "createdAt"
+    | "updatedAt"
+    | "address"
+    | "contactNumber"
+  >
+>;
+export type CategoryItem = Required<
+  Pick<
+    InventoryItem,
+    "id" | "name" | "active" | "createdAt" | "updatedAt" | "locationId"
+  >
+> & { description?: string };
+export type StockItem = Required<
+  Pick<
+    InventoryItem,
+    | "id"
+    | "name"
+    | "active"
+    | "createdAt"
+    | "updatedAt"
+    | "price"
+    | "categoryId"
+    | "quantity"
+  >
+>;

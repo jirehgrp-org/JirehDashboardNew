@@ -16,10 +16,10 @@ import {
   IconCategory,
   IconReport,
 } from "@tabler/icons-react";
-import { HardHat, User } from "lucide-react";
+import { User } from "lucide-react";
 
 export const roleIcons = {
-  owner: (
+  manager: (
     <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
   ),
   admin: (
@@ -59,11 +59,6 @@ const pages = {
     label: "Orders",
     section: "operations",
   },
-  expenses: {
-    icon: IconFileDollar,
-    label: "Expenses",
-    section: "operations",
-  },
   locations: {
     icon: IconMapRoute,
     label: "Locations",
@@ -79,15 +74,15 @@ const pages = {
     label: "Items",
     section: "inventory",
   },
-  employees: {
-    icon: HardHat,
-    label: "Employees",
-    section: "people",
+  expenses: {
+    icon: IconFileDollar,
+    label: "Expenses",
+    section: "management",
   },
   users: {
     icon: User,
     label: "Users",
-    section: "people",
+    section: "management",
   },
   reports: {
     icon: IconReport,
@@ -97,18 +92,17 @@ const pages = {
 } as const;
 
 export const roleAccess = {
-  owner: pages,
+  manager: pages,
   admin: {
     overview: pages.overview,
     analytics: pages.analytics,
     salesReport: pages.salesReport,
     profitLoss: pages.profitLoss,
     orders: pages.orders,
-    expenses: pages.expenses,
     locations: pages.locations,
     categories: pages.categories,
     items: pages.items,
-    employees: pages.employees,
+    expenses: pages.expenses,
     reports: pages.reports,
   },
   sales: {

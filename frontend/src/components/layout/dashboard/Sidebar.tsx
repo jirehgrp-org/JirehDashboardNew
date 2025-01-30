@@ -41,7 +41,7 @@ export function SidebarDashboard({ children }: SidebarDashboardProps) {
   const { language } = useLanguage();
   const router = useRouter();
   const t: Record<string, string> = translations[language].dashboard.sidebar;
-  const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
   
 
   const filteredSections = useMemo(() => {
@@ -159,14 +159,14 @@ const SectionLabel: React.FC<{ label: string; open: boolean }> = ({
 };
 
 const RoleSwitcher = () => {
-  const roles: UserRole[] = ["owner", "admin", "sales", "warehouse"];
+  const roles: UserRole[] = ["manager", "admin", "sales", "warehouse"];
   return (
     <select
       onChange={(e) => {
         localStorage.setItem("userRole", e.target.value);
         window.location.reload();
       }}
-      value={localStorage.getItem("userRole") || "owner"}
+      value={localStorage.getItem("userRole") || "manager"}
       className="absolute top-2 left-1/2 transform -translate-x-1/2 z-50"
     >
       {roles.map((role) => (
@@ -179,7 +179,7 @@ const RoleSwitcher = () => {
 };
 
 export const Logo: React.FC<{ t: any }> = ({ t }) => {
-  const userRole = (localStorage.getItem("userRole") as UserRole) || "owner";
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
   const getRoleInfo = (role: UserRole): UserRoleInfo => ({
     title: t[role],
     description: t[`${role}Description`],

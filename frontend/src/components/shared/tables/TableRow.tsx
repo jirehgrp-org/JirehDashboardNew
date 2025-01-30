@@ -1,29 +1,36 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/shared/tables/TableRow.tsx
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
-import type { Column } from "@/types/features/inventory";
+import type { InventoryItem } from "@/types/features/inventory";
+import type { OperationItem } from "@/types/features/operation";
+import type { Column } from "@/types/shared/tables";
 import { useCalendar } from "@/hooks/shared/useCalendar";
 
-interface TableRowProps {
-  row: any;
-  columns: Column[];
-  onEdit?: (row: any) => void;
-  onDelete?: (row: any) => void;
+interface TableRowProps<T extends InventoryItem | OperationItem> {
+  row: T;
+  columns: Column<T>[];
+  onEdit?: (row: T) => void;
+  onDelete?: (row: T) => void;
 }
 
-export function TableRow({ row, columns, onEdit, onDelete }: TableRowProps) {
+export function TableRow<T extends InventoryItem | OperationItem>({
+  row,
+  columns,
+  onEdit,
+  onDelete,
+}: TableRowProps<T>) {
   const { toEthiopian } = useCalendar();
 
   return (
     <tr>
       {columns.map((column) => {
-        const value = column.accessorKey ? row[column.accessorKey] : "";
+        const value = column.accessorKey
+          ? row[column.accessorKey as keyof T]
+          : "";
         const displayValue = column.accessorKey?.includes("At")
-          ? toEthiopian(new Date(value))
-          : value;
+          ? toEthiopian(new Date(value as string))
+          : (value as React.ReactNode);
 
         return (
           <td

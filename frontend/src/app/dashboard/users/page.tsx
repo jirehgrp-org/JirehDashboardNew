@@ -1,6 +1,6 @@
-// @/app/dashboard/locations/page.tsx
-
+// @/app/dashboard/users/page.tsx
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -26,43 +26,40 @@ import {
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
-import { InventoryForm } from "@/components/shared/forms/InventoryForm";
+import { OperationForm } from "@/components/shared/forms/operationForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
-import { useInventory } from "@/hooks/features/useInventory";
-import type { InventoryItem } from "@/types/features/inventory";
+import { useOperation } from "@/hooks/features/useOperation";
+import type { OperationItem } from "@/types/features/operation";
 
-const LocationsPage = () => {
+const UsersPage = () => {
   const { language } = useLanguage();
-  const t = translations[language].dashboard.inventory.page;
+  const t = translations[language].dashboard.operation.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingLocation, setEditingLocation] = useState<InventoryItem | null>(
-    null
-  );
+  const [editingUser, setEditingUser] = useState<OperationItem | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] =
-    useState<InventoryItem | null>(null);
+  const [userToDelete, setUserToDelete] = useState<OperationItem | null>(null);
 
   const {
     isLoading,
-    data: locations,
+    data: users,
     handleSubmit,
-    handleDelete: deleteLocation,
-  } = useInventory({
-    endpoint: "locations",
+    handleDelete: deleteUser,
+  } = useOperation({
+    endpoint: "users",
   });
 
-  // Filter to only show locations and apply search
-  const filteredLocations = locations?.filter(
+  // Filter users and apply search
+  const filteredUsers = users?.filter(
     (item) =>
-      item.address && // Ensure it's a location
-      item.contactNumber && // Additional check for location type
+      item.username && // Ensure it's a user
       (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.address.toLowerCase().includes(searchQuery.toLowerCase()))
+        item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.username.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const downloadCSV = () => {
-    if (!locations) return;
+    if (!users) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -73,13 +70,15 @@ const LocationsPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      locations
-        .filter((item) => item.address && item.contactNumber) // Only include locations
-        .map((location) => ({
-          name: location.name,
-          address: location.address,
-          contactNumber: location.contactNumber,
-          active: location.active,
+      users
+        .filter((item) => item.username && item.email) // Only include users
+        .map((user) => ({
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          active: user.active,
         }))
     );
 
@@ -88,33 +87,33 @@ const LocationsPage = () => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `locations-export-${date}.csv`);
+    link.setAttribute("download", `users-export-${date}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const onSubmit = async (data: Partial<InventoryItem>) => {
-    await handleSubmit(data, editingLocation?.id);
+  const onSubmit = async (data: Partial<OperationItem>) => {
+    await handleSubmit(data, editingUser?.id);
     setOpen(false);
-    setEditingLocation(null);
+    setEditingUser(null);
   };
 
-  const handleEdit = (location: InventoryItem) => {
-    setEditingLocation(location);
+  const handleEdit = (user: OperationItem) => {
+    setEditingUser(user);
     setOpen(true);
   };
 
-  const handleDelete = async (location: InventoryItem) => {
-    setLocationToDelete(location);
+  const handleDelete = async (user: OperationItem) => {
+    setUserToDelete(user);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (locationToDelete) {
-      await deleteLocation(locationToDelete.id);
-      setLocationToDelete(null);
+    if (userToDelete) {
+      await deleteUser(userToDelete.id);
+      setUserToDelete(null);
       setDeleteDialogOpen(false);
     }
   };
@@ -125,9 +124,9 @@ const LocationsPage = () => {
         <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold">
-              {t.locations}
+              {t.users}
               <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourLocations}
+                {t.manageYourUsers}
               </p>
             </h2>
 
@@ -144,22 +143,22 @@ const LocationsPage = () => {
                 <DialogTrigger asChild>
                   <Button disabled={isLoading}>
                     <Plus className="mr-2 h-4 w-4" />
-                    {t.addLocation}
+                    {t.addUser}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingLocation ? t.editLocation : t.addLocation}
+                      {editingUser ? t.editUser : t.addUser}
                     </DialogTitle>
                   </DialogHeader>
-                  <InventoryForm
-                    variant="location"
-                    initialData={editingLocation}
+                  <OperationForm
+                    variant="user"
+                    initialData={editingUser}
                     onSubmit={onSubmit}
                     onCancel={() => {
                       setOpen(false);
-                      setEditingLocation(null);
+                      setEditingUser(null);
                     }}
                   />
                 </DialogContent>
@@ -170,21 +169,21 @@ const LocationsPage = () => {
           <div className="flex justify-between items-center">
             <div className="w-full max-w-sm">
               <Input
-                placeholder={t.searchLocations}
+                placeholder={t.searchUsers}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
               />
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalLocations}: {filteredLocations?.length || 0}
+              {t.totalUsers}: {filteredUsers?.length || 0}
             </div>
           </div>
 
           <div className="flex-1">
             <DataTable
-              columns={getColumns("location", language)}
-              data={filteredLocations || []}
+              columns={getColumns("user", language)}
+              data={filteredUsers || []}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -196,13 +195,16 @@ const LocationsPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}&quot;{" "}
+              {t.thisWillPermanentlyDelete} &quot;{userToDelete?.name}&quot;{" "}
               {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
               {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -212,4 +214,4 @@ const LocationsPage = () => {
   );
 };
 
-export default LocationsPage;
+export default UsersPage;

@@ -3,24 +3,29 @@ CREATE DATABASE IF NOT EXISTS jireh_retail_db;
 USE jireh_db;
 SET GLOBAL event_scheduler = ON;
 
--- Create OWNER table
-CREATE TABLE owner (
+-- Modify USER table to include owner role
+CREATE TABLE user (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    business_id INT NOT NULL,
+    location_id INT,
     fullname VARCHAR(100) NOT NULL,
     username VARCHAR(100) NOT NULL,
-    phone VARCHAR(15) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(20) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    last_login DATETIME,
+    user_role ENUM('manager', 'admin', 'sales', 'warehouse') NOT NULL,
     is_active BOOLEAN DEFAULT true,
+    last_login DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (business_id) REFERENCES business(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- Create BUSINESS table
+-- Update BUSINESS table to refer to user table for owners
 CREATE TABLE business (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    owner_id INT NOT NULL,
+    user_id INT NOT NULL, -- Referencing user as owner
     name VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
     contact_number VARCHAR(15) NOT NULL,
@@ -28,7 +33,7 @@ CREATE TABLE business (
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (owner_id) REFERENCES owner(id)
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 -- Create PLAN table
@@ -89,44 +94,6 @@ CREATE TABLE location (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (business_id) REFERENCES business(id)
-);
-
--- Create USER table
-CREATE TABLE user (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    business_id INT NOT NULL,
-    location_id INT NOT NULL,
-    fullname VARCHAR(100) NOT NULL,
-    username VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    user_role ENUM('admin', 'sales', 'warehouse') NOT NULL,
-    is_active BOOLEAN DEFAULT true,
-    last_login DATETIME,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (business_id) REFERENCES business(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE SET NULL ON UPDATE CASCADE
-);
-
--- Create EMPLOYEE table
-CREATE TABLE employee (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    business_id INT NOT NULL,
-    location_id INT NOT NULL,
-    fullname VARCHAR(100) NOT NULL,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    position VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    hire_date DATE NOT NULL,
-    is_active BOOLEAN DEFAULT true,
-    salary DECIMAL(10,2) NOT NULL,
-    employment_status ENUM('FULL_TIME', 'PART_TIME', 'CONTRACT', 'TERMINATED') NOT NULL DEFAULT 'FULL_TIME',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (business_id) REFERENCES business(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- Create EXPENSE table

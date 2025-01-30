@@ -1,4 +1,4 @@
-// @/app/dashboard/locations/page.tsx
+// @/app/dashboard/categories/page.tsx
 
 "use client";
 import React, { useState } from "react";
@@ -31,38 +31,36 @@ import { getColumns } from "@/components/shared/tables/TableHeader";
 import { useInventory } from "@/hooks/features/useInventory";
 import type { InventoryItem } from "@/types/features/inventory";
 
-const LocationsPage = () => {
+const CategoriesPage = () => {
   const { language } = useLanguage();
   const t = translations[language].dashboard.inventory.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingLocation, setEditingLocation] = useState<InventoryItem | null>(
+  const [editingCategory, setEditingCategory] = useState<InventoryItem | null>(
     null
   );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] =
+  const [categoryToDelete, setCategoryToDelete] =
     useState<InventoryItem | null>(null);
 
   const {
     isLoading,
-    data: locations,
+    data: categories,
     handleSubmit,
-    handleDelete: deleteLocation,
+    handleDelete: deleteCategory,
   } = useInventory({
-    endpoint: "locations",
+    endpoint: "categories",
   });
 
-  // Filter to only show locations and apply search
-  const filteredLocations = locations?.filter(
+  // Filter to only show categories and apply search
+  const filteredCategories = categories?.filter(
     (item) =>
-      item.address && // Ensure it's a location
-      item.contactNumber && // Additional check for location type
-      (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.address.toLowerCase().includes(searchQuery.toLowerCase()))
+      item.locationId && // Ensure it's a category
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const downloadCSV = () => {
-    if (!locations) return;
+    if (!categories) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -73,13 +71,13 @@ const LocationsPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      locations
-        .filter((item) => item.address && item.contactNumber) // Only include locations
-        .map((location) => ({
-          name: location.name,
-          address: location.address,
-          contactNumber: location.contactNumber,
-          active: location.active,
+      categories
+        .filter((item) => item.locationId) // Only include categories
+        .map((category) => ({
+          name: category.name,
+          description: category.description || "",
+          locationId: category.locationId,
+          active: category.active,
         }))
     );
 
@@ -88,7 +86,7 @@ const LocationsPage = () => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `locations-export-${date}.csv`);
+    link.setAttribute("download", `categories-export-${date}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -96,25 +94,25 @@ const LocationsPage = () => {
   };
 
   const onSubmit = async (data: Partial<InventoryItem>) => {
-    await handleSubmit(data, editingLocation?.id);
+    await handleSubmit(data, editingCategory?.id);
     setOpen(false);
-    setEditingLocation(null);
+    setEditingCategory(null);
   };
 
-  const handleEdit = (location: InventoryItem) => {
-    setEditingLocation(location);
+  const handleEdit = (category: InventoryItem) => {
+    setEditingCategory(category);
     setOpen(true);
   };
 
-  const handleDelete = async (location: InventoryItem) => {
-    setLocationToDelete(location);
+  const handleDelete = async (category: InventoryItem) => {
+    setCategoryToDelete(category);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (locationToDelete) {
-      await deleteLocation(locationToDelete.id);
-      setLocationToDelete(null);
+    if (categoryToDelete) {
+      await deleteCategory(categoryToDelete.id);
+      setCategoryToDelete(null);
       setDeleteDialogOpen(false);
     }
   };
@@ -125,9 +123,9 @@ const LocationsPage = () => {
         <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold">
-              {t.locations}
+              {t.categories}
               <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourLocations}
+                {t.manageYourCategories}
               </p>
             </h2>
 
@@ -144,22 +142,22 @@ const LocationsPage = () => {
                 <DialogTrigger asChild>
                   <Button disabled={isLoading}>
                     <Plus className="mr-2 h-4 w-4" />
-                    {t.addLocation}
+                    {t.addCategory}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingLocation ? t.editLocation : t.addLocation}
+                      {editingCategory ? t.editCategory : t.addCategory}
                     </DialogTitle>
                   </DialogHeader>
                   <InventoryForm
-                    variant="location"
-                    initialData={editingLocation}
+                    variant="category"
+                    initialData={editingCategory}
                     onSubmit={onSubmit}
                     onCancel={() => {
                       setOpen(false);
-                      setEditingLocation(null);
+                      setEditingCategory(null);
                     }}
                   />
                 </DialogContent>
@@ -170,21 +168,21 @@ const LocationsPage = () => {
           <div className="flex justify-between items-center">
             <div className="w-full max-w-sm">
               <Input
-                placeholder={t.searchLocations}
+                placeholder={t.searchCategories}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
               />
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalLocations}: {filteredLocations?.length || 0}
+              {t.totalCategories}: {filteredCategories?.length || 0}
             </div>
           </div>
 
           <div className="flex-1">
             <DataTable
-              columns={getColumns("location", language)}
-              data={filteredLocations || []}
+              columns={getColumns("category", language)}
+              data={filteredCategories || []}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -196,7 +194,7 @@ const LocationsPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}&quot;{" "}
+              {t.thisWillPermanentlyDelete} &quot;{categoryToDelete?.name}&quot;{" "}
               {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -212,4 +210,4 @@ const LocationsPage = () => {
   );
 };
 
-export default LocationsPage;
+export default CategoriesPage;

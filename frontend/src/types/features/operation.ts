@@ -1,7 +1,7 @@
 // @/types/features/operation.ts
 
 import { z } from "zod";
-import { Column } from "@/types/shared/tables";
+import { Column } from "@/types/shared/table";
 import { UserSchema, ExpenseSchema } from "@/lib/schemas/operation";
 
 export type FormVariant = "user" | "expense";

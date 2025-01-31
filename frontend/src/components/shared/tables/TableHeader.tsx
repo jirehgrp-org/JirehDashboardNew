@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
-import type { Column } from "@/types/shared/tables";
+import type { Column } from "@/types/shared/table";
 import { translations } from "@/translations";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,16 +10,17 @@ import { useCalendar } from "@/hooks/shared/useCalendar";
 import { useInventory } from "@/hooks/features/useInventory";
 
 interface HeaderProps {
-  column: Column<InventoryItem | OperationItem>;
+  column: Column<any>;
   onSort?: (key: string) => void;
 }
 
 type CellProps = {
   row: {
-    original: InventoryItem | OperationItem;
+    original: any;
   };
 };
 
+// Status badge for active/inactive states
 const StatusBadge = ({
   active,
   labels,
@@ -37,6 +38,47 @@ const StatusBadge = ({
     {active ? labels.active : labels.inactive}
   </span>
 );
+
+// Status badge for orders
+const OrderStatusBadge = ({
+  type,
+  status,
+}: {
+  type: "order" | "payment";
+  status: string;
+}) => {
+  const getStatusColor = () => {
+    if (type === "payment") {
+      switch (status.toLowerCase()) {
+        case "paid":
+          return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+        case "cancelled":
+          return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        default:
+          return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      }
+    } else {
+      switch (status.toLowerCase()) {
+        case "completed":
+          return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+        case "cancelled":
+          return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        default:
+          return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      }
+    }
+  };
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-sm ${getStatusColor()}`}>
+      {status}
+    </span>
+  );
+};
 
 const RoleBadge = ({ role, label }: { role: string; label: string }) => (
   <span
@@ -72,23 +114,18 @@ const SortableHeader = ({
 );
 
 export const getColumns = (
-  variant: "location" | "category" | "item" | "user" | "expense",
+  variant: "location" | "category" | "item" | "user" | "expense" | "order",
   language: keyof typeof translations
 ): Column<any>[] => {
   const t = translations[language].dashboard;
   const { toEthiopian } = useCalendar();
 
-  // Get locations data for lookups
-  const { data: locations } = useInventory({
-    endpoint: "locations",
-  });
+  // Get data for lookups
+  const { data: locations } = useInventory({ endpoint: "locations" });
+  const { data: categories } = useInventory({ endpoint: "categories" });
+  const { data: items } = useInventory({ endpoint: "items" });
 
-  // Get categories data for lookups
-  const { data: categories } = useInventory({
-    endpoint: "categories",
-  });
-
-  const baseColumns: { [key: string]: Column<InventoryItem>[] } = {
+  const baseColumns: { [key: string]: Column<any>[] } = {
     location: [
       {
         accessorKey: "name",
@@ -113,6 +150,14 @@ export const getColumns = (
       {
         accessorKey: "contactNumber",
         header: t.inventory.table.contact,
+        cell: ({ row }: CellProps) => {
+          const contact = (row.original as InventoryItem).contactNumber || "";
+          return contact.startsWith("0")
+            ? `+251${contact.slice(1)}`
+            : contact.startsWith("9")
+            ? `+251${contact}`
+            : contact;
+        },
       },
       {
         accessorKey: "active",
@@ -313,6 +358,14 @@ export const getColumns = (
       {
         accessorKey: "phone",
         header: t.operation.table.phone,
+        cell: ({ row }: CellProps) => {
+          const phone = (row.original as OperationItem).phone || "";
+          return phone.startsWith("0")
+            ? `+251${phone.slice(1)}`
+            : phone.startsWith("9")
+            ? `+251${phone}`
+            : phone;
+        },
       },
       {
         accessorKey: "role",
@@ -324,7 +377,9 @@ export const getColumns = (
           />
         ),
         cell: ({ row }: CellProps) => {
-          const role = (row.original as OperationItem).role as keyof typeof roleLabels || "";
+          const role =
+            ((row.original as OperationItem).role as keyof typeof roleLabels) ||
+            "";
           const roleLabels = {
             manager: t.operation.manager,
             admin: t.operation.admin,
@@ -358,6 +413,216 @@ export const getColumns = (
       {
         id: "actions",
         header: t.operation.table.actions,
+      },
+    ],
+    expense: [
+      {
+        accessorKey: "name",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.operation.table.name}
+            sortKey="name"
+            onSort={onSort}
+          />
+        ),
+      },
+      {
+        accessorKey: "locationId",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.operation.table.location}
+            sortKey="locationId"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => {
+          const location = locations?.find(
+            (loc) => loc.id === row.original.locationId
+          );
+          return location?.name || row.original.locationId;
+        },
+      },
+      {
+        accessorKey: "amount",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.operation.table.amount}
+            sortKey="amount"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => {
+          const expense = row.original as OperationItem;
+          return (
+            <span className="font-mono">
+              {expense.amount?.toLocaleString(language, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "frequency",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.operation.table.frequency}
+            sortKey="frequency"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => {
+          const frequency =
+            ((row.original as OperationItem)
+              .frequency as keyof typeof frequencyLabels) || "";
+          const frequencyLabels = {
+            once: t.operation.form.oneTime,
+            daily: t.operation.form.daily,
+            weekly: t.operation.form.weekly,
+            monthly: t.operation.form.monthly,
+            quarterly: t.operation.form.quarterly,
+            halfYearly: t.operation.form.halfYearly,
+            yearly: t.operation.form.yearly,
+          };
+
+          return frequencyLabels[frequency] || frequency;
+        },
+      },
+      {
+        accessorKey: "description",
+        header: t.operation.table.description,
+        cell: ({ row }: CellProps) => row.original.description || "-",
+      },
+      {
+        accessorKey: "active",
+        header: t.operation.table.status,
+        cell: ({ row }: CellProps) => (
+          <StatusBadge
+            active={row.original.active}
+            labels={{
+              active: t.operation.table.active,
+              inactive: t.operation.table.inactive,
+            }}
+          />
+        ),
+      },
+      {
+        accessorKey: "updatedAt",
+        header: t.operation.table.lastUpdated,
+        cell: ({ row }: CellProps) =>
+          toEthiopian(new Date(row.original.updatedAt)),
+      },
+      {
+        id: "actions",
+        header: t.operation.table.actions,
+      },
+    ],
+
+    order: [
+      {
+        accessorKey: "orderNumber",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.orderNumber}
+            sortKey="orderNumber"
+            onSort={onSort}
+          />
+        ),
+      },
+      {
+        accessorKey: "customerName",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.customerName}
+            sortKey="customerName"
+            onSort={onSort}
+          />
+        ),
+      },
+      {
+        accessorKey: "customerPhone",
+        header: t.transaction.table.customerPhone,
+        cell: ({ row }: CellProps) => {
+          const phone = row.original.customerPhone;
+          return phone.startsWith("0")
+            ? `+251${phone.slice(1)}`
+            : phone.startsWith("9")
+            ? `+251${phone}`
+            : phone;
+        },
+      },
+      {
+        accessorKey: "itemId",
+        header: t.transaction.table.item,
+        cell: ({ row }: CellProps) => {
+          const item = items?.find((item) => item.id === row.original.itemId);
+          const total = (row.original.quantity || 0) * (item?.price || 0);
+          return item ? (
+            <div className="flex flex-col">
+              <span>{item.name}</span>
+              <span className="text-xs text-neutral-500">
+                {row.original.quantity} ×{" "}
+                {item.price?.toLocaleString(language, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
+                ={" "}
+                {total.toLocaleString(language, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          ) : (
+            row.original.itemId
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.status}
+            sortKey="status"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => (
+          <OrderStatusBadge type="order" status={row.original.status} />
+        ),
+      },
+      {
+        accessorKey: "paymentStatus",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.paymentStatus}
+            sortKey="paymentStatus"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => (
+          <OrderStatusBadge
+            type="payment"
+            status={row.original.paymentStatus}
+          />
+        ),
+      },
+      {
+        accessorKey: "orderDate",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.orderDate}
+            sortKey="orderDate"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) =>
+          toEthiopian(new Date(row.original.orderDate)),
+      },
+      {
+        id: "actions",
+        header: t.transaction.table.actions,
       },
     ],
   };

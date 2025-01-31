@@ -57,7 +57,7 @@ const pages = {
   orders: {
     icon: IconReceiptDollar,
     label: "Orders",
-    section: "operations",
+    section: "transactions",
   },
   locations: {
     icon: IconMapRoute,
@@ -77,12 +77,12 @@ const pages = {
   expenses: {
     icon: IconFileDollar,
     label: "Expenses",
-    section: "management",
+    section: "operations",
   },
   users: {
     icon: User,
     label: "Users",
-    section: "management",
+    section: "operations",
   },
   reports: {
     icon: IconReport,

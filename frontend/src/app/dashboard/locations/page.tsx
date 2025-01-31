@@ -185,6 +185,7 @@ const LocationsPage = () => {
             <DataTable
               columns={getColumns("location", language)}
               data={filteredLocations || []}
+              variant="location"
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

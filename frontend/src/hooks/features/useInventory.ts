@@ -174,33 +174,38 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const { toast } = useToast();
 
   const getToastMessages = (variant: string) => {
-    const messages = {
+    const commonMessages = {
+      createdSuccess: t.hook.createdSuccessfully,
+      updatedSuccess: t.hook.updatedSuccessfully,
+      deletedSuccess: t.hook.deletedSuccessfully,
+    };
+
+    const variantMessages = {
       locations: {
-        added: t.locations.hook.locationAdded,
-        updated: t.locations.hook.locationUpdated,
-        deleted: t.locations.hook.locationDeleted,
-        createdSuccess: t.locations.hook.locationCreatedSuccessfully,
-        updatedSuccess: t.locations.hook.locationUpdatedSuccessfully,
-        deletedSuccess: t.locations.hook.locationDeletedSuccessfully,
+        added: t.hook.locationAdded,
+        updated: t.hook.locationUpdated,
+        deleted: t.hook.locationDeleted,
       },
       categories: {
-        added: t.categories.hook.categoryAdded,
-        updated: t.categories.hook.categoryUpdated,
-        deleted: t.categories.hook.categoryDeleted,
-        createdSuccess: t.categories.hook.categoryCreatedSuccessfully,
-        updatedSuccess: t.categories.hook.categoryUpdatedSuccessfully,
-        deletedSuccess: t.categories.hook.categoryDeletedSuccessfully,
+        added: t.hook.categoryAdded,
+        updated: t.hook.categoryUpdated,
+        deleted: t.hook.categoryDeleted,
       },
       items: {
-        added: t.items.hook.itemAdded,
-        updated: t.items.hook.itemUpdated,
-        deleted: t.items.hook.itemDeleted,
-        createdSuccess: t.items.hook.itemCreatedSuccessfully,
-        updatedSuccess: t.items.hook.itemUpdatedSuccessfully,
-        deletedSuccess: t.items.hook.itemDeletedSuccessfully,
+        added: t.hook.itemAdded,
+        updated: t.hook.itemUpdated,
+        deleted: t.hook.itemDeleted,
       },
     };
-    return messages[variant as keyof typeof messages] || messages.locations;
+
+    const selectedVariant =
+      variantMessages[variant as keyof typeof variantMessages] ||
+      variantMessages.locations;
+
+    return {
+      ...commonMessages,
+      ...selectedVariant,
+    };
   };
 
   const handleCreate = async (newData: Partial<InventoryItem>) => {

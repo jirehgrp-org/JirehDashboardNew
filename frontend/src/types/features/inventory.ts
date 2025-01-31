@@ -1,6 +1,6 @@
 // @/types/features/inventory.ts
 
-import { Column } from "@/types/shared/tables";
+import { Column } from "@/types/shared/table";
 export type FormVariant = "location" | "category" | "item";
 
 export interface InventoryItem {

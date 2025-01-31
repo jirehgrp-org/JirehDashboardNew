@@ -144,7 +144,7 @@ export function InventoryForm({
                           type="tel"
                           placeholder={formT.contactNumberPlaceholder}
                           className="h-10 rounded-l-none"
-                          maxLength={10}
+                          maxLength={9}
                           minLength={9}
                           pattern="[0-9]{9,10}"
                         />

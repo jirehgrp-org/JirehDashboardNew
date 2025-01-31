@@ -1,6 +1,6 @@
-// @/app/dashboard/users/page.tsx
-"use client";
+// @/app/dashboard/orders/page.tsx
 
+"use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -26,40 +26,40 @@ import {
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
-import { OperationForm } from "@/components/shared/forms/operationForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
-import { useOperation } from "@/hooks/features/useOperation";
-import type { OperationItem } from "@/types/features/operation";
+import { useTransaction } from "@/hooks/features/useTransaction";
+import type { TransactionItem } from "@/types/features/transaction";
 
-const UsersPage = () => {
+const OrdersPage = () => {
   const { language } = useLanguage();
-  const t = translations[language].dashboard.operation.page;
+  const t = translations[language].dashboard.transaction.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingUser, setEditingUser] = useState<OperationItem | null>(null);
+  const [editingOrder, setEditingOrder] = useState<TransactionItem | null>(
+    null
+  );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<OperationItem | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<TransactionItem | null>(
+    null
+  );
 
   const {
     isLoading,
-    data: users,
+    data: orders,
     handleSubmit,
-    handleDelete: deleteUser,
-  } = useOperation({
-    endpoint: "users",
-  });
+    handleDelete: deleteOrder,
+    handleStatusChange,
+  } = useTransaction();
 
-  // Filter users and apply search
-  const filteredUsers = users?.filter(
-    (item) =>
-      item.username && // Ensure it's a user
-      (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.username.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Filter orders based on search query
+  const filteredOrders = orders?.filter(
+    (order) =>
+      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const downloadCSV = () => {
-    if (!users) return;
+    if (!orders) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -70,16 +70,17 @@ const UsersPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      users
-        .filter((item) => item.username && item.email) // Only include users
-        .map((user) => ({
-          name: user.name,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          active: user.active,
-        }))
+      orders.map((order) => ({
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        customerEmail: order.customerEmail || "",
+        itemId: order.itemId,
+        quantity: order.quantity,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        orderDate: order.orderDate,
+      }))
     );
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -87,35 +88,42 @@ const UsersPage = () => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `users-export-${date}.csv`);
+    link.setAttribute("download", `orders-export-${date}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const onSubmit = async (data: Partial<OperationItem>) => {
-    await handleSubmit(data, editingUser?.id);
+  const onSubmit = async (data: Partial<TransactionItem>) => {
+    await handleSubmit(data, editingOrder?.id);
     setOpen(false);
-    setEditingUser(null);
+    setEditingOrder(null);
   };
 
-  const handleEdit = (user: OperationItem) => {
-    setEditingUser(user);
+  const handleEdit = (order: TransactionItem) => {
+    setEditingOrder(order);
     setOpen(true);
   };
 
-  const handleDelete = async (user: OperationItem) => {
-    setUserToDelete(user);
+  const handleDelete = async (order: TransactionItem) => {
+    setOrderToDelete(order);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (userToDelete) {
-      await deleteUser(userToDelete.id);
-      setUserToDelete(null);
+    if (orderToDelete) {
+      await deleteOrder(orderToDelete.id);
+      setOrderToDelete(null);
       setDeleteDialogOpen(false);
     }
+  };
+
+  const handleActionClick = async (
+    order: TransactionItem,
+    action: "mark_paid" | "cancel"
+  ) => {
+    await handleStatusChange(order.id, action);
   };
 
   return (
@@ -124,9 +132,9 @@ const UsersPage = () => {
         <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold">
-              {t.users}
+              {t.orders}
               <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourUsers}
+                {t.manageYourOrders}
               </p>
             </h2>
 
@@ -143,22 +151,21 @@ const UsersPage = () => {
                 <DialogTrigger asChild>
                   <Button disabled={isLoading}>
                     <Plus className="mr-2 h-4 w-4" />
-                    {t.addUser}
+                    {t.addOrder}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingUser ? t.editUser : t.addUser}
+                      {editingOrder ? t.editOrder : t.addOrder}
                     </DialogTitle>
                   </DialogHeader>
-                  <OperationForm
-                    variant="user"
-                    initialData={editingUser}
+                  <OrderForm
+                    initialData={editingOrder}
                     onSubmit={onSubmit}
                     onCancel={() => {
                       setOpen(false);
-                      setEditingUser(null);
+                      setEditingOrder(null);
                     }}
                   />
                 </DialogContent>
@@ -169,24 +176,25 @@ const UsersPage = () => {
           <div className="flex justify-between items-center">
             <div className="w-full max-w-sm">
               <Input
-                placeholder={t.searchUsers}
+                placeholder={t.searchOrders}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
               />
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalUsers}: {filteredUsers?.length || 0}
+              {t.totalOrders}: {filteredOrders?.length || 0}
             </div>
           </div>
 
           <div className="flex-1">
             <DataTable
-              columns={getColumns("user", language)}
-              data={filteredUsers || []}
-              variant="user"
+              columns={getColumns("order", language)}
+              data={filteredOrders || []}
+              variant="order"
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onAction={handleActionClick}
             />
           </div>
         </div>
@@ -196,15 +204,13 @@ const UsersPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{userToDelete?.name}&quot;{" "}
-              {t.actionCannotBeUndone}
+              {t.thisWillPermanentlyDelete} &quot;{orderToDelete?.orderNumber}
+              &quot; {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-            >
+            <AlertDialogAction onClick={confirmDelete}>
               {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -214,4 +220,4 @@ const UsersPage = () => {
   );
 };
 
-export default UsersPage;
+export default OrdersPage;

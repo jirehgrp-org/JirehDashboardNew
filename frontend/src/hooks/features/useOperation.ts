@@ -14,7 +14,7 @@ const mockUsers: OperationItem[] = [
   {
     id: "1",
     name: "John Doe",
-    username: "johndoe",
+    username: "john.doe",
     email: "john@example.com",
     phone: "911234567",
     role: "admin",
@@ -26,7 +26,7 @@ const mockUsers: OperationItem[] = [
   {
     id: "2",
     name: "Jane Smith",
-    username: "janesmith",
+    username: "jane.smith",
     email: "jane@example.com",
     phone: "922345678",
     role: "sales",
@@ -37,7 +37,6 @@ const mockUsers: OperationItem[] = [
   },
 ];
 
-// Mock data for expenses
 const mockExpenses: OperationItem[] = [
   {
     id: "1",
@@ -77,25 +76,33 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const { toast } = useToast();
 
   const getToastMessages = (variant: string) => {
-    const messages = {
+    const commonMessages = {
+      createdSuccess: t.hook.createdSuccessfully,
+      updatedSuccess: t.hook.updatedSuccessfully,
+      deletedSuccess: t.hook.deletedSuccessfully,
+    };
+
+    const variantMessages = {
       users: {
         added: t.hook.userAdded,
         updated: t.hook.userUpdated,
         deleted: t.hook.userDeleted,
-        createdSuccess: t.hook.createdSuccessfully,
-        updatedSuccess: t.hook.updatedSuccessfully,
-        deletedSuccess: t.hook.deletedSuccessfully,
       },
       expenses: {
         added: t.hook.expenseAdded,
         updated: t.hook.expenseUpdated,
         deleted: t.hook.expenseDeleted,
-        createdSuccess: t.hook.createdSuccessfully,
-        updatedSuccess: t.hook.updatedSuccessfully,
-        deletedSuccess: t.hook.deletedSuccessfully,
       },
     };
-    return messages[variant as keyof typeof messages] || messages.users;
+
+    const selectedVariant =
+      variantMessages[variant as keyof typeof variantMessages] ||
+      variantMessages.users;
+
+    return {
+      ...commonMessages,
+      ...selectedVariant,
+    };
   };
 
   const handleCreate = async (newData: Partial<OperationItem>) => {

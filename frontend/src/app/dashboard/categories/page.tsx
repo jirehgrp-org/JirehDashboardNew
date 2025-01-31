@@ -183,6 +183,7 @@ const CategoriesPage = () => {
             <DataTable
               columns={getColumns("category", language)}
               data={filteredCategories || []}
+              variant="category"
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

@@ -4,16 +4,23 @@
 import React, { useState, useMemo } from "react";
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
-import type { DataTableProps } from "@/types/shared/tables";
+import type { TransactionItem } from "@/types/features/transaction";
+import type { DataTableProps } from "@/types/shared/table";
 import { TableRow } from "./TableRow";
 import { TablePagination } from "./TablePagination";
+import { useLanguage } from "@/components/context/LanguageContext";
+import { translations } from "@/translations";
 
-export function DataTable<T extends InventoryItem | OperationItem>({
+export function DataTable<T extends InventoryItem | OperationItem | TransactionItem>({
   columns,
   data,
+  variant,
   onEdit,
   onDelete,
+  onAction,
 }: DataTableProps<T>) {
+  const { language } = useLanguage();
+  const t = translations[language].dashboard.table.message;
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -43,6 +50,12 @@ export function DataTable<T extends InventoryItem | OperationItem>({
 
       // Handle different types of values
       if (typeof aVal === "string" && typeof bVal === "string") {
+        // Special handling for order number sorting (e.g., "ORD-001")
+        if (sortConfig.key === "orderNumber") {
+          const aNum = parseInt(aVal.split("-")[1]);
+          const bNum = parseInt(bVal.split("-")[1]);
+          return sortConfig.direction === "asc" ? aNum - bNum : bNum - aNum;
+        }
         return sortConfig.direction === "asc"
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
@@ -66,14 +79,30 @@ export function DataTable<T extends InventoryItem | OperationItem>({
           : 1;
       }
 
-      // Handle date strings
+      // Handle dates (including orderDate)
       if (
         sortConfig.key === "createdAt" ||
-        sortConfig.key === "updatedAt"
+        sortConfig.key === "updatedAt" ||
+        sortConfig.key === "orderDate"
       ) {
         const dateA = new Date(aVal as string).getTime();
         const dateB = new Date(bVal as string).getTime();
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
+      }
+
+      // Handle order status sorting
+      if (sortConfig.key === "status" || sortConfig.key === "paymentStatus") {
+        const statusOrder = {
+          pending: 0,
+          completed: 1,
+          paid: 1,
+          cancelled: 2,
+        };
+        const aStatus = statusOrder[aVal as keyof typeof statusOrder] || 0;
+        const bStatus = statusOrder[bVal as keyof typeof statusOrder] || 0;
+        return sortConfig.direction === "asc"
+          ? aStatus - bStatus
+          : bStatus - aStatus;
       }
 
       // Fallback
@@ -89,6 +118,27 @@ export function DataTable<T extends InventoryItem | OperationItem>({
       currentPage * itemsPerPage
     );
   }, [sortedData, currentPage]);
+
+  if (!data.length) {
+    const emptyMessages = {
+      location: t.location,
+      category: t.category,
+      item: t.item,
+      user: t.user,
+      order: t.order,
+      expense: t.expense,
+    };
+
+    return (
+      <div className="rounded-md border">
+        <div className="flex flex-col items-center justify-center h-[150px] bg-white dark:bg-neutral-900">
+          <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+            {emptyMessages[variant]}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">
@@ -122,6 +172,7 @@ export function DataTable<T extends InventoryItem | OperationItem>({
                 columns={columns}
                 onEdit={onEdit}
                 onDelete={onDelete}
+                onAction={onAction}
               />
             ))}
           </tbody>

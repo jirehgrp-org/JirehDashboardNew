@@ -68,6 +68,22 @@ export function OperationForm({
     },
   });
 
+  const generateUsername = (fullName: string) => {
+    const formattedName = fullName
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .trim()
+      .split(/\s+/)
+      .filter((part) => part.length > 0);
+
+    if (formattedName.length >= 2) {
+      return `${formattedName[0]}.${formattedName[formattedName.length - 1]}`;
+    } else if (formattedName.length === 1) {
+      return formattedName[0];
+    }
+    return "";
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -87,39 +103,16 @@ export function OperationForm({
                     {...field}
                     placeholder={formT.namePlaceholder}
                     className="h-10"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      if (variant === "user") {
+                        const generatedUsername = generateUsername(
+                          e.target.value
+                        );
+                        form.setValue("username", generatedUsername);
+                      }
+                    }}
                   />
-                </FormControl>
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="locationId"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-center gap-4">
-                <FormLabel className="w-1/4 text-right">
-                  {formT.location}
-                  <RequiredIndicator />
-                </FormLabel>
-                <FormControl className="w-3/4">
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="h-10 w-3/4">
-                      <SelectValue placeholder={formT.locationPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations
-                        ?.filter((location) => location.active)
-                        .map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
                 </FormControl>
               </div>
               <FormMessage />
@@ -144,7 +137,8 @@ export function OperationForm({
                       <Input
                         {...field}
                         placeholder={formT.usernamePlaceholder}
-                        className="h-10"
+                        className="h-10 bg-neutral-100 dark:bg-neutral-800"
+                        readOnly
                       />
                     </FormControl>
                   </div>
@@ -273,41 +267,6 @@ export function OperationForm({
 
             <FormField
               control={form.control}
-              name="frequency"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-4">
-                    <FormLabel className="w-1/4 text-right">
-                      {formT.frequency}
-                      <RequiredIndicator />
-                    </FormLabel>
-                    <FormControl className="w-3/4">
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={formT.frequencyPlaceholder}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="one-time">One Time</SelectItem>
-                          <SelectItem value="daily">Daily</SelectItem>
-                          <SelectItem value="weekly">Weekly</SelectItem>
-                          <SelectItem value="monthly">Monthly</SelectItem>
-                          <SelectItem value="yearly">Yearly</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -327,8 +286,83 @@ export function OperationForm({
                 </FormItem>
               )}
             />
+            
+            <FormField
+              control={form.control}
+              name="frequency"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="w-1/4 text-right">
+                      {formT.frequency}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl className="w-3/4">
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-10 w-3/4">
+                          <SelectValue
+                            placeholder={formT.frequencyPlaceholder}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="once">{formT.oneTime}</SelectItem>
+                          <SelectItem value="daily">{formT.daily}</SelectItem>
+                          <SelectItem value="weekly">{formT.weekly}</SelectItem>
+                          <SelectItem value="monthly">
+                            {formT.monthly}
+                          </SelectItem>
+                          <SelectItem value="quarterly">
+                            {formT.quarterly}
+                          </SelectItem>
+                          <SelectItem value="halfYearly">
+                            {formT.halfYearly}
+                          </SelectItem>
+                          <SelectItem value="yearly">{formT.yearly}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
+
+        <FormField
+          control={form.control}
+          name="locationId"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-4">
+                <FormLabel className="w-1/4 text-right">
+                  {formT.location}
+                  <RequiredIndicator />
+                </FormLabel>
+                <FormControl className="w-3/4">
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-10 w-3/4">
+                      <SelectValue placeholder={formT.locationPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations
+                        ?.filter((location) => location.active)
+                        .map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Common active field for all variants */}
         <FormField

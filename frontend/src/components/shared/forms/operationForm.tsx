@@ -1,4 +1,4 @@
-// @/components/shared/forms/InventoryForm.tsx
+// @/components/shared/forms/operationForm.tsx
 
 "use client";
 
@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { useInventory } from "@/hooks/features/useInventory";
-import type { InventoryFormProps } from "@/types/features/inventory";
+import type { OperationFormProps } from "@/types/features/operation";
 import {
   Form,
   FormControl,
@@ -28,48 +28,61 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getSchemaForVariant } from "@/lib/schemas/inventory";
+import { getSchemaForVariant } from "@/lib/schemas/operation";
 
 const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
-export function InventoryForm({
+export function OperationForm({
   variant,
   initialData,
   onSubmit,
   onCancel,
-}: InventoryFormProps) {
+}: OperationFormProps) {
   const { language } = useLanguage();
-    const formT = translations[language].dashboard.inventory.form;  
-    const schema = getSchemaForVariant(variant, language);
+  const formT = translations[language].dashboard.operation.form;
 
+  // Fetch locations for the location select field
   const { data: locations } = useInventory({
     endpoint: "locations",
   });
 
-  const { data: categories } = useInventory({
-    endpoint: "categories",
-  });
+  const schema = getSchemaForVariant(variant, language);
 
   const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: initialData || {
       name: "",
-      description: "",
       active: true,
-      ...(variant === "location" && {
-        address: "",
-        contactNumber: "",
+      locationId: "",
+      ...(variant === "user" && {
+        username: "",
+        email: "",
+        phone: "",
+        role: "",
       }),
-      ...(variant === "category" && {
-        locationId: "",
-      }),
-      ...(variant === "item" && {
-        price: 0,
-        quantity: 0,
-        categoryId: "",
+      ...(variant === "expense" && {
+        amount: 0,
+        description: "",
+        frequency: "",
       }),
     },
   });
+
+  const generateUsername = (fullName: string) => {
+    const formattedName = fullName
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .trim()
+      .split(/\s+/)
+      .filter((part) => part.length > 0);
+
+    if (formattedName.length >= 2) {
+      return `${formattedName[0]}.${formattedName[formattedName.length - 1]}`;
+    } else if (formattedName.length === 1) {
+      return formattedName[0];
+    }
+    return "";
+  };
 
   return (
     <Form {...form}>
@@ -90,6 +103,15 @@ export function InventoryForm({
                     {...field}
                     placeholder={formT.namePlaceholder}
                     className="h-10"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      if (variant === "user") {
+                        const generatedUsername = generateUsername(
+                          e.target.value
+                        );
+                        form.setValue("username", generatedUsername);
+                      }
+                    }}
                   />
                 </FormControl>
               </div>
@@ -98,23 +120,48 @@ export function InventoryForm({
           )}
         />
 
-        {/* Location variant fields */}
-        {variant === "location" && (
+        {/* User variant fields */}
+        {variant === "user" && (
           <>
             <FormField
               control={form.control}
-              name="address"
+              name="username"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center gap-4">
                     <FormLabel className="w-1/4 text-right">
-                      {formT.address}
+                      {formT.username}
                       <RequiredIndicator />
                     </FormLabel>
                     <FormControl className="w-3/4">
                       <Input
                         {...field}
-                        placeholder={formT.addressPlaceholder}
+                        placeholder={formT.usernamePlaceholder}
+                        className="h-10 bg-neutral-100 dark:bg-neutral-800"
+                        readOnly
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="w-1/4 text-right">
+                      {formT.email}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl className="w-3/4">
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder={formT.emailPlaceholder}
                         className="h-10"
                       />
                     </FormControl>
@@ -126,29 +173,57 @@ export function InventoryForm({
 
             <FormField
               control={form.control}
-              name="contactNumber"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center gap-4">
                     <FormLabel className="w-1/4 text-right">
-                      {formT.contactNumber}
+                      {formT.phone}
                       <RequiredIndicator />
                     </FormLabel>
                     <FormControl className="w-3/4">
-                      <div className="flex items-center">
-                        <div className="flex items-center justify-center px-3 h-10 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                          +251
-                        </div>
-                        <Input
-                          {...field}
-                          type="tel"
-                          placeholder={formT.contactNumberPlaceholder}
-                          className="h-10 rounded-l-none"
-                          maxLength={9}
-                          minLength={9}
-                          pattern="[0-9]{9,10}"
-                        />
-                      </div>
+                      <Input
+                        {...field}
+                        type="tel"
+                        placeholder={formT.phonePlaceholder}
+                        className="h-10"
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="w-1/4 text-right">
+                      {formT.role}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl className="w-3/4">
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-10 w-3/4">
+                          <SelectValue placeholder={formT.rolePlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="manager">
+                            {formT.manager}
+                          </SelectItem>
+                          <SelectItem value="admin">{formT.admin}</SelectItem>
+                          <SelectItem value="sales">{formT.sales}</SelectItem>
+                          <SelectItem value="warehouse">
+                            {formT.warehouse}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -158,9 +233,38 @@ export function InventoryForm({
           </>
         )}
 
-        {/* Category variant fields */}
-        {variant === "category" && (
+        {/* Expense variant fields */}
+        {variant === "expense" && (
           <>
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="w-1/4 text-right">
+                      {formT.amount}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl className="w-3/4">
+                      <Input
+                        {...field}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder={formT.amountPlaceholder}
+                        className="h-10"
+                        onChange={(e) =>
+                          field.onChange(parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="description"
@@ -182,15 +286,15 @@ export function InventoryForm({
                 </FormItem>
               )}
             />
-
+            
             <FormField
               control={form.control}
-              name="locationId"
+              name="frequency"
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center gap-4">
                     <FormLabel className="w-1/4 text-right">
-                      {formT.location}
+                      {formT.frequency}
                       <RequiredIndicator />
                     </FormLabel>
                     <FormControl className="w-3/4">
@@ -200,17 +304,23 @@ export function InventoryForm({
                       >
                         <SelectTrigger className="h-10 w-3/4">
                           <SelectValue
-                            placeholder={formT.locationPlaceholder}
+                            placeholder={formT.frequencyPlaceholder}
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {locations
-                            ?.filter((location) => location.active)
-                            .map((location) => (
-                              <SelectItem key={location.id} value={location.id}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
+                          <SelectItem value="once">{formT.oneTime}</SelectItem>
+                          <SelectItem value="daily">{formT.daily}</SelectItem>
+                          <SelectItem value="weekly">{formT.weekly}</SelectItem>
+                          <SelectItem value="monthly">
+                            {formT.monthly}
+                          </SelectItem>
+                          <SelectItem value="quarterly">
+                            {formT.quarterly}
+                          </SelectItem>
+                          <SelectItem value="halfYearly">
+                            {formT.halfYearly}
+                          </SelectItem>
+                          <SelectItem value="yearly">{formT.yearly}</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -222,105 +332,37 @@ export function InventoryForm({
           </>
         )}
 
-        {/* Item variant fields */}
-        {variant === "item" && (
-          <>
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-4">
-                    <FormLabel className="w-1/4 text-right">
-                      {formT.category}
-                      <RequiredIndicator />
-                    </FormLabel>
-                    <FormControl className="w-3/4">
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger className="h-10 w-3/4">
-                          <SelectValue
-                            placeholder={formT.categoryPlaceholder}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories
-                            ?.filter((category) => category.active)
-                            .map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-4">
-                    <FormLabel className="w-1/4 text-right">
-                      {formT.price}
-                      <RequiredIndicator />
-                    </FormLabel>
-                    <FormControl className="w-3/4">
-                      <Input
-                        {...field}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder={formT.pricePlaceholder}
-                        className="h-10"
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-center gap-4">
-                    <FormLabel className="w-1/4 text-right">
-                      {formT.quantity}
-                      <RequiredIndicator />
-                    </FormLabel>
-                    <FormControl className="w-3/4">
-                      <Input
-                        {...field}
-                        type="number"
-                        min="0"
-                        step="1"
-                        placeholder={formT.quantityPlaceholder}
-                        className="h-10"
-                        onChange={(e) =>
-                          field.onChange(parseInt(e.target.value, 10))
-                        }
-                      />
-                    </FormControl>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
+        <FormField
+          control={form.control}
+          name="locationId"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center gap-4">
+                <FormLabel className="w-1/4 text-right">
+                  {formT.location}
+                  <RequiredIndicator />
+                </FormLabel>
+                <FormControl className="w-3/4">
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="h-10 w-3/4">
+                      <SelectValue placeholder={formT.locationPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations
+                        ?.filter((location) => location.active)
+                        .map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Common active field for all variants */}
         <FormField

@@ -1,6 +1,5 @@
-// @/app/dashboard/locations/page.tsx
-
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -26,43 +25,44 @@ import {
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
-import { InventoryForm } from "@/components/shared/forms/InventoryForm";
+import { OperationForm } from "@/components/shared/forms/operationForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
-import { useInventory } from "@/hooks/features/useInventory";
-import type { InventoryItem } from "@/types/features/inventory";
+import { useOperation } from "@/hooks/features/useOperation";
+import type { OperationItem } from "@/types/features/operation";
 
-const LocationsPage = () => {
+const ExpensesPage = () => {
   const { language } = useLanguage();
-  const t = translations[language].dashboard.inventory.page;
+  const t = translations[language].dashboard.operation.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingLocation, setEditingLocation] = useState<InventoryItem | null>(
+  const [editingExpense, setEditingExpense] = useState<OperationItem | null>(
     null
   );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] =
-    useState<InventoryItem | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<OperationItem | null>(
+    null
+  );
 
   const {
     isLoading,
-    data: locations,
+    data: expenses,
     handleSubmit,
-    handleDelete: deleteLocation,
-  } = useInventory({
-    endpoint: "locations",
+    handleDelete: deleteExpense,
+  } = useOperation({
+    endpoint: "expenses",
   });
 
-  // Filter to only show locations and apply search
-  const filteredLocations = locations?.filter(
+  // Filter expenses and apply search
+  const filteredExpenses = expenses?.filter(
     (item) =>
-      item.address && // Ensure it's a location
-      item.contactNumber && // Additional check for location type
+      item.amount !== undefined && // Ensure it's an expense
       (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.address.toLowerCase().includes(searchQuery.toLowerCase()))
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.frequency?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const downloadCSV = () => {
-    if (!locations) return;
+    if (!expenses) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -73,13 +73,14 @@ const LocationsPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      locations
-        .filter((item) => item.address && item.contactNumber) // Only include locations
-        .map((location) => ({
-          name: location.name,
-          address: location.address,
-          contactNumber: location.contactNumber,
-          active: location.active,
+      expenses
+        .filter((item) => item.amount !== undefined) // Only include expenses
+        .map((expense) => ({
+          name: expense.name,
+          amount: expense.amount,
+          frequency: expense.frequency,
+          description: expense.description || "",
+          active: expense.active,
         }))
     );
 
@@ -88,33 +89,33 @@ const LocationsPage = () => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `locations-export-${date}.csv`);
+    link.setAttribute("download", `expenses-export-${date}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const onSubmit = async (data: Partial<InventoryItem>) => {
-    await handleSubmit(data, editingLocation?.id);
+  const onSubmit = async (data: Partial<OperationItem>) => {
+    await handleSubmit(data, editingExpense?.id);
     setOpen(false);
-    setEditingLocation(null);
+    setEditingExpense(null);
   };
 
-  const handleEdit = (location: InventoryItem) => {
-    setEditingLocation(location);
+  const handleEdit = (expense: OperationItem) => {
+    setEditingExpense(expense);
     setOpen(true);
   };
 
-  const handleDelete = async (location: InventoryItem) => {
-    setLocationToDelete(location);
+  const handleDelete = async (expense: OperationItem) => {
+    setExpenseToDelete(expense);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (locationToDelete) {
-      await deleteLocation(locationToDelete.id);
-      setLocationToDelete(null);
+    if (expenseToDelete) {
+      await deleteExpense(expenseToDelete.id);
+      setExpenseToDelete(null);
       setDeleteDialogOpen(false);
     }
   };
@@ -125,9 +126,9 @@ const LocationsPage = () => {
         <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
           <div className="flex justify-between items-center">
             <h2 className="text-3xl font-bold">
-              {t.locations}
+              {t.expenses}
               <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourLocations}
+                {t.manageYourExpenses}
               </p>
             </h2>
 
@@ -144,22 +145,22 @@ const LocationsPage = () => {
                 <DialogTrigger asChild>
                   <Button disabled={isLoading}>
                     <Plus className="mr-2 h-4 w-4" />
-                    {t.addLocation}
+                    {t.addExpense}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>
-                      {editingLocation ? t.editLocation : t.addLocation}
+                      {editingExpense ? t.editExpense : t.addExpense}
                     </DialogTitle>
                   </DialogHeader>
-                  <InventoryForm
-                    variant="location"
-                    initialData={editingLocation}
+                  <OperationForm
+                    variant="expense"
+                    initialData={editingExpense}
                     onSubmit={onSubmit}
                     onCancel={() => {
                       setOpen(false);
-                      setEditingLocation(null);
+                      setEditingExpense(null);
                     }}
                   />
                 </DialogContent>
@@ -170,22 +171,22 @@ const LocationsPage = () => {
           <div className="flex justify-between items-center">
             <div className="w-full max-w-sm">
               <Input
-                placeholder={t.searchLocations}
+                placeholder={t.searchExpenses}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
               />
             </div>
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalLocations}: {filteredLocations?.length || 0}
+              {t.totalExpenses}: {filteredExpenses?.length || 0}
             </div>
           </div>
 
           <div className="flex-1">
             <DataTable
-              columns={getColumns("location", language)}
-              data={filteredLocations || []}
-              variant="location"
+              columns={getColumns("expense", language)}
+              data={filteredExpenses || []}
+              variant="expense"
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -197,13 +198,15 @@ const LocationsPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}&quot;{" "}
+              {t.thisWillPermanentlyDelete} &quot;{expenseToDelete?.name}&quot;{" "}
               {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
+            <AlertDialogAction
+              onClick={confirmDelete}
+            >
               {t.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -213,4 +216,4 @@ const LocationsPage = () => {
   );
 };
 
-export default LocationsPage;
+export default ExpensesPage;

@@ -24,11 +24,7 @@ frontend/
     │   │   └── layout.tsx
     │   │
     │   ├── dashboard/
-    │   │   ├── analytics/
-    │   │   │   └── page.tsx
     │   │   ├── categories/
-    │   │   │   └── page.tsx
-    │   │   ├── employees/
     │   │   │   └── page.tsx
     │   │   ├── expenses/
     │   │   │   └── page.tsx
@@ -37,14 +33,6 @@ frontend/
     │   │   ├── locations/
     │   │   │   └── page.tsx
     │   │   ├── orders/
-    │   │   │   └── page.tsx
-    │   │   ├── overview/
-    │   │   │   └── page.tsx
-    │   │   ├── profitLoss/
-    │   │   │   └── page.tsx
-    │   │   ├── reports/
-    │   │   │   └── page.tsx
-    │   │   ├── salesReport/
     │   │   │   └── page.tsx
     │   │   ├── users/
     │   │   │   └── page.tsx
@@ -59,25 +47,8 @@ frontend/
     │   │   └── layout.tsx
     │   │
     │   ├── superadmin/
-    │   │   ├── activityLog/
-    │   │   │   └── page.tsx
-    │   │   ├── allBusinesses/
-    │   │   │   └── page.tsx
-    │   │   ├── billingPayments/
-    │   │   │   └── page.tsx
-    │   │   ├── businessAnalytics/
-    │   │   │   └── page.tsx
-    │   │   ├── overview/
-    │   │   │   └── page.tsx
-    │   │   ├── reports/
-    │   │   │   └── page.tsx
-    │   │   ├── subscriptions/
-    │   │   │   └── page.tsx
-    │   │   ├── systemSettings/
-    │   │   │   └── page.tsx
-    │   │   └── userManagement/
-    │   │       ├── layout.tsx
-    │   │       └── page.tsx
+    │   │   ├── layout.tsx
+    │   │   └── page.tsx
     │   │
     │   ├── favicon.ico
     │   ├── globals.css
@@ -106,7 +77,6 @@ frontend/
     │   │
     │   ├── layout/
     │   │   ├── dashboard/
-    │   │   │   ├── Dashboard.tsx
     │   │   │   └── Sidebar.tsx
     │   │   └── superadmin/
     │   │       ├── Dashboard.tsx
@@ -122,8 +92,9 @@ frontend/
     │   │   │   ├── LineChart.tsx
     │   │   │   └── PieChart.tsx
     │   │   ├── forms/
-    │   │   │   ├── DateForm.tsx
-    │   │   │   └── FormField.tsx
+    │   │   │   ├── InventoryForm.tsx
+    │   │   │   ├── operationForm.tsx
+    │   │   │   └── TransactionFrom.tsx
     │   │   └── tables/
     │   │       ├── DataTable.tsx
     │   │       ├── TableHeader.tsx
@@ -142,16 +113,21 @@ frontend/
     ├── hooks/
     │   ├── features/
     │   │   ├── useInventory.ts
+    │   │   ├── useOperation.ts
     │   │   ├── usePlan.ts
-    │   │   └── useSubscription.ts
+    │   │   ├── useSubscription.ts
+    │   │   └── useTransaction.ts
     │   │
     │   └── shared/
+    │       ├── useCalendar.ts
     │       ├── useOutsideClick.ts
     │       └── useToast.ts
     │   
     ├── lib/
     │   ├── schemas/
-    │   │   └── subscription.ts
+    │   │   ├── inventory.ts
+    │   │   ├── operation.ts
+    │   │   └── transaction.ts
     │   └── utils.ts
     │   
     ├── translations/
@@ -162,10 +138,13 @@ frontend/
     ├── types/
     │   ├── features/
     │   │   ├── inventory.ts
-    │   │   ├── plan,ts
-    │   │   └── subscription.ts
+    │   │   ├── operation.ts
+    │   │   ├── plan.ts
+    │   │   ├── subscription.ts
+    │   │   └── transaction.ts
     │   └── shared/
-    │       └── auth.ts
+    │       ├── auth.ts
+    │       └── table.ts
     │
     ├── .gitignore
     ├── components.json

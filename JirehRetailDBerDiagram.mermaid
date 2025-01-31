@@ -1,4 +1,7 @@
 erDiagram
+    %% Owner Level
+    MANAGER ||--o{ BUSINESS : manages
+
     %% Core Business Structure
     BUSINESS ||--o{ SUBSCRIPTION : has
     BUSINESS ||--o{ USER : has
@@ -29,7 +32,7 @@ erDiagram
 
     BUSINESS {
         int id PK
-        int owner_id FK
+        int user_id FK
         string name
         string address
         string contact_number

@@ -1,7 +1,4 @@
 erDiagram
-    %% Owner Level
-    OWNER ||--o{ BUSINESS : owns
-
     %% Core Business Structure
     BUSINESS ||--o{ SUBSCRIPTION : has
     BUSINESS ||--o{ USER : has
@@ -29,19 +26,6 @@ erDiagram
 
     %% Expense Details
     EXPENSE ||--o{ USER : created_by
-
-    OWNER {
-        int id PK
-        string fullname
-        string username
-        string phone
-        string email
-        string password_hash
-        datetime last_login
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
 
     BUSINESS {
         int id PK

@@ -11,6 +11,9 @@ services:
     environment:
     - DJANGO_SECRET_KEY=django-insecure-71%@ogk-j=d(x=rl^fry9yvwpy)ix&5k5@u8cec59a@1j+$4r!
     - DJANGO_DEBUG=True
+    - ROTATE_REFRESH_TOKENS=False
+    - BLACKLIST_AFTER_ROTATION=False
+    - UPDATE_LAST_LOGIN=False
   db:
     image: postgres:13
     volumes:

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from environs import Env
+from datetime import timedelta
 
 env = Env()
 env.read_env()
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth.registration',
+    'rest_framework_simplejwt',
 
 
     'django.contrib.admin',
@@ -156,21 +158,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+
+
+
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASS':[
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES':[
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ],
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 5
     'DEFAULT_AUTHENTICATION_CLASS':[
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',    
     ],
+    
 }
+REST_AUTH_REGISTER_SERIALIZERS = {
+    'REGISTER_SERIALIZER': 'apis.serializers.CustomRegisterSerializer',
+}
+
+
+SIMPLE_JWT = {    
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': env.bool('ROTATE_REFRESH_TOKENS'),
+    'BLACKLIST_AFTER_ROTATION': env.bool('BLACKLIST_AFTER_ROTATION'),
+    'UPDATE_LAST_LOGIN': env.bool('UPDATE_LAST_LOGIN'),
+}
+
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
@@ -180,4 +192,5 @@ CORS_ORIGIN_WHITELIST = (
 CSRF_TRUSTED_ORIGINS=['http://localhost:3000']
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 SITE_ID = 1

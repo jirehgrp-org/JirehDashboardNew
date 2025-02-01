@@ -27,4 +27,7 @@ export interface DataTableProps<T> {
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   onAction?: (row: T, action: string) => void;
+  isLoading?: boolean;
 }
+
+export type ActionType = "mark_paid" | "cancel" | string;

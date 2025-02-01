@@ -477,13 +477,13 @@ export const getColumns = (
             ((row.original as OperationItem)
               .frequency as keyof typeof frequencyLabels) || "";
           const frequencyLabels = {
-            once: t.operation.form.oneTime,
-            daily: t.operation.form.daily,
-            weekly: t.operation.form.weekly,
-            monthly: t.operation.form.monthly,
-            quarterly: t.operation.form.quarterly,
-            halfYearly: t.operation.form.halfYearly,
-            yearly: t.operation.form.yearly,
+            once: t.form.oneTime,
+            daily: t.form.daily,
+            weekly: t.form.weekly,
+            monthly: t.form.monthly,
+            quarterly: t.form.quarterly,
+            halfYearly: t.form.halfYearly,
+            yearly: t.form.yearly,
           };
 
           return frequencyLabels[frequency] || frequency;
@@ -521,16 +521,6 @@ export const getColumns = (
 
     order: [
       {
-        accessorKey: "orderNumber",
-        header: ({ onSort }: HeaderProps) => (
-          <SortableHeader
-            label={t.transaction.table.orderNumber}
-            sortKey="orderNumber"
-            onSort={onSort}
-          />
-        ),
-      },
-      {
         accessorKey: "customerName",
         header: ({ onSort }: HeaderProps) => (
           <SortableHeader
@@ -553,29 +543,35 @@ export const getColumns = (
         },
       },
       {
-        accessorKey: "itemId",
+        accessorKey: "items",
         header: t.transaction.table.item,
         cell: ({ row }: CellProps) => {
-          const item = items?.find((item) => item.id === row.original.itemId);
-          const total = (row.original.quantity || 0) * (item?.price || 0);
-          return item ? (
-            <div className="flex flex-col">
-              <span>{item.name}</span>
-              <span className="text-xs text-neutral-500">
-                {row.original.quantity} ×{" "}
-                {item.price?.toLocaleString(language, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                ={" "}
-                {total.toLocaleString(language, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </span>
+          const orderItems = row.original.items;
+          return (
+            <div className="space-y-1">
+              {orderItems.map((orderItem: any, index: number) => {
+                const item = items?.find((i) => i.id === orderItem.itemId);
+                const total = orderItem.quantity * orderItem.price;
+
+                return (
+                  <div key={index} className="flex flex-col">
+                    <span>{item?.name}</span>
+                    <span className="text-xs text-neutral-500">
+                      {orderItem.quantity} ×{" "}
+                      {orderItem.price.toLocaleString(language, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      ={" "}
+                      {total.toLocaleString(language, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          ) : (
-            row.original.itemId
           );
         },
       },

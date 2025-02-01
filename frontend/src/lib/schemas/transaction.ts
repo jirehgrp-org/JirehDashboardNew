@@ -1,4 +1,4 @@
-// @/lib/schemas/order.ts
+// @/lib/schemas/transaction.ts
 
 import * as z from "zod";
 import { translations } from "@/translations";
@@ -28,27 +28,8 @@ export const OrderSchema = (language: SupportedLanguages = "en") => {
       ),
 
     customerEmail: z
-      .string()
-      .email(t.orderSchema?.invalidEmail || "Invalid email")
-      .optional(),
-
-    item: z.string().min(1, t.orderSchema?.itemRequired || "Item is required"),
-
-    quantity: z
-      .number()
-      .min(1, t.orderSchema?.quantityRequired || "Quantity must be at least 1"),
-
-    status: z.enum(["pending", "completed", "cancelled"]).default("pending"),
-    paymentStatus: z.enum(["pending", "paid", "cancelled"]).default("pending"),
-
-    actions: z
-      .array(
-        z.object({
-          type: z.enum(["mark_paid", "cancel"]),
-          timestamp: z.date(),
-          performedBy: z.string(),
-        })
-      )
-      .default([]),
+      .union([z.string().email(), z.string().length(0)])
+      .optional()
+      .transform((e) => (e === "" ? undefined : e)),
   });
 };

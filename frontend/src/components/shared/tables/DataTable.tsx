@@ -5,19 +5,23 @@ import React, { useState, useMemo } from "react";
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
 import type { TransactionItem } from "@/types/features/transaction";
-import type { DataTableProps } from "@/types/shared/table";
+import type { DataTableProps, ActionType, Column } from "@/types/shared/table";
 import { TableRow } from "./TableRow";
 import { TablePagination } from "./TablePagination";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
+import { Loader2 } from "lucide-react";
 
-export function DataTable<T extends InventoryItem | OperationItem | TransactionItem>({
+export function DataTable<
+  T extends InventoryItem | OperationItem | TransactionItem
+>({
   columns,
   data,
   variant,
   onEdit,
   onDelete,
   onAction,
+  isLoading = false,
 }: DataTableProps<T>) {
   const { language } = useLanguage();
   const t = translations[language].dashboard.table.message;
@@ -36,10 +40,16 @@ export function DataTable<T extends InventoryItem | OperationItem | TransactionI
     }));
   };
 
+  const getColumnKey = (column: Column<T>) => {
+    return column.id || column.accessorKey || column.header.toString();
+  };
+
   const sortedData = useMemo(() => {
     if (!sortConfig) return data;
 
     return [...data].sort((a, b) => {
+      if (!sortConfig.key) return 0;
+
       const aVal = a[sortConfig.key as keyof T];
       const bVal = b[sortConfig.key as keyof T];
 
@@ -119,6 +129,16 @@ export function DataTable<T extends InventoryItem | OperationItem | TransactionI
     );
   }, [sortedData, currentPage]);
 
+  if (isLoading) {
+    return (
+      <div className="rounded-md border">
+        <div className="flex flex-col items-center justify-center h-[150px] bg-white dark:bg-neutral-900">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
   if (!data.length) {
     const emptyMessages = {
       location: t.location,
@@ -148,13 +168,7 @@ export function DataTable<T extends InventoryItem | OperationItem | TransactionI
             <tr>
               {columns.map((column) => (
                 <th
-                  key={
-                    column.id ||
-                    column.accessorKey ||
-                    (typeof column.header === "string"
-                      ? column.header
-                      : "column")
-                  }
+                  key={getColumnKey(column)}
                   className="px-4 py-3 text-left text-sm font-medium text-neutral-500 dark:text-neutral-400"
                 >
                   {typeof column.header === "function"
@@ -172,7 +186,7 @@ export function DataTable<T extends InventoryItem | OperationItem | TransactionI
                 columns={columns}
                 onEdit={onEdit}
                 onDelete={onDelete}
-                onAction={onAction}
+                onAction={onAction as (row: T, action: ActionType) => void}
               />
             ))}
           </tbody>

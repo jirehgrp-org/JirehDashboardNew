@@ -39,7 +39,7 @@ export function InventoryForm({
   onCancel,
 }: InventoryFormProps) {
   const { language } = useLanguage();
-    const formT = translations[language].dashboard.inventory.form;  
+    const formT = translations[language].dashboard.form;  
     const schema = getSchemaForVariant(variant, language);
 
   const { data: locations } = useInventory({

@@ -4,13 +4,19 @@ import { z } from "zod";
 import { Column } from "@/types/shared/table";
 import { OrderSchema } from "@/lib/schemas/transaction";
 
+export interface OrderItem {
+  itemId: string;
+  quantity: number;
+  price: number;
+}
+
 export interface TransactionItem {
   id: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;
-  itemId: string; // Changed from 'item' to 'itemId'
-  quantity: number;
+  items: OrderItem[];
+  total: number;
   status: "pending" | "completed" | "cancelled";
   paymentStatus: "pending" | "paid" | "cancelled";
   orderNumber: string;
@@ -23,16 +29,15 @@ export interface TransactionItem {
     performedBy: string;
   }[];
 }
-
-export interface OrderFormProps {
+export interface TransactionFormProps {
   initialData?: Partial<TransactionItem> | null;
   onSubmit: (data: Partial<TransactionItem>) => void;
   onCancel: () => void;
 }
 
-export type OrderColumn = Column<TransactionItem>;
+export type TransactionColumn = Column<TransactionItem>;
 
-export interface OrderState {
+export interface TransactionState {
   orders: TransactionItem[];
   isLoading: boolean;
   error: string | null;
@@ -40,10 +45,10 @@ export interface OrderState {
 
 export interface OrderAction {
   type: "SET_DATA" | "SET_LOADING" | "SET_ERROR";
-  payload: Partial<OrderState>;
+  payload: Partial<TransactionState>;
 }
 
-export interface UseOrderOptions {
+export interface UseTransactionOptions {
   onSuccess?: () => void;
 }
 

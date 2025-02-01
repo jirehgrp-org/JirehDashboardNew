@@ -1,21 +1,29 @@
-// @/hooks/features/useTransaction.ts
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/shared/useToast";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
-import type { OrderItem, UseOrderOptions } from "@/types/features/transaction";
+import type {
+  TransactionItem,
+  OrderItem,
+  UseTransactionOptions,
+} from "@/types/features/transaction";
 import { useInventory } from "@/hooks/features/useInventory";
 
-// Update mock data to use itemId
-const mockOrders: OrderItem[] = [
+// Update mock data to use items array
+const mockOrders: TransactionItem[] = [
   {
     id: "1",
     customerName: "John Doe",
     customerPhone: "911234567",
     customerEmail: "john@example.com",
-    itemId: "1",
-    quantity: 2,
+    items: [
+      {
+        itemId: "1",
+        quantity: 2,
+        price: 1500,
+      },
+    ],
+    total: 3000,
     status: "pending",
     paymentStatus: "pending",
     orderNumber: "ORD-001",
@@ -28,8 +36,14 @@ const mockOrders: OrderItem[] = [
     id: "2",
     customerName: "Jane Smith",
     customerPhone: "922345678",
-    itemId: "2",
-    quantity: 1,
+    items: [
+      {
+        itemId: "2",
+        quantity: 1,
+        price: 500,
+      },
+    ],
+    total: 500,
     status: "completed",
     paymentStatus: "paid",
     orderNumber: "ORD-002",
@@ -40,14 +54,13 @@ const mockOrders: OrderItem[] = [
   },
 ];
 
-export function useTransaction({ onSuccess }: UseOrderOptions) {
+export function useTransaction({ onSuccess }: UseTransactionOptions) {
   const { language } = useLanguage();
   const t = translations[language].dashboard.transaction;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<OrderItem[]>(mockOrders);
+  const [data, setData] = useState<TransactionItem[]>(mockOrders);
 
-  // Get inventory items
   const inventory = useInventory({ endpoint: "items" });
   const [availableItems, setAvailableItems] = useState(inventory.data);
 
@@ -77,40 +90,64 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
       .padStart(3, "0");
     return `${prefix}-${timestamp}-${random}`;
   };
-  
-  // Update the checkInventoryAvailability function
-  const checkInventoryAvailability = (
-    itemId: string,
-    requestedQuantity: number
-  ) => {
-    const inventoryItem = availableItems.find((item) => item.id === itemId);
-    if (!inventoryItem) {
-      throw new Error("Item not found in inventory");
-    }
-    if (
-      inventoryItem.quantity === undefined ||
-      inventoryItem.quantity < requestedQuantity
-    ) {
-      throw new Error(getToastMessages().insufficientStock);
-    }
-    return inventoryItem;
+
+  const calculateTotal = (items: OrderItem[]) => {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
-  // Update handleCreate
-  const handleCreate = async (newData: Partial<OrderItem>) => {
+  const checkInventoryAvailability = (items: OrderItem[]) => {
+    for (const orderItem of items) {
+      const inventoryItem = availableItems?.find(
+        (item) => item.id === orderItem.itemId
+      );
+      if (!inventoryItem) {
+        throw new Error(`Item ${orderItem.itemId} not found in inventory`);
+      }
+      if (
+        inventoryItem.quantity === undefined ||
+        inventoryItem.quantity < orderItem.quantity
+      ) {
+        throw new Error(getToastMessages().insufficientStock);
+      }
+    }
+    return true;
+  };
+
+  const handleCreate = async (newData: Partial<TransactionItem>) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      // Check inventory availability using itemId
-      const inventoryItem = checkInventoryAvailability(
-        newData.itemId!, // Changed from item to itemId
-        newData.quantity!
-      );
+      if (!newData.items || newData.items.length === 0) {
+        throw new Error("No items in order");
+      }
 
-      const result: OrderItem = {
-        ...newData,
+      // Verify and update inventory for all items
+      checkInventoryAvailability(newData.items);
+
+      // Update inventory quantities
+      for (const orderItem of newData.items) {
+        const inventoryItem = availableItems?.find(
+          (i) => i.id === orderItem.itemId
+        );
+        if (!inventoryItem) continue;
+
+        const currentQuantity = inventoryItem.quantity ?? 0;
+        await inventory.handleUpdate(inventoryItem.id, {
+          ...inventoryItem,
+          quantity: currentQuantity - orderItem.quantity,
+        });
+      }
+
+      const total = calculateTotal(newData.items);
+
+      const result: TransactionItem = {
         id: crypto.randomUUID(),
+        customerName: newData.customerName!,
+        customerPhone: newData.customerPhone!,
+        customerEmail: newData.customerEmail,
+        items: newData.items,
+        total,
         orderNumber: generateOrderNumber(),
         orderDate: new Date().toISOString(),
         createdAt: new Date().toISOString(),
@@ -118,13 +155,7 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
         status: "pending",
         paymentStatus: "pending",
         actions: [],
-      } as OrderItem;
-
-      // Update inventory quantity
-      await inventory.handleUpdate(inventoryItem.id, {
-        ...inventoryItem,
-        quantity: (inventoryItem.quantity ?? 0) - newData.quantity!,
-      });
+      };
 
       setData((prev) => [...prev, result]);
 
@@ -143,7 +174,10 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
     }
   };
 
-  const handleUpdate = async (id: string, updateData: Partial<OrderItem>) => {
+  const handleUpdate = async (
+    id: string,
+    updateData: Partial<TransactionItem>
+  ) => {
     setIsLoading(true);
     setError(null);
 
@@ -153,27 +187,39 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
         throw new Error("Order not found");
       }
 
-      if (
-        updateData.quantity &&
-        updateData.quantity !== existingItem.quantity
-      ) {
-        const inventoryItem = checkInventoryAvailability(
-          existingItem.itemId, // Changed from item to itemId
-          updateData.quantity - existingItem.quantity
-        );
+      // If items are being updated, check inventory
+      if (updateData.items) {
+        checkInventoryAvailability(updateData.items);
 
-        // Update inventory quantity
-        await inventory.handleUpdate(inventoryItem.id, {
-          ...inventoryItem,
-          quantity:
-            (inventoryItem.quantity ?? 0) -
-            (updateData.quantity - existingItem.quantity),
-        });
+        // Update inventory quantities
+        for (const orderItem of updateData.items) {
+          const existingOrderItem = existingItem.items.find(
+            (item) => item.itemId === orderItem.itemId
+          );
+          const quantityDiff =
+            orderItem.quantity - (existingOrderItem?.quantity || 0);
+
+          const inventoryItem = availableItems?.find(
+            (item) => item.id === orderItem.itemId
+          );
+          if (!inventoryItem) continue;
+
+          const currentQuantity = inventoryItem.quantity ?? 0;
+          await inventory.handleUpdate(inventoryItem.id, {
+            ...inventoryItem,
+            quantity: currentQuantity - quantityDiff,
+          });
+        }
       }
 
-      const result: OrderItem = {
+      const total = updateData.items
+        ? calculateTotal(updateData.items)
+        : existingItem.total;
+
+      const result: TransactionItem = {
         ...existingItem,
         ...updateData,
+        total,
         updatedAt: new Date().toISOString(),
       };
 
@@ -226,7 +272,7 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
     });
   };
 
-  const handleSubmit = async (data: Partial<OrderItem>, id?: string) => {
+  const handleSubmit = async (data: Partial<TransactionItem>, id?: string) => {
     if (id) {
       return handleUpdate(id, data);
     }
@@ -237,7 +283,7 @@ export function useTransaction({ onSuccess }: UseOrderOptions) {
     isLoading,
     error,
     data,
-    availableItems, // Expose available inventory items
+    availableItems,
     handleSubmit,
     handleCreate,
     handleUpdate,

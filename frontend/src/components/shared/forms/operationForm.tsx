@@ -39,7 +39,7 @@ export function OperationForm({
   onCancel,
 }: OperationFormProps) {
   const { language } = useLanguage();
-  const formT = translations[language].dashboard.operation.form;
+  const formT = translations[language].dashboard.form;
 
   // Fetch locations for the location select field
   const { data: locations } = useInventory({

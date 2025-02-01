@@ -144,37 +144,28 @@ CREATE TABLE item (
 );
 
 -- Create ORDER table
-CREATE TABLE order (
+CREATE TABLE `order` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     business_id INT NOT NULL,
     location_id INT NOT NULL,
     user_id INT NOT NULL,
-    employee_id INT NOT NULL,
-    order_id INT NOT NULL,
-    category_id INT NOT NULL,
-    item_id INT NOT NULL,
-    
     order_number VARCHAR(30) UNIQUE NOT NULL,
-
-    -- Order detail
-    quantity INT NOT NULL,
-    unit_price DECIMAL(10,2) NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
     
     -- Customer information
-    customer_name VARCHAR(100),
-    customer_phone VARCHAR(20),
+    customer_name VARCHAR(100) NOT NULL,
+    customer_phone VARCHAR(20) NOT NULL,
+    customer_email VARCHAR(100),
     
     -- Order status and timing
     order_date DATETIME NOT NULL,
-    status VARCHAR(20) NOT NULL,
+    status ENUM('pending', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
     
     -- Financial information
     total_amount DECIMAL(10,2) NOT NULL,
     
     -- Payment information
-    payment_status ENUM('Cash', 'Telebirr', 'Bank Transfer', 'Credit') NOT NULL DEFAULT 'Cash',
-    payment_method VARCHAR(20) NOT NULL,
+    payment_status ENUM('pending', 'paid', 'cancelled') NOT NULL DEFAULT 'pending',
+    payment_method ENUM('Cash', 'Telebirr', 'Bank Transfer', 'Credit') NOT NULL DEFAULT 'Cash',
     paid_amount DECIMAL(10,2) DEFAULT 0.00,
     remaining_amount DECIMAL(10,2) GENERATED ALWAYS AS (total_amount - paid_amount) STORED,
     
@@ -185,10 +176,25 @@ CREATE TABLE order (
     -- Constraints
     FOREIGN KEY (business_id) REFERENCES business(id),
     FOREIGN KEY (location_id) REFERENCES location(id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (user_id) REFERENCES user(id)
+);
+
+-- Create ORDER items table
+CREATE TABLE order_item (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT NOT NULL,
+    item_id INT NOT NULL,
+    category_id INT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (order_id) REFERENCES `order`(id) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES item(id),
-    FOREIGN KEY (category_id) REFERENCES category(id),
-    FOREIGN KEY (employee_id) REFERENCES employee(id)
+    FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
 CREATE TABLE db_version (

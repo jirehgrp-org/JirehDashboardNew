@@ -1,6 +1,7 @@
 // @/app/dashboard/orders/page.tsx
 
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
@@ -28,7 +29,9 @@ import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
 import { getColumns } from "@/components/shared/tables/TableHeader";
 import { useTransaction } from "@/hooks/features/useTransaction";
+import { TransactionForm } from "@/components/shared/forms/TransactionForm";
 import type { TransactionItem } from "@/types/features/transaction";
+import type { ActionType } from "@/types/shared/table";
 
 const OrdersPage = () => {
   const { language } = useLanguage();
@@ -48,18 +51,29 @@ const OrdersPage = () => {
     data: orders,
     handleSubmit,
     handleDelete: deleteOrder,
-    handleStatusChange,
-  } = useTransaction();
+    handleUpdate,
+  } = useTransaction({
+    onSuccess: () => {
+      setOpen(false);
+      setEditingOrder(null);
+      setDeleteDialogOpen(false);
+    },
+  });
 
   // Filter orders based on search query
-  const filteredOrders = orders?.filter(
-    (order) =>
-      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrders = React.useMemo(() => {
+    return orders?.filter((order) => {
+      const searchTerm = searchQuery.toLowerCase();
+      return (
+        order.customerName.toLowerCase().includes(searchTerm) ||
+        order.orderNumber.toLowerCase().includes(searchTerm) ||
+        order.customerPhone.toLowerCase().includes(searchTerm)
+      );
+    });
+  }, [orders, searchQuery]);
 
   const downloadCSV = () => {
-    if (!orders) return;
+    if (!orders?.length) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -79,7 +93,8 @@ const OrdersPage = () => {
         quantity: order.quantity,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        orderDate: order.orderDate,
+        orderDate: new Date(order.orderDate).toLocaleDateString(),
+        total: order.total,
       }))
     );
 
@@ -89,16 +104,14 @@ const OrdersPage = () => {
 
     link.setAttribute("href", url);
     link.setAttribute("download", `orders-export-${date}.csv`);
-    link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const onSubmit = async (data: Partial<TransactionItem>) => {
     await handleSubmit(data, editingOrder?.id);
-    setOpen(false);
-    setEditingOrder(null);
   };
 
   const handleEdit = (order: TransactionItem) => {
@@ -106,7 +119,7 @@ const OrdersPage = () => {
     setOpen(true);
   };
 
-  const handleDelete = async (order: TransactionItem) => {
+  const handleDelete = (order: TransactionItem) => {
     setOrderToDelete(order);
     setDeleteDialogOpen(true);
   };
@@ -114,16 +127,30 @@ const OrdersPage = () => {
   const confirmDelete = async () => {
     if (orderToDelete) {
       await deleteOrder(orderToDelete.id);
-      setOrderToDelete(null);
-      setDeleteDialogOpen(false);
     }
   };
 
   const handleActionClick = async (
     order: TransactionItem,
-    action: "mark_paid" | "cancel"
+    action: ActionType
   ) => {
-    await handleStatusChange(order.id, action);
+    if (action !== "mark_paid" && action !== "cancel") return;
+
+    const updates: Partial<TransactionItem> = {
+      id: order.id,
+      status: action === "cancel" ? "cancelled" : order.status,
+      paymentStatus: action === "mark_paid" ? "paid" : order.paymentStatus,
+      actions: [
+        ...(order.actions || []),
+        {
+          type: action,
+          timestamp: new Date(),
+          performedBy: "user",
+        },
+      ],
+    };
+
+    await handleUpdate(order.id, updates);
   };
 
   return (
@@ -142,9 +169,9 @@ const OrdersPage = () => {
               <Button
                 variant="outline"
                 onClick={downloadCSV}
-                disabled={isLoading}
+                disabled={isLoading || !orders?.length}
               >
-                <Download />
+                <Download className="h-4 w-4" />
               </Button>
 
               <Dialog open={open} onOpenChange={setOpen}>
@@ -154,13 +181,13 @@ const OrdersPage = () => {
                     {t.addOrder}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-4xl">
                   <DialogHeader>
                     <DialogTitle>
                       {editingOrder ? t.editOrder : t.addOrder}
                     </DialogTitle>
                   </DialogHeader>
-                  <OrderForm
+                  <TransactionForm
                     initialData={editingOrder}
                     onSubmit={onSubmit}
                     onCancel={() => {
@@ -195,10 +222,12 @@ const OrdersPage = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onAction={handleActionClick}
+              isLoading={isLoading}
             />
           </div>
         </div>
       </div>
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

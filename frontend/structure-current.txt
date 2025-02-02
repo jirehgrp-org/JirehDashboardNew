@@ -60,7 +60,8 @@ frontend/
     │   ├── common/
     │   │   ├── DashboardHeader.tsx
     │   │   ├── Header.tsx
-    │   │   └── LanguageToggle.tsx
+    │   │   ├── LanguageToggle.tsx
+    │   │   └── ResponsiveWrapper.tsx
     │   │
     │   ├── context/
     │   │   ├── LanguageContext.tsx
@@ -121,6 +122,7 @@ frontend/
     │   └── shared/
     │       ├── useCalendar.ts
     │       ├── useOutsideClick.ts
+    │       ├── useResponsive.ts
     │       └── useToast.ts
     │   
     ├── lib/

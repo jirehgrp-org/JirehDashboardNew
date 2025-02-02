@@ -164,7 +164,7 @@ export function TransactionForm({
                         >
                           <div className="font-medium">{item.name}</div>
                           <div className="text-sm text-neutral-500">
-                            {formT.price}: ${item.price}
+                            {formT.price}: {formT.birr} {item.price}
                           </div>
                           <div className="text-sm text-neutral-500">
                             {formT.inStock}: {item.quantity}
@@ -193,7 +193,7 @@ export function TransactionForm({
                 <div className="flex-1">
                   <div className="font-medium">{item.name}</div>
                   <div className="text-sm text-neutral-500">
-                    ${item.price} x {item.orderQuantity}
+                    {formT.birr} {item.price} x {item.orderQuantity}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -229,7 +229,9 @@ export function TransactionForm({
           </div>
           <div className="flex justify-between pt-4 border-t font-medium">
             <span>{formT.total}:</span>
-            <span>${calculateTotal().toFixed(2)}</span>
+            <span>
+              {formT.birr} {calculateTotal().toFixed(2)}
+            </span>
           </div>
         </div>
 

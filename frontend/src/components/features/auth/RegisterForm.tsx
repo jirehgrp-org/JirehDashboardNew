@@ -172,6 +172,8 @@ export function RegisterForm() {
                     type="tel"
                     disabled={isLoading}
                     className="rounded-l-none border-l-0"
+                    maxLength={9}
+                    minLength={9}
                   />
                 </div>
               </LabelInputContainer>
@@ -333,6 +335,8 @@ export function RegisterForm() {
                     type="tel"
                     disabled={isLoading}
                     className="rounded-l-none border-l-0"
+                    maxLength={9}
+                    minLength={9}
                   />
                 </div>
               </LabelInputContainer>

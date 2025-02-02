@@ -1,8 +1,8 @@
 // @/app/dashboard/orders/page.tsx
 
 "use client";
-
 import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,8 +32,11 @@ import { useTransaction } from "@/hooks/features/useTransaction";
 import { TransactionForm } from "@/components/shared/forms/TransactionForm";
 import type { TransactionItem } from "@/types/features/transaction";
 import type { ActionType } from "@/types/shared/table";
+import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
+import { useResponsive } from "@/hooks/shared/useResponsive";
 
 const OrdersPage = () => {
+  const { isMobile } = useResponsive();
   const { language } = useLanguage();
   const t = translations[language].dashboard.transaction.page;
   const [open, setOpen] = useState(false);
@@ -155,78 +158,95 @@ const OrdersPage = () => {
 
   return (
     <div className="flex flex-1 h-full flex-col">
-      <div className="flex flex-1 h-full">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
-          <div className="flex justify-between items-center">
-            <h2 className="text-3xl font-bold">
-              {t.orders}
-              <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourOrders}
-              </p>
-            </h2>
+      <ResponsiveWrapper>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2
+            className={cn(
+              "text-2xl md:text-3xl font-bold",
+              isMobile && "w-full"
+            )}
+          >
+            {t.orders}
+            <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
+              {t.manageYourOrders}
+            </p>
+          </h2>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={downloadCSV}
-                disabled={isLoading || !orders?.length}
-              >
-                <Download className="h-4 w-4" />
-              </Button>
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              isMobile ? "w-full flex-col" : "flex-row"
+            )}
+          >
+            <Button
+              variant="outline"
+              onClick={downloadCSV}
+              disabled={isLoading || !orders?.length}
+              className={cn(isMobile && "w-full")}
+            >
+              <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
+            </Button>
 
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button disabled={isLoading}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t.addOrder}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingOrder ? t.editOrder : t.addOrder}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <TransactionForm
-                    initialData={editingOrder}
-                    onSubmit={onSubmit}
-                    onCancel={() => {
-                      setOpen(false);
-                      setEditingOrder(null);
-                    }}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="w-full max-w-sm">
-              <Input
-                placeholder={t.searchOrders}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalOrders}: {filteredOrders?.length || 0}
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <DataTable
-              columns={getColumns("order", language)}
-              data={filteredOrders || []}
-              variant="order"
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onAction={handleActionClick}
-              isLoading={isLoading}
-            />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  disabled={isLoading}
+                  className={cn(isMobile && "w-full")}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t.addOrder}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingOrder ? t.editOrder : t.addOrder}
+                  </DialogTitle>
+                </DialogHeader>
+                <TransactionForm
+                  initialData={editingOrder}
+                  onSubmit={onSubmit}
+                  onCancel={() => {
+                    setOpen(false);
+                    setEditingOrder(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
-      </div>
+
+        <div
+          className={cn(
+            "flex justify-between items-center",
+            isMobile ? "flex-col gap-4" : "flex-row"
+          )}
+        >
+          <div className={cn("w-full", !isMobile && "max-w-sm")}>
+            <Input
+              placeholder={t.searchOrders}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="text-sm text-zinc-600 dark:text-zinc-400">
+            {t.totalOrders}: {filteredOrders?.length || 0}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <DataTable
+            columns={getColumns("order", language)}
+            data={filteredOrders || []}
+            variant="order"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onAction={handleActionClick}
+            isLoading={isLoading}
+          />
+        </div>
+      </ResponsiveWrapper>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

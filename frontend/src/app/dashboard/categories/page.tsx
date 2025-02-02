@@ -2,6 +2,7 @@
 
 "use client";
 import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -30,8 +31,11 @@ import { InventoryForm } from "@/components/shared/forms/InventoryForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
 import { useInventory } from "@/hooks/features/useInventory";
 import type { InventoryItem } from "@/types/features/inventory";
+import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
+import { useResponsive } from "@/hooks/shared/useResponsive";
 
 const CategoriesPage = () => {
+  const { isMobile } = useResponsive();
   const { language } = useLanguage();
   const t = translations[language].dashboard.inventory.page;
   const [open, setOpen] = useState(false);
@@ -119,77 +123,76 @@ const CategoriesPage = () => {
 
   return (
     <div className="flex flex-1 h-full flex-col">
-      <div className="flex flex-1 h-full">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
-          <div className="flex justify-between items-center">
-            <h2 className="text-3xl font-bold">
-              {t.categories}
-              <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourCategories}
-              </p>
-            </h2>
+      <ResponsiveWrapper>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className="text-2xl md:text-3xl font-bold">
+            {t.categories}
+            <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
+              {t.manageYourCategories}
+            </p>
+          </h2>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={downloadCSV}
-                disabled={isLoading}
-              >
-                <Download />
-              </Button>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <Button
+              variant="outline"
+              onClick={downloadCSV}
+              disabled={isLoading}
+              className="flex-1 md:flex-none"
+            >
+              <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
+            </Button>
 
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button disabled={isLoading}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t.addCategory}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingCategory ? t.editCategory : t.addCategory}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <InventoryForm
-                    variant="category"
-                    initialData={editingCategory}
-                    onSubmit={onSubmit}
-                    onCancel={() => {
-                      setOpen(false);
-                      setEditingCategory(null);
-                    }}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="w-full max-w-sm">
-              <Input
-                placeholder={t.searchCategories}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalCategories}: {filteredCategories?.length || 0}
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <DataTable
-              columns={getColumns("category", language)}
-              data={filteredCategories || []}
-              variant="category"
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button disabled={isLoading}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t.addCategory}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCategory ? t.editCategory : t.addCategory}
+                  </DialogTitle>
+                </DialogHeader>
+                <InventoryForm
+                  variant="category"
+                  initialData={editingCategory}
+                  onSubmit={onSubmit}
+                  onCancel={() => {
+                    setOpen(false);
+                    setEditingCategory(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
-      </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="w-full md:max-w-sm">
+            <Input
+              placeholder={t.searchCategories}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="text-sm text-zinc-600 dark:text-zinc-400">
+            {t.totalCategories}: {filteredCategories?.length || 0}
+          </div>
+        </div>
+
+        <div className="flex-1 -mx-2 md:mx-0">
+          <DataTable
+            columns={getColumns("category", language)}
+            data={filteredCategories || []}
+            variant="category"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      </ResponsiveWrapper>
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

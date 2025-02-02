@@ -395,6 +395,7 @@ export const en = {
       monthly: "Monthly",
       quarterly: "Quarterly",
       halfYearly: "half-Yearly",
+      birr: "Br",
       yearly: "Yearly",
       active: "Active",
       create: "Create",

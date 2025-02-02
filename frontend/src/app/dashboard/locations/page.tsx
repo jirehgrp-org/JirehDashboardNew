@@ -2,6 +2,7 @@
 
 "use client";
 import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -30,8 +31,11 @@ import { InventoryForm } from "@/components/shared/forms/InventoryForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
 import { useInventory } from "@/hooks/features/useInventory";
 import type { InventoryItem } from "@/types/features/inventory";
+import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
+import { useResponsive } from "@/hooks/shared/useResponsive";
 
 const LocationsPage = () => {
+  const { isMobile } = useResponsive();
   const { language } = useLanguage();
   const t = translations[language].dashboard.inventory.page;
   const [open, setOpen] = useState(false);
@@ -121,84 +125,102 @@ const LocationsPage = () => {
 
   return (
     <div className="flex flex-1 h-full flex-col">
-      <div className="flex flex-1 h-full">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-4 flex-1">
-          <div className="flex justify-between items-center">
-            <h2 className="text-3xl font-bold">
-              {t.locations}
-              <p className="text-base font-semibold text-zinc-600 dark:text-zinc-400">
-                {t.manageYourLocations}
-              </p>
-            </h2>
+      <ResponsiveWrapper>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2
+            className={cn(
+              "text-2xl md:text-3xl font-bold",
+              isMobile && "w-full"
+            )}
+          >
+            {t.locations}
+            <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
+              {t.manageYourLocations}
+            </p>
+          </h2>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={downloadCSV}
-                disabled={isLoading}
-              >
-                <Download />
-              </Button>
+          <div
+            className={cn(
+              "flex items-center gap-2",
+              isMobile ? "w-full flex-col" : "flex-row"
+            )}
+          >
+            <Button
+              variant="outline"
+              onClick={downloadCSV}
+              disabled={isLoading}
+              className={cn(isMobile && "w-full")}
+            >
+              <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
+            </Button>
 
-              <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                  <Button disabled={isLoading}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t.addLocation}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingLocation ? t.editLocation : t.addLocation}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <InventoryForm
-                    variant="location"
-                    initialData={editingLocation}
-                    onSubmit={onSubmit}
-                    onCancel={() => {
-                      setOpen(false);
-                      setEditingLocation(null);
-                    }}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <div className="w-full max-w-sm">
-              <Input
-                placeholder={t.searchLocations}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              {t.totalLocations}: {filteredLocations?.length || 0}
-            </div>
-          </div>
-
-          <div className="flex-1">
-            <DataTable
-              columns={getColumns("location", language)}
-              data={filteredLocations || []}
-              variant="location"
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  disabled={isLoading}
+                  className={cn(isMobile && "w-full")}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t.addLocation}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingLocation ? t.editLocation : t.addLocation}
+                  </DialogTitle>
+                </DialogHeader>
+                <InventoryForm
+                  variant="location"
+                  initialData={editingLocation}
+                  onSubmit={onSubmit}
+                  onCancel={() => {
+                    setOpen(false);
+                    setEditingLocation(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
-      </div>
+
+        <div
+          className={cn(
+            "flex justify-between items-center",
+            isMobile ? "flex-col gap-4" : "flex-row"
+          )}
+        >
+          <div className={cn("w-full", !isMobile && "max-w-sm")}>
+            <Input
+              placeholder={t.searchLocations}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="text-sm text-zinc-600 dark:text-zinc-400">
+            {t.totalLocations}: {filteredLocations?.length || 0}
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <DataTable
+            columns={getColumns("location", language)}
+            data={filteredLocations || []}
+            variant="location"
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      </ResponsiveWrapper>
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}&quot;{" "}
-              {t.actionCannotBeUndone}
+              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}
+              &quot; {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

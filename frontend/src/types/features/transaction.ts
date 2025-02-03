@@ -11,8 +11,6 @@ export interface OrderItem {
 }
 
 export interface TransactionItem {
-  itemId: any;
-  quantity: any;
   id: string;
   customerName: string;
   customerPhone: string;

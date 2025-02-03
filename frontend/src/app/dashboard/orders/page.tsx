@@ -86,20 +86,24 @@ const OrdersPage = () => {
       })
       .replace(/\//g, "-");
 
-    const csv = Papa.unparse(
-      orders.map((order) => ({
+    // Flatten orders with their items for CSV export
+    const flattenedOrders = orders.flatMap((order) =>
+      order.items.map((item) => ({
         orderNumber: order.orderNumber,
         customerName: order.customerName,
         customerPhone: order.customerPhone,
         customerEmail: order.customerEmail || "",
-        itemId: order.itemId,
-        quantity: order.quantity,
+        itemId: item.itemId,
+        quantity: item.quantity,
+        price: item.price,
         status: order.status,
         paymentStatus: order.paymentStatus,
         orderDate: new Date(order.orderDate).toLocaleDateString(),
         total: order.total,
       }))
     );
+
+    const csv = Papa.unparse(flattenedOrders);
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");

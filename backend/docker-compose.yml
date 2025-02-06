@@ -1,4 +1,6 @@
 services:
+# web:
+  # container_name: jireh_web
   web:
     build: .
     command: python /backend/manage.py runserver 0.0.0.0:8000

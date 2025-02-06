@@ -64,6 +64,7 @@ frontend/
     │   │   └── ResponsiveWrapper.tsx
     │   │
     │   ├── context/
+    │   │   ├── AuthContext.tsx
     │   │   ├── LanguageContext.tsx
     │   │   └── ThemeContext.tsx
     │   │
@@ -88,6 +89,10 @@ frontend/
     │   │   └── Terms.tsx
     │   │
     │   ├── Shared/
+    │   │   ├── cards/
+    │   │   │   ├── ChartCard.tsx
+    │   │   │   ├── ListCard.tsx
+    │   │   │   └── MetricCard.tsx
     │   │   ├── charts/
     │   │   │   ├── BarChart.tsx
     │   │   │   ├── LineChart.tsx
@@ -120,6 +125,7 @@ frontend/
     │   │   └── useTransaction.ts
     │   │
     │   └── shared/
+    │       ├── useAuth.ts
     │       ├── useCalendar.ts
     │       ├── useOutsideClick.ts
     │       ├── useResponsive.ts
@@ -130,6 +136,8 @@ frontend/
     │   │   ├── inventory.ts
     │   │   ├── operation.ts
     │   │   └── transaction.ts
+    │   ├── services/
+    │   │   └── auth.ts
     │   └── utils.ts
     │   
     ├── translations/
@@ -146,6 +154,7 @@ frontend/
     │   │   └── transaction.ts
     │   └── shared/
     │       ├── auth.ts
+    │       ├── card.ts
     │       └── table.ts
     │
     ├── .gitignore

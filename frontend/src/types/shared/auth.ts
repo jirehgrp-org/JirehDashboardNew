@@ -24,12 +24,8 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  success: boolean;
-  data: {
-    role: UserRole;
-    token: string;
-    userId: string;
-    };
+  access: string;
+  refresh?: string;
 }
 
 export interface PageInfo {

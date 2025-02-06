@@ -10,13 +10,16 @@ import { Eye, EyeClosed } from "lucide-react";
 import { translations } from "@/translations";
 import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
-import type { LoginCredentials, LoginResponse } from "@/types/shared/auth";
+import type { LoginCredentials } from "@/types/shared/auth";
+import { useAuth } from "@/hooks/shared/useAuth";
 
 export function LoginForm() {
+  const { login } = useAuth();
   const router = useRouter();
   const { language } = useLanguage();
   const t = translations[language].auth.login;
-
+  
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [credentials, setCredentials] = useState<LoginCredentials>({
@@ -27,35 +30,15 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    try {
-      // Replace with your actual API call
-      const response: LoginResponse = await new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              success: true,
-              data: {
-                role: "admin",
-                token: "fake-token",
-                userId: "123",
-              },
-            }),
-          1000
-        )
-      );
-
-      if (response.success) {
-        localStorage.setItem("userRole", response.data.role);
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userId", response.data.userId);
-        router.push("/dashboard");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+    const result = await login(credentials);
+    if (result.success) {
+      router.push("/dashboard");
+    } else {
+      setError(result.error);
     }
+    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +55,11 @@ export function LoginForm() {
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.title}
         </h2>
+        {error && (
+          <div className="bg-red-50 text-red-500 p-3 rounded-md mt-4">
+            {error}
+          </div>
+        )}
         <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-400">
           {t.description}
         </p>

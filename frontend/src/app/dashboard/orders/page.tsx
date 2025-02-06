@@ -1,5 +1,3 @@
-// @/app/dashboard/orders/page.tsx
-
 "use client";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -32,6 +30,7 @@ import { useTransaction } from "@/hooks/features/useTransaction";
 import { TransactionForm } from "@/components/shared/forms/TransactionForm";
 import type { TransactionItem } from "@/types/features/transaction";
 import type { ActionType } from "@/types/shared/table";
+import type { UserRole } from "@/types/shared/auth";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
 
@@ -48,6 +47,10 @@ const OrdersPage = () => {
   const [orderToDelete, setOrderToDelete] = useState<TransactionItem | null>(
     null
   );
+
+  // Get user role from localStorage
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
+  const canAddOrders = userRole !== "warehouse"; // Only warehouse users cannot add orders
 
   const {
     isLoading,
@@ -86,7 +89,6 @@ const OrdersPage = () => {
       })
       .replace(/\//g, "-");
 
-    // Flatten orders with their items for CSV export
     const flattenedOrders = orders.flatMap((order) =>
       order.items.map((item) => ({
         orderNumber: order.orderNumber,
@@ -104,7 +106,6 @@ const OrdersPage = () => {
     );
 
     const csv = Papa.unparse(flattenedOrders);
-
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
@@ -191,32 +192,34 @@ const OrdersPage = () => {
               <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
             </Button>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  disabled={isLoading}
-                  className={cn(isMobile && "w-full")}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t.addOrder}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingOrder ? t.editOrder : t.addOrder}
-                  </DialogTitle>
-                </DialogHeader>
-                <TransactionForm
-                  initialData={editingOrder}
-                  onSubmit={onSubmit}
-                  onCancel={() => {
-                    setOpen(false);
-                    setEditingOrder(null);
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
+            {canAddOrders && (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    disabled={isLoading}
+                    className={cn(isMobile && "w-full")}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t.addOrder}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingOrder ? t.editOrder : t.addOrder}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <TransactionForm
+                    initialData={editingOrder}
+                    onSubmit={onSubmit}
+                    onCancel={() => {
+                      setOpen(false);
+                      setEditingOrder(null);
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
 

@@ -214,9 +214,6 @@ export function OperationForm({
                           <SelectValue placeholder={formT.rolePlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="manager">
-                            {formT.manager}
-                          </SelectItem>
                           <SelectItem value="admin">{formT.admin}</SelectItem>
                           <SelectItem value="sales">{formT.sales}</SelectItem>
                           <SelectItem value="warehouse">

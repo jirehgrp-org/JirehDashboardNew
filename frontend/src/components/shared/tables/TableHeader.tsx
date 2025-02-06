@@ -518,7 +518,6 @@ export const getColumns = (
         header: t.operation.table.actions,
       },
     ],
-
     order: [
       {
         accessorKey: "customerName",

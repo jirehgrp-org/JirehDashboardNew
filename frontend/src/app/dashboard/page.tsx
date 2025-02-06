@@ -1,34 +1,19 @@
 // @/components/layout/shared/Dashboard.tsx
 
 "use client";
-import React from "react";
-const Dashboard = () => {
-  return (
-    <div className="flex flex-1 h-full flex-col">
+import { useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
 
-      {/* dashboard content */}
-      <div className="flex flex-1 h-full">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1">
-          <div className="flex gap-2">
-            {[...Array(4)].map((_, index) => (
-              <div
-                key={`first-row-${index}`}
-                className="h-20 w-full rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse"
-              ></div>
-            ))}
-          </div>
-          <div className="flex gap-2 flex-1">
-            {[...Array(2)].map((_, index) => (
-              <div
-                key={`second-row-${index}`}
-                className="h-full w-full rounded-lg bg-gray-100 dark:bg-neutral-800 animate-pulse"
-              ></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+const Dashboard = () => {
+  const router = useRouter(); // Initialize the router
+
+  // Redirect to /dashboard/overview on component mount
+  useEffect(() => {
+    router.push("/dashboard/overview");
+  }, [router]);
+
+  // Render nothing (or a loading state if desired)
+  return null;
 };
 
 export default Dashboard;

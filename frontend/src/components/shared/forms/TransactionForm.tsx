@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// @/components/shared/forms/TransactionForm
+
 "use client";
 
 import React from "react";
@@ -17,6 +19,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -305,6 +314,38 @@ export function TransactionForm({
                       placeholder={formT.customerEmailPlaceholder}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {formT.paymentMethod}
+                    <RequiredIndicator />
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={formT.selectPaymentMethod} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Cash">{formT.cash}</SelectItem>
+                      <SelectItem value="Telebirr">{formT.telebirr}</SelectItem>
+                      <SelectItem value="Bank Transfer">
+                        {formT.bankTransfer}
+                      </SelectItem>
+                      <SelectItem value="Credit">{formT.credit}</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

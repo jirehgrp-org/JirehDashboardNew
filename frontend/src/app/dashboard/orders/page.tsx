@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,24 +13,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
-import { getColumns } from "@/components/shared/tables/TableHeader";
+import { useColumns } from "@/components/shared/tables/useColumn";
 import { useTransaction } from "@/hooks/features/useTransaction";
 import { TransactionForm } from "@/components/shared/forms/TransactionForm";
+import OrderDetailsDialog from "@/components/features/dashboard/OrderDetailsDialog";
 import type { TransactionItem } from "@/types/features/transaction";
-import type { ActionType } from "@/types/shared/table";
 import type { UserRole } from "@/types/shared/auth";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
@@ -40,29 +31,27 @@ const OrdersPage = () => {
   const t = translations[language].dashboard.transaction.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingOrder, setEditingOrder] = useState<TransactionItem | null>(
+  const [selectedOrder, setSelectedOrder] = useState<TransactionItem | null>(
     null
   );
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState<TransactionItem | null>(
-    null
-  );
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Get user role from localStorage
   const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
-  const canAddOrders = userRole !== "warehouse"; // Only warehouse users cannot add orders
+  const canAddOrders = userRole !== "warehouse";
 
   const {
     isLoading,
     data: orders,
     handleSubmit,
-    handleDelete: deleteOrder,
     handleUpdate,
   } = useTransaction({
     onSuccess: () => {
       setOpen(false);
-      setEditingOrder(null);
-      setDeleteDialogOpen(false);
+      setSelectedOrder(null);
+      setDetailsDialogOpen(false);
     },
   });
 
@@ -118,48 +107,50 @@ const OrdersPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  const onSubmit = async (data: Partial<TransactionItem>) => {
-    await handleSubmit(data, editingOrder?.id);
-  };
-
-  const handleEdit = (order: TransactionItem) => {
-    setEditingOrder(order);
-    setOpen(true);
-  };
-
-  const handleDelete = (order: TransactionItem) => {
-    setOrderToDelete(order);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (orderToDelete) {
-      await deleteOrder(orderToDelete.id);
-    }
-  };
-
-  const handleActionClick = async (
+  const handleOrderAction = async (
     order: TransactionItem,
-    action: ActionType
+    action: "mark_paid" | "complete" | "cancel"
   ) => {
-    if (action !== "mark_paid" && action !== "cancel") return;
-
     const updates: Partial<TransactionItem> = {
       id: order.id,
-      status: action === "cancel" ? "cancelled" : order.status,
-      paymentStatus: action === "mark_paid" ? "paid" : order.paymentStatus,
+      status:
+        action === "cancel"
+          ? "cancelled"
+          : action === "complete"
+          ? "completed"
+          : order.status,
+      paymentStatus:
+        action === "cancel"
+          ? "cancelled"
+          : action === "mark_paid"
+          ? "paid"
+          : order.paymentStatus,
       actions: [
         ...(order.actions || []),
         {
           type: action,
           timestamp: new Date(),
-          performedBy: "user",
+          performedBy: userRole,
         },
       ],
     };
 
     await handleUpdate(order.id, updates);
   };
+
+  const handleRowClick = (order: TransactionItem) => {
+    setSelectedOrder(order);
+    setDetailsDialogOpen(true);
+  };
+
+  const onSubmit = async (data: Partial<TransactionItem>) => {
+    await handleSubmit(data);
+  };
+
+  const columns = useColumns("order");
+  const tableColumns = React.useMemo(() => {
+    return columns.filter((column) => column.id !== "actions");
+  }, [columns]);
 
   return (
     <div className="flex flex-1 h-full flex-col">
@@ -205,17 +196,11 @@ const OrdersPage = () => {
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl">
                   <DialogHeader>
-                    <DialogTitle>
-                      {editingOrder ? t.editOrder : t.addOrder}
-                    </DialogTitle>
+                    <DialogTitle>{t.addOrder}</DialogTitle>
                   </DialogHeader>
                   <TransactionForm
-                    initialData={editingOrder}
                     onSubmit={onSubmit}
-                    onCancel={() => {
-                      setOpen(false);
-                      setEditingOrder(null);
-                    }}
+                    onCancel={() => setOpen(false)}
                   />
                 </DialogContent>
               </Dialog>
@@ -244,34 +229,24 @@ const OrdersPage = () => {
 
         <div className="flex-1">
           <DataTable
-            columns={getColumns("order", language)}
+            columns={tableColumns}
             data={filteredOrders || []}
             variant="order"
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onAction={handleActionClick}
+            onRowClick={handleRowClick}
             isLoading={isLoading}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            itemsPerPage={itemsPerPage}
           />
         </div>
       </ResponsiveWrapper>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{orderToDelete?.orderNumber}
-              &quot; {t.actionCannotBeUndone}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              {t.delete}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <OrderDetailsDialog
+        order={selectedOrder}
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        onAction={handleOrderAction}
+      />
     </div>
   );
 };

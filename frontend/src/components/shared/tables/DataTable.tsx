@@ -1,11 +1,12 @@
 // @/components/shared/tables/DataTable.tsx
+
 "use client";
 
 import React, { useState, useMemo } from "react";
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
 import type { TransactionItem } from "@/types/features/transaction";
-import type { DataTableProps, ActionType, Column } from "@/types/shared/table";
+import type { DataTableProps, Column } from "@/types/shared/table";
 import { TableRow } from "./TableRow";
 import { TablePagination } from "./TablePagination";
 import { useLanguage } from "@/components/context/LanguageContext";
@@ -21,6 +22,7 @@ export function DataTable<
   onEdit,
   onDelete,
   onAction,
+  onRowClick,
   isLoading = false,
 }: DataTableProps<T>) {
   const { language } = useLanguage();
@@ -60,7 +62,7 @@ export function DataTable<
 
       // Handle different types of values
       if (typeof aVal === "string" && typeof bVal === "string") {
-        // Special handling for order number sorting (e.g., "ORD-001")
+        // Special handling for order number sorting
         if (sortConfig.key === "orderNumber") {
           const aNum = parseInt(aVal.split("-")[1]);
           const bNum = parseInt(bVal.split("-")[1]);
@@ -89,7 +91,7 @@ export function DataTable<
           : 1;
       }
 
-      // Handle dates (including orderDate)
+      // Handle dates
       if (
         sortConfig.key === "createdAt" ||
         sortConfig.key === "updatedAt" ||
@@ -100,7 +102,7 @@ export function DataTable<
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
 
-      // Handle order status sorting
+      // Handle status sorting
       if (sortConfig.key === "status" || sortConfig.key === "paymentStatus") {
         const statusOrder = {
           pending: 0,
@@ -186,7 +188,8 @@ export function DataTable<
                 columns={columns}
                 onEdit={onEdit}
                 onDelete={onDelete}
-                onAction={onAction as (row: T, action: ActionType) => void}
+                onAction={onAction}
+                onRowClick={onRowClick}
               />
             ))}
           </tbody>

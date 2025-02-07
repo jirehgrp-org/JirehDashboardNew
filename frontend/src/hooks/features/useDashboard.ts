@@ -6,6 +6,8 @@ import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/shared/useToast";
 import { useTransaction } from "./useTransaction";
 import { useInventory } from "./useInventory";
+import { useLanguage } from "@/components/context/LanguageContext";
+import { translations } from "@/translations";
 import type { DashboardAnalytics, DashboardChartData, DashboardMetrics, TimeframeOption } from "@/types/features/dashboard";
 import Papa from "papaparse";
 
@@ -144,13 +146,23 @@ export const useDashboard = () => {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Payment methods data
+    // Payment methods data - Update this section in the chartData useMemo
     const paymentMethods = Object.entries(
       filteredOrders.reduce((acc: Record<string, number>, order) => {
-        const status = order.paymentStatus;
-        acc[status] = (acc[status] || 0) + 1;
+        const method = order.paymentMethod;
+        acc[method] = (acc[method] || 0) + 1;
         return acc;
       }, {})
-    ).map(([name, value]) => ({ name, value }));
+    ).map(([name, value]) => ({
+      name:
+        {
+          Cash: "Cash",
+          Telebirr: "Telebirr",
+          "Bank Transfer": "Bank Transfer",
+          Credit: "Credit",
+        }[name] || name,
+      value,
+    }));
 
     return {
       revenueData,

@@ -31,5 +31,10 @@ export const OrderSchema = (language: SupportedLanguages = "en") => {
       .union([z.string().email(), z.string().length(0)])
       .optional()
       .transform((e) => (e === "" ? undefined : e)),
+
+    paymentMethod: z.enum(["Cash", "Telebirr", "Bank Transfer", "Credit"], {
+      required_error: t.orderSchema.paymentMethodRequired || "Payment method is required",
+    }),
   });
+  
 };

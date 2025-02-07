@@ -39,12 +39,13 @@ const OverviewPage = () => {
   const { language } = useLanguage();
   const t = translations[language].dashboard.overview.page;
 
-  const { setTimeframe, metrics, chartData, analytics } =
-    useDashboard();
+  const { setTimeframe, metrics, chartData, analytics } = useDashboard();
 
   return (
-    <div className="flex flex-1 h-full flex-col">
-      <ResponsiveWrapper>
+    // Added overflow-y-auto to fix scrolling while maintaining flex layout
+    <div className="flex flex-1 h-full flex-col overflow-y-auto">
+      {/* Added pb-6 to prevent content cutoff at the bottom */}
+      <ResponsiveWrapper className="pb-6">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h2
@@ -60,12 +61,15 @@ const OverviewPage = () => {
           </h2>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 w-full md:w-auto"
+              >
                 <Clock className="h-4 w-4" />
                 <span>{t.timeframes}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-[200px]">
               {TIMEFRAME_OPTIONS(language).map((option) => (
                 <DropdownMenuItem
                   key={option.value}
@@ -78,11 +82,11 @@ const OverviewPage = () => {
           </DropdownMenu>
         </div>
 
-        {/* Metrics Grid */}
+        {/* Metrics Grid - Adjusted breakpoints */}
         <div
           className={cn(
             "grid gap-4",
-            isMobile ? "grid-cols-1" : "grid-cols-2 md:grid-cols-4"
+            isMobile ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-4"
           )}
         >
           <MetricCard
@@ -120,7 +124,7 @@ const OverviewPage = () => {
           />
         </div>
 
-        {/* Charts Section */}
+        {/* Charts Section - Added responsive height */}
         <div
           className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2")}
         >
@@ -128,7 +132,7 @@ const OverviewPage = () => {
             title={t.charts.revenueTrend}
             description={t.charts.revenueTrendDesc}
           >
-            <div className="h-[300px]">
+            <div className="h-[250px] md:h-[300px]">
               <LineChart
                 data={chartData.revenueData}
                 xDataKey="date"
@@ -145,7 +149,7 @@ const OverviewPage = () => {
             title={t.charts.paymentMethods}
             description={t.charts.paymentMethodsDesc}
           >
-            <div className="h-[300px]">
+            <div className="h-[250px] md:h-[300px]">
               <PieChart
                 data={chartData.paymentMethods}
                 colors={Object.values(CHART_COLORS)}
@@ -155,9 +159,9 @@ const OverviewPage = () => {
           </ChartCard>
         </div>
 
-        {/* Analytics Lists */}
+        {/* Analytics Lists - Added gap-6 for better spacing */}
         <div
-          className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2")}
+          className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-2")}
         >
           <ListCard
             title={t.lists.topItems}
@@ -186,9 +190,9 @@ const OverviewPage = () => {
           />
         </div>
 
-        {/* Customer Section */}
+        {/* Customer Section - Improved spacing */}
         <div
-          className={cn("grid gap-4", isMobile ? "grid-cols-1" : "grid-cols-2")}
+          className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-2")}
         >
           <ListCard
             title={t.lists.topCustomers}

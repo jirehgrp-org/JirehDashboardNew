@@ -3,11 +3,18 @@
 import { z } from "zod";
 import { Column } from "@/types/shared/table";
 import { OrderSchema } from "@/lib/schemas/transaction";
+import { UserRole } from "../shared/auth";
 
 export interface OrderItem {
   itemId: string;
   quantity: number;
   price: number;
+}
+
+export interface TransactionAction {
+  type: "mark_paid" | "complete" | "cancel"; // Add 'complete' to possible action types
+  timestamp: Date;
+  performedBy: UserRole; // Change this to UserRole instead of string
 }
 
 export interface TransactionItem {
@@ -19,16 +26,14 @@ export interface TransactionItem {
   total: number;
   status: "pending" | "completed" | "cancelled";
   paymentStatus: "pending" | "paid" | "cancelled";
+  paymentMethod: "Cash" | "Telebirr" | "Bank Transfer" | "Credit";
   orderNumber: string;
   orderDate: string;
   createdAt: string;
   updatedAt: string;
-  actions: {
-    type: "mark_paid" | "cancel";
-    timestamp: Date;
-    performedBy: string;
-  }[];
+  actions: TransactionAction[];
 }
+
 export interface TransactionFormProps {
   initialData?: Partial<TransactionItem> | null;
   onSubmit: (data: Partial<TransactionItem>) => void;

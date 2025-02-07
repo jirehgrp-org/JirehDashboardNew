@@ -8,6 +8,7 @@ import type { OperationItem } from "@/types/features/operation";
 import type { TransactionItem } from "@/types/features/transaction";
 import type { TableRowProps } from "@/types/shared/table"; // Ensure this type is correctly defined in the module
 import { useCalendar } from "@/hooks/shared/useCalendar";
+import { cn } from "@/lib/utils";
 
 export function TableRow<T extends InventoryItem | OperationItem | TransactionItem>({
   row,
@@ -15,6 +16,7 @@ export function TableRow<T extends InventoryItem | OperationItem | TransactionIt
   onEdit,
   onDelete,
   onAction,
+  onRowClick,
 }: TableRowProps<T>) {
   const { toEthiopian } = useCalendar();
 
@@ -22,6 +24,43 @@ export function TableRow<T extends InventoryItem | OperationItem | TransactionIt
   const isOrderItem = (item: any): item is TransactionItem => {
     return "orderNumber" in item && "paymentStatus" in item;
   };
+
+  const isTransactionItem = (item: any): item is TransactionItem => {
+    return "orderNumber" in item && "paymentStatus" in item;
+  };
+
+  const handleRowClick = () => {
+    if (isTransactionItem(row) && onRowClick) {
+      onRowClick(row);
+    }
+  };
+
+  return (
+    <tr
+      className={cn(
+        "transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800",
+        isTransactionItem(row) && "cursor-pointer"
+      )}
+      onClick={handleRowClick}
+    >
+      {columns.map((column) => {
+        const value = column.accessorKey
+          ? row[column.accessorKey as keyof T]
+          : "";
+
+        return (
+          <td
+            key={column.id || column.accessorKey}
+            className="px-4 py-3 text-sm text-neutral-900 dark:text-neutral-100"
+          >
+            {column.cell
+              ? column.cell({ row: { original: row } })
+              : (value as React.ReactNode)}
+          </td>
+        );
+      })}
+    </tr>
+  );
 
   // Render action buttons based on item type and status
   const renderActions = () => {

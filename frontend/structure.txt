@@ -50,10 +50,6 @@ frontend/
     │   │   │   └── page.tsx
     │   │   └── layout.tsx
     │   │
-    │   ├── superadmin/
-    │   │   ├── layout.tsx
-    │   │   └── page.tsx
-    │   │
     │   ├── favicon.ico
     │   ├── globals.css
     │   ├── layout.tsx
@@ -85,9 +81,6 @@ frontend/
     │   ├── layout/
     │   │   ├── dashboard/
     │   │   │   └── Sidebar.tsx
-    │   │   └── superadmin/
-    │   │       ├── Dashboard.tsx
-    │   │       └── Sidebar.tsx
     │   │
     │   ├── Legal/
     │   │   ├── Privacy.tsx

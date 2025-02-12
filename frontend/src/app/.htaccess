@@ -12,7 +12,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^auth(/.*)?$ auth$1 [L]
 RewriteRule ^dashboard(/.*)?$ dashboard$1 [L]
 RewriteRule ^legal(/.*)?$ legal$1 [L]
-RewriteRule ^superadmin(/.*)?$ superadmin$1 [L]
 
 # Handle the home page
 RewriteRule ^$ index.html [L]

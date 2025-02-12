@@ -41,9 +41,9 @@ export function OperationForm({
   const { language } = useLanguage();
   const formT = translations[language].dashboard.form;
 
-  // Fetch locations for the location select field
-  const { data: locations } = useInventory({
-    endpoint: "locations",
+  // Fetch branches for the branch select field
+  const { data: branches } = useInventory({
+    endpoint: "branches",
   });
 
   const schema = getSchemaForVariant(variant, language);
@@ -53,7 +53,7 @@ export function OperationForm({
     defaultValues: initialData || {
       name: "",
       active: true,
-      locationId: "",
+      branchId: "",
       ...(variant === "user" && {
         username: "",
         email: "",
@@ -331,25 +331,25 @@ export function OperationForm({
 
         <FormField
           control={form.control}
-          name="locationId"
+          name="branchId"
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center gap-4">
                 <FormLabel className="w-1/4 text-right">
-                  {formT.location}
+                  {formT.branch}
                   <RequiredIndicator />
                 </FormLabel>
                 <FormControl className="w-3/4">
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger className="h-10 w-3/4">
-                      <SelectValue placeholder={formT.locationPlaceholder} />
+                      <SelectValue placeholder={formT.branchPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {locations
-                        ?.filter((location) => location.active)
-                        .map((location) => (
-                          <SelectItem key={location.id} value={location.id}>
-                            {location.name}
+                      {branches
+                        ?.filter((branch) => branch.active)
+                        .map((branch) => (
+                          <SelectItem key={branch.id} value={branch.id}>
+                            {branch.name}
                           </SelectItem>
                         ))}
                     </SelectContent>

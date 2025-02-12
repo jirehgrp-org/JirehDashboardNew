@@ -12,14 +12,14 @@ import type { Column } from "@/types/shared/table";
 import React from "react";
 
 export function useColumns(
-  variant: "location" | "category" | "item" | "user" | "expense" | "order"
+  variant: "branch" | "category" | "item" | "user" | "expense" | "order"
 ) {
   const { language } = useLanguage();
   const t = translations[language].dashboard;
   const { toEthiopian } = useCalendar();
 
   // Get data for lookups
-  const { data: locations } = useInventory({ endpoint: "locations" });
+  const { data: branches } = useInventory({ endpoint: "branches" });
   const { data: categories } = useInventory({ endpoint: "categories" });
   const { data: items } = useInventory({ endpoint: "items" });
 

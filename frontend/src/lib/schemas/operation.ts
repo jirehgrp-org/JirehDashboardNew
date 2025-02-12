@@ -16,9 +16,9 @@ const BaseSchema = (language: SupportedLanguages = "en") => {
   return z.object({
     name: z.string().min(1, t.nameIsRequired || "Name is required"),
     active: z.boolean().default(true),
-    locationId: z
+    branchId: z
       .string()
-      .min(1, t?.locationIsRequired || "Location is required"),
+      .min(1, t?.branchIsRequired || "Branch is required"),
   });
 };
 

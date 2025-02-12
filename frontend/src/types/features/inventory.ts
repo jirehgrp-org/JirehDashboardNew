@@ -1,7 +1,7 @@
 // @/types/features/inventory.ts
 
 import { Column } from "@/types/shared/table";
-export type FormVariant = "location" | "category" | "item";
+export type FormVariant = "branch" | "category" | "item";
 
 export interface InventoryItem {
   id: string;
@@ -10,16 +10,16 @@ export interface InventoryItem {
   createdAt: string;
   updatedAt: string;
 
-  // Location fields
+  // branch fields
   address?: string;
   contactNumber?: string;
 
   // Category fields
   description?: string;
-  locationId?: string;
 
   // Item fields
   categoryId?: string;
+  branchId?: string;
   price?: number;
   quantity?: number;
 }
@@ -36,7 +36,7 @@ export type InventoryColumn = Column<InventoryItem>;
 export interface InventoryState {
   items: InventoryItem[];
   categories: InventoryItem[];
-  locations: InventoryItem[];
+  branches: InventoryItem[];
   isLoading: boolean;
   error: string | null;
 }
@@ -52,20 +52,24 @@ export interface UseInventoryOptions {
 }
 
 // Type guards to check what type of inventory item we're dealing with
-export const isLocation = (item: InventoryItem): boolean => {
+export const isBranch = (item: InventoryItem): boolean => {
   return Boolean(item.address && item.contactNumber);
 };
 
 export const isCategory = (item: InventoryItem): boolean => {
-  return Boolean(item.locationId);
+  return Boolean(
+    item.description !== undefined && !item.categoryId && !item.branchId
+  );
 };
 
 export const isItem = (item: InventoryItem): boolean => {
-  return Boolean(item.categoryId && typeof item.price === "number");
+  return Boolean(
+    item.categoryId && item.branchId && typeof item.price === "number"
+  );
 };
 
 // Helper types for more specific type checking when needed
-export type LocationItem = Required<
+export type BranchItem = Required<
   Pick<
     InventoryItem,
     | "id"
@@ -77,12 +81,11 @@ export type LocationItem = Required<
     | "contactNumber"
   >
 >;
+
 export type CategoryItem = Required<
-  Pick<
-    InventoryItem,
-    "id" | "name" | "active" | "createdAt" | "updatedAt" | "locationId"
-  >
+  Pick<InventoryItem, "id" | "name" | "active" | "createdAt" | "updatedAt">
 > & { description?: string };
+
 export type StockItem = Required<
   Pick<
     InventoryItem,
@@ -93,6 +96,7 @@ export type StockItem = Required<
     | "updatedAt"
     | "price"
     | "categoryId"
+    | "branchId"
     | "quantity"
   >
 >;

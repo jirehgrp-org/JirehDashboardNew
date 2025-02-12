@@ -147,6 +147,7 @@ CREATE TABLE category (
 CREATE TABLE item (
     id INT PRIMARY KEY AUTO_INCREMENT,
     business_id INT NOT NULL,
+    branch_id INT NOT NULL,
     category_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     price DECIMAL(10,2) NOT NULL CHECK (price >= 0),

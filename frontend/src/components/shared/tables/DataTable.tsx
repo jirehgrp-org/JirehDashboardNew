@@ -143,7 +143,7 @@ export function DataTable<
 
   if (!data.length) {
     const emptyMessages = {
-      location: t.location,
+      branch: t.branch,
       category: t.category,
       item: t.item,
       user: t.user,

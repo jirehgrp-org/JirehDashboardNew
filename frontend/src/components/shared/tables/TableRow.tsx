@@ -1,30 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/components/shared/tables/TableRow.tsx
+// @/components/shared/tables/TableRow
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Ban, CreditCard } from "lucide-react";
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
 import type { TransactionItem } from "@/types/features/transaction";
-import type { TableRowProps } from "@/types/shared/table"; // Ensure this type is correctly defined in the module
+import type { TableRowProps } from "@/types/shared/table";
 import { useCalendar } from "@/hooks/shared/useCalendar";
 import { cn } from "@/lib/utils";
 
-export function TableRow<T extends InventoryItem | OperationItem | TransactionItem>({
-  row,
-  columns,
-  onEdit,
-  onDelete,
-  onAction,
-  onRowClick,
-}: TableRowProps<T>) {
+export function TableRow<
+  T extends InventoryItem | OperationItem | TransactionItem
+>({ row, columns, onEdit, onDelete, onAction, onRowClick }: TableRowProps<T>) {
   const { toEthiopian } = useCalendar();
 
-  // Type guard to check if the row is an OrderItem
-  const isOrderItem = (item: any): item is TransactionItem => {
-    return "orderNumber" in item && "paymentStatus" in item;
-  };
-
+  // Type guard to check if the row is a TransactionItem
   const isTransactionItem = (item: any): item is TransactionItem => {
     return "orderNumber" in item && "paymentStatus" in item;
   };
@@ -35,36 +27,9 @@ export function TableRow<T extends InventoryItem | OperationItem | TransactionIt
     }
   };
 
-  return (
-    <tr
-      className={cn(
-        "transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800",
-        isTransactionItem(row) && "cursor-pointer"
-      )}
-      onClick={handleRowClick}
-    >
-      {columns.map((column) => {
-        const value = column.accessorKey
-          ? row[column.accessorKey as keyof T]
-          : "";
-
-        return (
-          <td
-            key={column.id || column.accessorKey}
-            className="px-4 py-3 text-sm text-neutral-900 dark:text-neutral-100"
-          >
-            {column.cell
-              ? column.cell({ row: { original: row } })
-              : (value as React.ReactNode)}
-          </td>
-        );
-      })}
-    </tr>
-  );
-
   // Render action buttons based on item type and status
   const renderActions = () => {
-    if (isOrderItem(row)) {
+    if (isTransactionItem(row)) {
       return (
         <div className="flex gap-2">
           {/* Order action buttons */}
@@ -151,16 +116,17 @@ export function TableRow<T extends InventoryItem | OperationItem | TransactionIt
   };
 
   return (
-    <tr>
-      {columns.map((column: any) => {
+    <tr
+      className={cn(
+        "transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-800",
+        isTransactionItem(row) && "cursor-pointer"
+      )}
+      onClick={handleRowClick}
+    >
+      {columns.map((column) => {
         const value = column.accessorKey
           ? row[column.accessorKey as keyof T]
           : "";
-        const displayValue =
-          column.accessorKey?.includes("At") ||
-          column.accessorKey?.includes("Date")
-            ? toEthiopian(new Date(value as string))
-            : (value as React.ReactNode);
 
         return (
           <td
@@ -171,7 +137,10 @@ export function TableRow<T extends InventoryItem | OperationItem | TransactionIt
               ? renderActions()
               : column.cell
               ? column.cell({ row: { original: row } })
-              : displayValue}
+              : column.accessorKey?.includes("At") ||
+                column.accessorKey?.includes("Date")
+              ? toEthiopian(new Date(value as string))
+              : (value as React.ReactNode)}
           </td>
         );
       })}

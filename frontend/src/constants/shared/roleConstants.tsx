@@ -59,9 +59,9 @@ const pages = {
     label: "Orders",
     section: "transactions",
   },
-  locations: {
+  branches: {
     icon: IconMapRoute,
-    label: "Locations",
+    label: "Branches",
     section: "inventory",
   },
   categories: {
@@ -99,18 +99,15 @@ export const roleAccess = {
     salesReport: pages.salesReport,
     profitLoss: pages.profitLoss,
     orders: pages.orders,
-    locations: pages.locations,
+    branches: pages.branches,
     categories: pages.categories,
     items: pages.items,
     expenses: pages.expenses,
-    reports: pages.reports,
   },
   sales: {
-    overview: pages.overview,
     orders: pages.orders,
   },
   warehouse: {
-    overview: pages.overview,
     orders: pages.orders,
   },
 } as const;

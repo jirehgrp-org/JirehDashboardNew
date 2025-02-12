@@ -1,5 +1,4 @@
 // @/app/layout.tsx
-
 import { Providers } from "./providers";
 import { Geist, Geist_Mono, Roboto_Mono } from "next/font/google";
 import localFont from "next/font/local";
@@ -31,12 +30,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://rbms.jirehgrp.com"),
   title: "JirehDashboard",
   description:
-    "A comprehensive and intuitive dashboard designed to manage your business operations. JirehDashboard empowers owners, employees, and managers to oversee, track orders, manage expenses, and optimize inventory across multiple locations. With role-based access and real-time analytics, it offers a seamless user experience for efficient decision-making and growth.",
+    "A comprehensive and intuitive dashboard designed to manage your business operations. JirehDashboard empowers owners, employees, and managers to oversee, track orders, manage expenses, and optimize inventory across multiple branches. With role-based access and real-time analytics, it offers a seamless user experience for efficient decision-making and growth.",
   openGraph: {
     title: "JirehDashboard",
     description:
       "A modern dashboard to manage your business operations with efficiency. Track subscriptions, orders, inventory, and expenses.",
-    url: "/", 
+    url: "/",
     siteName: "JirehDashboard",
     images: [
       {
@@ -63,11 +62,31 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.getItem('jireh-theme') === 'dark' || 
+                    (!localStorage.getItem('jireh-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${robotoMono.variable} ${entoto.variable} font-mono`}
+        className={`${geistSans.variable} ${geistMono.variable} ${robotoMono.variable} ${entoto.variable} font-mono antialiased`}
         suppressHydrationWarning
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="min-h-screen bg-background transition-colors duration-300">
+            {children}
+          </div>
+        </Providers>
         <Toaster />
       </body>
     </html>

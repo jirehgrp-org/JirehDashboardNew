@@ -9,7 +9,7 @@ import type {
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 
-const mockLocations: InventoryItem[] = [
+const mockBranches: InventoryItem[] = [
   {
     id: "1",
     name: "Main Store",
@@ -62,7 +62,6 @@ const mockCategories: InventoryItem[] = [
     id: "1",
     name: "Electronics",
     description: "Electronic devices and accessories",
-    locationId: "1",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
@@ -71,7 +70,6 @@ const mockCategories: InventoryItem[] = [
     id: "2",
     name: "Office Supplies",
     description: "General office materials and supplies",
-    locationId: "2",
     active: true,
     createdAt: "2024-01-02T12:00:00Z",
     updatedAt: "2024-01-16T12:00:00Z",
@@ -80,7 +78,6 @@ const mockCategories: InventoryItem[] = [
     id: "3",
     name: "Furniture",
     description: "Office and home furniture",
-    locationId: "1",
     active: false,
     createdAt: "2024-01-03T12:00:00Z",
     updatedAt: "2024-01-17T12:00:00Z",
@@ -89,7 +86,6 @@ const mockCategories: InventoryItem[] = [
     id: "4",
     name: "Clothing",
     description: "",
-    locationId: "2",
     active: true,
     createdAt: "2024-01-04T12:00:00Z",
     updatedAt: "2024-01-18T12:00:00Z",
@@ -98,7 +94,6 @@ const mockCategories: InventoryItem[] = [
     id: "5",
     name: "Home Decor",
     description: "",
-    locationId: "1",
     active: true,
     createdAt: "2024-01-05T12:00:00Z",
     updatedAt: "2024-01-19T12:00:00Z",
@@ -112,6 +107,7 @@ const mockItems: InventoryItem[] = [
     price: 1500,
     quantity: 5,
     categoryId: "1",
+    branchId: "1",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
@@ -122,6 +118,7 @@ const mockItems: InventoryItem[] = [
     price: 500,
     quantity: 3,
     categoryId: "2",
+    branchId: "3",
     active: true,
     createdAt: "2024-01-02T12:00:00Z",
     updatedAt: "2024-01-16T12:00:00Z",
@@ -132,6 +129,7 @@ const mockItems: InventoryItem[] = [
     price: 800,
     quantity: 2,
     categoryId: "1",
+    branchId: "3",
     active: false,
     createdAt: "2024-01-03T12:00:00Z",
     updatedAt: "2024-01-17T12:00:00Z",
@@ -142,6 +140,7 @@ const mockItems: InventoryItem[] = [
     price: 200,
     quantity: 4,
     categoryId: "2",
+    branchId: "2",
     active: false,
     createdAt: "2024-01-04T12:00:00Z",
     updatedAt: "2024-01-18T12:00:00Z",
@@ -152,6 +151,7 @@ const mockItems: InventoryItem[] = [
     price: 100,
     quantity: 6,
     categoryId: "1",
+    branchId: "3",
     active: true,
     createdAt: "2024-01-05T12:00:00Z",
     updatedAt: "2024-01-19T12:00:00Z",
@@ -164,7 +164,7 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InventoryItem[]>(() => {
-    if (endpoint === "locations") return mockLocations;
+    if (endpoint === "branches") return mockBranches;
     if (endpoint === "categories") return mockCategories;
     if (endpoint === "items") return mockItems;
     return [];
@@ -180,10 +180,10 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
     };
 
     const variantMessages = {
-      locations: {
-        added: t.hook.locationAdded,
-        updated: t.hook.locationUpdated,
-        deleted: t.hook.locationDeleted,
+      branches: {
+        added: t.hook.branchAdded,
+        updated: t.hook.branchUpdated,
+        deleted: t.hook.branchDeleted,
       },
       categories: {
         added: t.hook.categoryAdded,
@@ -199,7 +199,7 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
 
     const selectedVariant =
       variantMessages[variant as keyof typeof variantMessages] ||
-      variantMessages.locations;
+      variantMessages.branches;
 
     return {
       ...commonMessages,

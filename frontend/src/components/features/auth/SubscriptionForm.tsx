@@ -1,22 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/features/auth/SubscriptionForm
 
 "use client";
 import React, { useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { useSubscription } from "@/hooks/features/useSubscription";
 import { usePlans } from "@/hooks/features/usePlan";
 import { Plan } from "@/types/features/plan";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
-import { Info, MoveLeft } from "lucide-react";
+import { Info } from "lucide-react";
 import { PaymentDialog } from "./PaymentDialog";
-
+import { MobileWrapper } from "@/components/common/MobileWrapper";
 
 export function SubscriptionForm() {
   const { language } = useLanguage();
@@ -42,10 +40,6 @@ export function SubscriptionForm() {
   const getPlanPrice = (plan: Plan) => {
     if (!plan.monthlyPrice) return null;
     return isYearly ? plan.yearlyPrice : plan.monthlyPrice;
-  };
-
-  const handleTrialActivation = () => {
-    setShowPaymentDialog(true);
   };
 
   const handleSubscribe = (plan: Plan) => {
@@ -86,29 +80,46 @@ export function SubscriptionForm() {
     return <div>Error loading plans: {error}</div>;
   }
 
+  const PlanButton = ({
+    onClick,
+    planId,
+    id,
+    isPrimary,
+    children,
+  }: {
+    onClick: () => void;
+    planId: string;
+    id: string;
+    isPrimary?: boolean;
+    children: React.ReactNode;
+  }) => {
+    return (
+      <motion.div className="relative mt-8">
+        <motion.div
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-75 blur-sm"
+          animate={{
+            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.02, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
+        <motion.button
+          layoutId={`button-${planId}-${id}`}
+          onClick={onClick}
+          className="relative w-full rounded-full pl-4 pr-1 py-2 text-black flex items-center justify-between bg-zinc-200 dark:bg-zinc-700 dark:text-white hover:opacity-90 transition-opacity"
+        >
+          {children}
+        </motion.button>
+      </motion.div>
+    );
+  };
+
   return (
-    <>
-      <div className="fixed top-4 left-4 z-50">
-        <Link href="/auth/register">
-          <Button variant="ghost" className="gap-2">
-            <MoveLeft className="h-5 w-5" />
-            {t.page.back}
-          </Button>
-        </Link>
-      </div>
-
-      {/* Pricing disclaimer */}
-      <div className="fixed top-20 center">
-        <div className="bg-neutral-200 dark:bg-neutral-800 rounded-lg p-4 mb-10 max-w-2xl mx-auto">
-          <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
-            <Info className="h-4 w-4 shrink-0" />
-            {t.page.allPrices}
-          </p>
-        </div>
-      </div>
-
-      <Header />
-
+    <MobileWrapper>
       <div className="container mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold text-center mb-8 dark:text-white">
           {t.page.choose}
@@ -152,9 +163,9 @@ export function SubscriptionForm() {
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
-        
+
         {/* Plans List */}
-        <ul className="max-w-6xl mx-auto grid grid-cols-2 gap-4 mb-20">
+        <ul className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-20">
           {visiblePlans.map((plan) => (
             <motion.div
               layoutId={`card-${plan.id}-${id}`}
@@ -352,20 +363,20 @@ export function SubscriptionForm() {
                     </ul>
                   </motion.div>
 
-                  <motion.button
-                    layoutId={`button-${activePlan.id}-${id}`}
+                  <PlanButton
                     onClick={() => handleSubscribe(activePlan)}
-                    className="mt-8 w-full rounded-full pl-4 pr-1 py-2 text-black flex items-center justify-between bg-zinc-200 dark:bg-zinc-700 dark:text-white hover:opacity-90 transition-opacity"
+                    planId={activePlan.id.toString()}
+                    id={id}
                   >
-                    <span className="text-sm font-bold">
+                    <span className="text-lg font-bold">
                       {getPlanPrice(activePlan)
                         ? t.page.subscribe
                         : t.page.contactSupport}
                     </span>
-                    <span className="font-semibold bg-zinc-200 dark:bg-zinc-700 dark:text-white rounded-full px-4 py-2 text-s">
-                      {activePlan.duration} {t.page.days}{" "}
+                    <span className="font-bold bg-zinc-200 dark:bg-zinc-700 dark:text-white rounded-full px-4 py-2 text-s">
+                      {activePlan.duration} {t.page.days}
                     </span>
-                  </motion.button>
+                  </PlanButton>
                 </motion.div>
               </div>
             </>
@@ -381,24 +392,19 @@ export function SubscriptionForm() {
           isTrial={!activePlan}
         />
 
-        
-        {/* Free Trial Button */}
-        <div className="container mx-auto flex justify-center">
-          <Button
-            onClick={handleTrialActivation}
-            className="bg-white dark:bg-zinc-900 hover:bg-neutral-50 dark:hover:bg-zinc-800 text-black dark:text-white border border-neutral-200 dark:border-neutral-700 shadow-lg hover:shadow-xl transition-all duration-200 py-8 px-12 w-96"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-xl font-semibold">
-                {t.page.startFreeTrial}
-              </span>
-              <span className="text-sm opacity-90">
-                {t.page.tryAllFeatures}
-              </span>
-            </div>
-          </Button>
+        {/* Pricing disclaimer - moved above billing toggle */}
+        <div className="mb-8">
+          <div className="bg-neutral-200 dark:bg-neutral-800 rounded-lg p-4 max-w-2xl mx-auto">
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
+              <Info className="h-4 w-4 shrink-0" />
+              {t.page.allPrices}
+            </p>
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
+              {t.page.getFreeTrial}
+            </p>
+          </div>
         </div>
       </div>
-    </>
+    </MobileWrapper>
   );
 }

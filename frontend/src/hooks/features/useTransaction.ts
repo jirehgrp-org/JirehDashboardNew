@@ -24,9 +24,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "pending",
     paymentMethod: "Cash",
     orderNumber: "ORD-001",
-    orderDate: "2024-01-01T12:00:00Z",
-    createdAt: "2024-01-01T12:00:00Z",
-    updatedAt: "2024-01-01T12:00:00Z",
+    orderDate: "2024-03-25T12:00:00Z", // Last week
+    createdAt: "2024-03-25T12:00:00Z",
+    updatedAt: "2024-03-25T12:00:00Z",
     actions: [],
   },
   {
@@ -40,9 +40,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "paid",
     paymentMethod: "Telebirr",
     orderNumber: "ORD-002",
-    orderDate: "2024-01-02T12:00:00Z",
-    createdAt: "2024-01-02T12:00:00Z",
-    updatedAt: "2024-01-02T12:00:00Z",
+    orderDate: "2024-02-15T12:00:00Z", // Last month
+    createdAt: "2024-02-15T12:00:00Z",
+    updatedAt: "2024-02-15T12:00:00Z",
     actions: [],
   },
   {
@@ -59,9 +59,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "cancelled",
     paymentMethod: "Bank Transfer",
     orderNumber: "ORD-003",
-    orderDate: "2024-01-03T12:00:00Z",
-    createdAt: "2024-01-03T12:00:00Z",
-    updatedAt: "2024-01-03T12:00:00Z",
+    orderDate: "2023-04-10T12:00:00Z", // Last year
+    createdAt: "2023-04-10T12:00:00Z",
+    updatedAt: "2023-04-10T12:00:00Z",
     actions: [],
   },
   {
@@ -75,9 +75,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "paid",
     paymentMethod: "Cash",
     orderNumber: "ORD-004",
-    orderDate: "2024-01-04T12:00:00Z",
-    createdAt: "2024-01-04T12:00:00Z",
-    updatedAt: "2024-01-04T12:00:00Z",
+    orderDate: "2024-03-20T12:00:00Z", // Last week
+    createdAt: "2024-03-20T12:00:00Z",
+    updatedAt: "2024-03-20T12:00:00Z",
     actions: [],
   },
   {
@@ -91,9 +91,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "pending",
     paymentMethod: "Telebirr",
     orderNumber: "ORD-005",
-    orderDate: "2024-01-05T12:00:00Z",
-    createdAt: "2024-01-05T12:00:00Z",
-    updatedAt: "2024-01-05T12:00:00Z",
+    orderDate: "2024-02-28T12:00:00Z", // Last month
+    createdAt: "2024-02-28T12:00:00Z",
+    updatedAt: "2024-02-28T12:00:00Z",
     actions: [],
   },
   {
@@ -107,9 +107,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "paid",
     paymentMethod: "Bank Transfer",
     orderNumber: "ORD-006",
-    orderDate: "2024-01-06T12:00:00Z",
-    createdAt: "2024-01-06T12:00:00Z",
-    updatedAt: "2024-01-06T12:00:00Z",
+    orderDate: "2023-12-15T12:00:00Z", // Last year
+    createdAt: "2023-12-15T12:00:00Z",
+    updatedAt: "2023-12-15T12:00:00Z",
     actions: [],
   },
   {
@@ -126,9 +126,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "paid",
     paymentMethod: "Cash",
     orderNumber: "ORD-007",
-    orderDate: "2024-01-07T12:00:00Z",
-    createdAt: "2024-01-07T12:00:00Z",
-    updatedAt: "2024-01-07T12:00:00Z",
+    orderDate: "2024-03-22T12:00:00Z", // Last week
+    createdAt: "2024-03-22T12:00:00Z",
+    updatedAt: "2024-03-22T12:00:00Z",
     actions: [],
   },
   {
@@ -146,9 +146,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "pending",
     paymentMethod: "Telebirr",
     orderNumber: "ORD-008",
-    orderDate: "2024-01-08T12:00:00Z",
-    createdAt: "2024-01-08T12:00:00Z",
-    updatedAt: "2024-01-08T12:00:00Z",
+    orderDate: "2024-02-10T12:00:00Z", // Last month
+    createdAt: "2024-02-10T12:00:00Z",
+    updatedAt: "2024-02-10T12:00:00Z",
     actions: [],
   },
   {
@@ -162,9 +162,9 @@ const mockOrders: TransactionItem[] = [
     paymentStatus: "pending",
     paymentMethod: "Cash",
     orderNumber: "ORD-009",
-    orderDate: "2024-01-09T12:00:00Z",
-    createdAt: "2024-01-09T12:00:00Z",
-    updatedAt: "2024-01-09T12:00:00Z",
+    orderDate: "2023-11-01T12:00:00Z", // Last year
+    createdAt: "2023-11-01T12:00:00Z",
+    updatedAt: "2023-11-01T12:00:00Z",
     actions: [],
   },
 ];

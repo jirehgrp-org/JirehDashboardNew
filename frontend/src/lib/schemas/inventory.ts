@@ -12,36 +12,30 @@ const getSchemaTranslations = (language: SupportedLanguages = "en") => {
 // Base schema with common fields
 const BaseSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
-
   return z.object({
     name: z.string().min(1, t.nameIsRequired || "Name is required"),
     active: z.boolean().default(true),
   });
 };
 
-export const LocationSchema = (language: SupportedLanguages = "en") => {
+
+export const BranchSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
 
   return BaseSchema(language).extend({
-    address: z.string().min(1, t.locationSchema.addressIsRequired),
-    contactNumber: z.string().min(1, t.locationSchema.contactNumberIsRequired),
+    address: z.string().min(1, t.branchSchema.addressIsRequired),
+    contactNumber: z.string().min(1, t.branchSchema.contactNumberIsRequired),
   });
 };
 
 export const CategorySchema = (language: SupportedLanguages = "en") => {
-  const t = getSchemaTranslations(language);
-
   return BaseSchema(language).extend({
     description: z.string().optional(),
-    locationId: z
-      .string()
-      .min(1, t.categorySchema?.locationIsRequired || "Location is required"),
   });
 };
 
 export const ItemSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
-
   return BaseSchema(language).extend({
     price: z
       .number()
@@ -52,17 +46,20 @@ export const ItemSchema = (language: SupportedLanguages = "en") => {
     categoryId: z
       .string()
       .min(1, t.itemSchema?.categoryRequired || "Category is required"),
+    branchId: z
+      .string()
+      .min(1, t.itemSchema?.branchRequired || "Branch is required"),
   });
 };
 
 // Function to get the appropriate schema based on variant
 export const getSchemaForVariant = (
-  variant: "location" | "category" | "item",
+  variant: "branch" | "category" | "item",
   language: SupportedLanguages = "en"
 ) => {
   switch (variant) {
-    case "location":
-      return LocationSchema(language);
+    case "branch":
+      return BranchSchema(language);
     case "category":
       return CategorySchema(language);
     case "item":

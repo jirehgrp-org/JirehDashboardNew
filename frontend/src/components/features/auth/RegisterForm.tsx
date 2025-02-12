@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { translations } from "@/translations";
 import { LinkPreview } from "@/components/ui/aceternity/link-preview";
-import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { MobileWrapper } from "@/components/common/MobileWrapper";
 
 interface Address {
   street: string;
@@ -92,8 +92,7 @@ export function RegisterForm() {
   };
 
   return (
-    <>
-      <Header />
+    <MobileWrapper>
       <div className="max-w-4xl mx-auto mt-12 p-4">
         <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
           {t.welcome}
@@ -354,23 +353,51 @@ export function RegisterForm() {
           <br />
 
           <div className="text-center text-sm">
-            <div className="text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1 text-sm">
-              <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
-              {t.terms}{" "}
-              <LinkPreview
-                url="https://rbms.jirehgrp.com/legal/terms"
-                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
-              >
-                {t.termsLink}
-              </LinkPreview>{" "}
-              {t.and}{" "}
-              <LinkPreview
-                url="https://rbms.jirehgrp.com/legal/privacy"
-                className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
-              >
-                {t.privacyLink}
-              </LinkPreview>
-              {t.ነው}
+            <div className="text-gray-600 dark:text-gray-400 md:flex items-center justify-center gap-1 text-sm">
+              <div className="flex md:hidden flex-col items-center space-y-2">
+                <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
+                <span>{t.terms}</span>
+                <a
+                  href="https://rbms.jirehgrp.com/legal/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+                >
+                  {t.termsLink}
+                </a>
+                <span>{t.and}</span>
+                <a
+                  href="https://rbms.jirehgrp.com/legal/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+                >
+                  {t.privacyLink}
+                </a>
+                <span>{t.ነው}</span>
+              </div>
+              <div className="hidden md:flex items-center gap-1">
+                <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
+                {t.terms}{" "}
+                <a
+                  href="https://rbms.jirehgrp.com/legal/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+                >
+                  {t.termsLink}
+                </a>{" "}
+                {t.and}{" "}
+                <a
+                  href="https://rbms.jirehgrp.com/legal/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
+                >
+                  {t.privacyLink}
+                </a>
+                {t.ነው}
+              </div>
             </div>
           </div>
 
@@ -386,7 +413,7 @@ export function RegisterForm() {
           </div>
         </form>
       </div>
-    </>
+    </MobileWrapper>
   );
 }
 

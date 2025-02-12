@@ -18,7 +18,7 @@ const MOCK_PLANS: Plan[] = [
     isActive: true,
     isHidden: false,
     features_en: [
-      { title: "Unlimited locations", included: true },
+      { title: "Unlimited branches", included: true },
       { title: "Unlimited accounts", included: true },
       { title: "Real-time inventory sync", included: true },
       { title: "businesses analytics dashboard", included: true },

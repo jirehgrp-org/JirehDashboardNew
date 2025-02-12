@@ -10,6 +10,7 @@ export type TimeframeOption =
 
 export interface DashboardMetrics {
   totalRevenue: number;
+  totalExpenses: number;
   uniqueCustomers: number;
   averageOrderValue: number;
   growth: number;
@@ -18,6 +19,7 @@ export interface DashboardMetrics {
 export interface ChartDataPoint {
   date: string;
   amount: number;
+  expenses: number;
 }
 
 export interface PaymentMethodData {

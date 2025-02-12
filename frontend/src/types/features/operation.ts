@@ -12,7 +12,7 @@ export interface OperationItem {
   active: boolean;
   createdAt: string;
   updatedAt: string;
-  locationId: string;
+  branchId: string;
 
   // User fields
   username?: string;
@@ -70,7 +70,7 @@ export type UserItem = Required<
     | "active"
     | "createdAt"
     | "updatedAt"
-    | "locationId"
+    | "branchId"
     | "username"
     | "email"
     | "phone"
@@ -86,7 +86,7 @@ export type ExpenseItem = Required<
     | "active"
     | "createdAt"
     | "updatedAt"
-    | "locationId"
+    | "branchId"
     | "amount"
     | "frequency"
   >

@@ -1,5 +1,4 @@
 // @/app/providers.tsx
-
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -12,8 +11,14 @@ export function Providers({ children, ...props }: ThemeProviderProps) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      disableTransitionOnChange
+      disableTransitionOnChange={false}
       storageKey="jireh-theme"
+      themes={["light", "dark", "system"]}
+      value={{
+        light: "light",
+        dark: "dark",
+        system: "system",
+      }}
       {...props}
     >
       <LanguageProvider>{children}</LanguageProvider>

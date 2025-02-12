@@ -1,36 +1,36 @@
 // @/components/common/Header.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import React from "react";
 import { LanguageToggle } from "@/components/common/LanguageToggle";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { MoveLeft } from "lucide-react";
+import Link from "next/link";
+import { useLanguage } from "@/components/context/LanguageContext";
+import { translations } from "@/translations";
 
 const Header: React.FC = () => {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
+  const pathname = usePathname();
+  const { language } = useLanguage();
+  const t = translations[language].auth.subscription;
+  const isSubscriptionPage = pathname === "/auth/subscription";
 
   return (
-    <div className="fixed top-4 right-4 flex items-center space-x-2 z-50">
-      <button
-        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-colors duration-200"
-      >
-        {resolvedTheme === "dark" ? (
-          <Sun className="w-5 h-5 text-yellow-500" />
-        ) : (
-          <Moon className="w-5 h-5 text-slate-700" />
-        )}
-      </button>
-      <LanguageToggle />
+    <div className="fixed top-4 w-full px-4 flex items-center justify-between z-50">
+      {isSubscriptionPage && (
+        <Link href="/auth/register">
+          <Button variant="ghost" className="gap-2">
+            <MoveLeft className="h-5 w-5" />
+            {t.page.back}
+          </Button>
+        </Link>
+      )}
+      <div className="ml-auto flex items-center space-x-2">
+        <ThemeToggle />
+        <LanguageToggle />
+      </div>
     </div>
   );
 };

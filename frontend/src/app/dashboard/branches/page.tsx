@@ -1,4 +1,4 @@
-// @/app/dashboard/locations/page.tsx
+// @/app/dashboard/branches/page.tsx
 
 "use client";
 import React, { useState } from "react";
@@ -34,39 +34,39 @@ import type { InventoryItem } from "@/types/features/inventory";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
 
-const LocationsPage = () => {
+const BranchesPage = () => {
   const { isMobile } = useResponsive();
   const { language } = useLanguage();
   const t = translations[language].dashboard.inventory.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingLocation, setEditingLocation] = useState<InventoryItem | null>(
+  const [editingBranch, setEditingBranch] = useState<InventoryItem | null>(
     null
   );
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] =
+  const [branchToDelete, setBranchToDelete] =
     useState<InventoryItem | null>(null);
 
   const {
     isLoading,
-    data: locations,
+    data: branches,
     handleSubmit,
-    handleDelete: deleteLocation,
+    handleDelete: deleteBranch,
   } = useInventory({
-    endpoint: "locations",
+    endpoint: "branches",
   });
 
-  // Filter to only show locations and apply search
-  const filteredLocations = locations?.filter(
+  // Filter to only show branches and apply search
+  const filteredBranches = branches?.filter(
     (item) =>
-      item.address && // Ensure it's a location
-      item.contactNumber && // Additional check for location type
+      item.address && // Ensure it's a branch
+      item.contactNumber && // Additional check for branch type
       (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.address.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const downloadCSV = () => {
-    if (!locations) return;
+    if (!branches) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -77,13 +77,13 @@ const LocationsPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      locations
-        .filter((item) => item.address && item.contactNumber) // Only include locations
-        .map((location) => ({
-          name: location.name,
-          address: location.address,
-          contactNumber: location.contactNumber,
-          active: location.active,
+      branches
+        .filter((item) => item.address && item.contactNumber) // Only include branches
+        .map((branch) => ({
+          name: branch.name,
+          address: branch.address,
+          contactNumber: branch.contactNumber,
+          active: branch.active,
         }))
     );
 
@@ -92,7 +92,7 @@ const LocationsPage = () => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute("href", url);
-    link.setAttribute("download", `locations-export-${date}.csv`);
+    link.setAttribute("download", `branches-export-${date}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -100,25 +100,25 @@ const LocationsPage = () => {
   };
 
   const onSubmit = async (data: Partial<InventoryItem>) => {
-    await handleSubmit(data, editingLocation?.id);
+    await handleSubmit(data, editingBranch?.id);
     setOpen(false);
-    setEditingLocation(null);
+    setEditingBranch(null);
   };
 
-  const handleEdit = (location: InventoryItem) => {
-    setEditingLocation(location);
+  const handleEdit = (branch: InventoryItem) => {
+    setEditingBranch(branch);
     setOpen(true);
   };
 
-  const handleDelete = async (location: InventoryItem) => {
-    setLocationToDelete(location);
+  const handleDelete = async (branch: InventoryItem) => {
+    setBranchToDelete(branch);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (locationToDelete) {
-      await deleteLocation(locationToDelete.id);
-      setLocationToDelete(null);
+    if (branchToDelete) {
+      await deleteBranch(branchToDelete.id);
+      setBranchToDelete(null);
       setDeleteDialogOpen(false);
     }
   };
@@ -133,9 +133,9 @@ const LocationsPage = () => {
               isMobile && "w-full"
             )}
           >
-            {t.locations}
+            {t.branches}
             <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
-              {t.manageYourLocations}
+              {t.manageYourBranches}
             </p>
           </h2>
 
@@ -161,22 +161,22 @@ const LocationsPage = () => {
                   className={cn(isMobile && "w-full")}
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  {t.addLocation}
+                  {t.addBranch}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {editingLocation ? t.editLocation : t.addLocation}
+                    {editingBranch ? t.editBranch : t.addBranch}
                   </DialogTitle>
                 </DialogHeader>
                 <InventoryForm
-                  variant="location"
-                  initialData={editingLocation}
+                  variant="branch"
+                  initialData={editingBranch}
                   onSubmit={onSubmit}
                   onCancel={() => {
                     setOpen(false);
-                    setEditingLocation(null);
+                    setEditingBranch(null);
                   }}
                 />
               </DialogContent>
@@ -192,22 +192,22 @@ const LocationsPage = () => {
         >
           <div className={cn("w-full", !isMobile && "max-w-sm")}>
             <Input
-              placeholder={t.searchLocations}
+              placeholder={t.searchBranches}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
             />
           </div>
           <div className="text-sm text-zinc-600 dark:text-zinc-400">
-            {t.totalLocations}: {filteredLocations?.length || 0}
+            {t.totalBranches}: {filteredBranches?.length || 0}
           </div>
         </div>
 
         <div className="flex-1">
           <DataTable
-            columns={getColumns("location", language)}
-            data={filteredLocations || []}
-            variant="location"
+            columns={getColumns("branch", language)}
+            data={filteredBranches || []}
+            variant="branch"
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
@@ -219,7 +219,7 @@ const LocationsPage = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.thisWillPermanentlyDelete} &quot;{locationToDelete?.name}
+              {t.thisWillPermanentlyDelete} &quot;{branchToDelete?.name}
               &quot; {t.actionCannotBeUndone}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -235,4 +235,4 @@ const LocationsPage = () => {
   );
 };
 
-export default LocationsPage;
+export default BranchesPage;

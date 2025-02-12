@@ -59,7 +59,7 @@ const CategoriesPage = () => {
   // Filter to only show categories and apply search
   const filteredCategories = categories?.filter(
     (item) =>
-      item.locationId && // Ensure it's a category
+      item.description !== undefined && // Ensure it's a category
       item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -76,11 +76,11 @@ const CategoriesPage = () => {
 
     const csv = Papa.unparse(
       categories
-        .filter((item) => item.locationId) // Only include categories
+        .filter((item) => item.branchId) // Only include categories
         .map((category) => ({
           name: category.name,
           description: category.description || "",
-          locationId: category.locationId,
+          branchId: category.branchId, // Remove this line
           active: category.active,
         }))
     );

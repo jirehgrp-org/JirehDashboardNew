@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/shared/useToast";
 import { useTransaction } from "./useTransaction";
 import { useInventory } from "./useInventory";
+import { useOperation } from "@/hooks/features/useOperation";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import type { DashboardAnalytics, DashboardChartData, DashboardMetrics, TimeframeOption } from "@/types/features/dashboard";
@@ -21,6 +22,7 @@ export const useDashboard = () => {
     endpoint: "items",
   });
   const { data: categories } = useInventory({ endpoint: "categories" });
+  const { data: expenses } = useOperation({ endpoint: "expenses" });
 
   const isLoading = ordersLoading || inventoryLoading;
 
@@ -28,23 +30,31 @@ export const useDashboard = () => {
   const getDateRange = (timeframe: TimeframeOption) => {
     const now = new Date();
     const start = new Date();
-    const end = new Date();
 
     switch (timeframe) {
       case "today":
         start.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         break;
       case "week":
         start.setDate(start.getDate() - 7);
+        start.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         break;
       case "month":
         start.setMonth(start.getMonth() - 1);
+        start.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         break;
       case "quarter":
         start.setMonth(start.getMonth() - 3);
+        start.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         break;
       case "year":
         start.setFullYear(start.getFullYear() - 1);
+        start.setHours(0, 0, 0, 0);
+        now.setHours(23, 59, 59, 999);
         break;
       case "total":
         return null;
@@ -78,6 +88,20 @@ export const useDashboard = () => {
     ).size;
     const averageOrderValue = totalRevenue / (filteredOrders.length || 1);
 
+    // Calculate total expenses for the period
+    const totalExpenses = expenses.reduce((total, expense) => {
+      const expenseDate = new Date(expense.createdAt);
+      const dateRange = getDateRange(timeframe);
+
+      if (
+        dateRange &&
+        (expenseDate < dateRange.start || expenseDate > dateRange.end)
+      ) {
+        return total;
+      }
+      return total + (expense.amount || 0); // Add this null check
+    }, 0);
+
     // Calculate growth
     const dateRange = getDateRange(timeframe);
     let growth = 0;
@@ -86,22 +110,32 @@ export const useDashboard = () => {
       const previousStart = new Date(dateRange.start);
       const previousEnd = new Date(dateRange.start);
 
+      // Calculate previous period
       switch (timeframe) {
         case "today":
           previousStart.setDate(previousStart.getDate() - 1);
           previousEnd.setDate(previousEnd.getDate() - 1);
+          previousEnd.setHours(23, 59, 59, 999);
           break;
         case "week":
           previousStart.setDate(previousStart.getDate() - 7);
+          previousEnd.setDate(previousEnd.getDate() - 1);
+          previousEnd.setHours(23, 59, 59, 999);
           break;
         case "month":
           previousStart.setMonth(previousStart.getMonth() - 1);
+          previousEnd.setDate(previousEnd.getDate() - 1);
+          previousEnd.setHours(23, 59, 59, 999);
           break;
         case "quarter":
           previousStart.setMonth(previousStart.getMonth() - 3);
+          previousEnd.setDate(previousEnd.getDate() - 1);
+          previousEnd.setHours(23, 59, 59, 999);
           break;
         case "year":
           previousStart.setFullYear(previousStart.getFullYear() - 1);
+          previousEnd.setDate(previousEnd.getDate() - 1);
+          previousEnd.setHours(23, 59, 59, 999);
           break;
       }
 
@@ -114,39 +148,59 @@ export const useDashboard = () => {
         (sum, order) => sum + order.total,
         0
       );
+
       growth = previousTotal
         ? ((totalRevenue - previousTotal) / previousTotal) * 100
+        : totalRevenue > 0
+        ? 100
         : 0;
     }
 
     return {
       totalRevenue,
+      totalExpenses,
       uniqueCustomers,
       averageOrderValue,
       growth,
     };
-  }, [filteredOrders, orders, timeframe]);
+  }, [filteredOrders, orders, timeframe, expenses]);
 
   // Get chart data
   const chartData = useMemo(() => {
     // Revenue trend data
     const revenueData = filteredOrders
-      .reduce((acc: Array<{ date: string; amount: number }>, order) => {
-        const date = new Date(order.orderDate).toLocaleDateString();
-        const existingDay = acc.find((item) => item.date === date);
+      .reduce(
+        (
+          acc: Array<{ date: string; amount: number; expenses: number }>,
+          order
+        ) => {
+          const date = new Date(order.orderDate).toLocaleDateString();
+          const existingDay = acc.find((item) => item.date === date);
 
-        if (existingDay) {
-          existingDay.amount += order.total;
-        } else {
-          acc.push({ date, amount: order.total });
-        }
+          if (existingDay) {
+            existingDay.amount += order.total;
+          } else {
+            // Get expenses for this date
+            const dailyExpenses = expenses
+              .filter(
+                (exp) => new Date(exp.createdAt).toLocaleDateString() === date
+              )
+              .reduce((sum, exp) => sum + (exp.amount || 0), 0); // Add this null check
 
-        return acc;
-      }, [])
+            acc.push({
+              date,
+              amount: order.total,
+              expenses: dailyExpenses,
+            });
+          }
+
+          return acc;
+        },
+        []
+      )
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Payment methods data
-    // Payment methods data - Update this section in the chartData useMemo
     const paymentMethods = Object.entries(
       filteredOrders.reduce((acc: Record<string, number>, order) => {
         const method = order.paymentMethod;
@@ -168,7 +222,7 @@ export const useDashboard = () => {
       revenueData,
       paymentMethods,
     };
-  }, [filteredOrders]);
+  }, [filteredOrders, expenses]);
 
   // Get analytics
   const analytics = useMemo(() => {

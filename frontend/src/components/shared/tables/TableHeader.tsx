@@ -114,19 +114,19 @@ const SortableHeader = ({
 );
 
 export const getColumns = (
-  variant: "location" | "category" | "item" | "user" | "expense" | "order",
+  variant: "branch" | "category" | "item" | "user" | "expense" | "order",
   language: keyof typeof translations
 ): Column<any>[] => {
   const t = translations[language].dashboard;
   const { toEthiopian } = useCalendar();
 
   // Get data for lookups
-  const { data: locations } = useInventory({ endpoint: "locations" });
+  const { data: branches } = useInventory({ endpoint: "branches" });
   const { data: categories } = useInventory({ endpoint: "categories" });
   const { data: items } = useInventory({ endpoint: "items" });
 
   const baseColumns: { [key: string]: Column<any>[] } = {
-    location: [
+    branch: [
       {
         accessorKey: "name",
         header: ({ onSort }: HeaderProps) => (
@@ -195,22 +195,6 @@ export const getColumns = (
         ),
       },
       {
-        accessorKey: "locationId",
-        header: ({ onSort }: HeaderProps) => (
-          <SortableHeader
-            label={t.inventory.table.location}
-            sortKey="locationId"
-            onSort={onSort}
-          />
-        ),
-        cell: ({ row }: CellProps) => {
-          const location = locations?.find(
-            (loc) => loc.id === row.original.locationId
-          );
-          return location?.name || row.original.locationId;
-        },
-      },
-      {
         accessorKey: "description",
         header: t.inventory.table.description,
         cell: ({ row }: CellProps) => row.original.description || "-",
@@ -265,6 +249,23 @@ export const getColumns = (
             (cat) => cat.id === (row.original as InventoryItem).categoryId
           );
           return category?.name || (row.original as InventoryItem).categoryId;
+        },
+      },
+
+      {
+        accessorKey: "branchId",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.inventory.table.branch}
+            sortKey="branchId"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => {
+          const branch = branches?.find(
+            (loc) => loc.id === row.original.branchId
+          );
+          return branch?.name || row.original.branchId;
         },
       },
       {
@@ -326,19 +327,19 @@ export const getColumns = (
         ),
       },
       {
-        accessorKey: "locationId",
+        accessorKey: "branchId",
         header: ({ onSort }: HeaderProps) => (
           <SortableHeader
-            label={t.operation.table.location}
-            sortKey="locationId"
+            label={t.operation.table.branch}
+            sortKey="branchId"
             onSort={onSort}
           />
         ),
         cell: ({ row }: CellProps) => {
-          const location = locations?.find(
-            (loc) => loc.id === row.original.locationId
+          const branch = branches?.find(
+            (loc) => loc.id === row.original.branchId
           );
-          return location?.name || row.original.locationId;
+          return branch?.name || row.original.branchId;
         },
       },
       {
@@ -427,19 +428,19 @@ export const getColumns = (
         ),
       },
       {
-        accessorKey: "locationId",
+        accessorKey: "branchId",
         header: ({ onSort }: HeaderProps) => (
           <SortableHeader
-            label={t.operation.table.location}
-            sortKey="locationId"
+            label={t.operation.table.branch}
+            sortKey="branchId"
             onSort={onSort}
           />
         ),
         cell: ({ row }: CellProps) => {
-          const location = locations?.find(
-            (loc) => loc.id === row.original.locationId
+          const branch = branches?.find(
+            (loc) => loc.id === row.original.branchId
           );
-          return location?.name || row.original.locationId;
+          return branch?.name || row.original.branchId;
         },
       },
       {

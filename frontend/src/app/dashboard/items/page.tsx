@@ -30,7 +30,7 @@ import { DataTable } from "@/components/shared/tables/DataTable";
 import { InventoryForm } from "@/components/shared/forms/InventoryForm";
 import { getColumns } from "@/components/shared/tables/TableHeader";
 import { useInventory } from "@/hooks/features/useInventory";
-import type { InventoryItem } from "@/types/features/inventory";
+import { isItem, type InventoryItem } from "@/types/features/inventory";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
 
@@ -56,8 +56,7 @@ const ItemsPage = () => {
   // Filter to only show items and apply search
   const filteredItems = items?.filter(
     (item) =>
-      item.categoryId && // Ensure it's an item
-      typeof item.price === "number" && // Additional check for item type
+      isItem(item) && // Use the type guard instead
       item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

@@ -35,3 +35,6 @@ yarn-debug.log*
 **/.pnp
 .pnp.*
 .yarn/*
+
+# ignore Google Cloud credentials
+frontend/src/api/sheets/*.json

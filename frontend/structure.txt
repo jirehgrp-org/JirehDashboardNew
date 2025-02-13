@@ -13,9 +13,8 @@ frontend/
 └── src/
     ├── app/
     │   ├── api/
-    │   │   ├── sheets/
-    │   │   │   ├── route.ts
-    │   │   │   └── sublime-index-449213-g7-eb0878a135c9.json
+    │   │   └── sheets/
+    │   │       └── route.ts
     │   ├── auth/
     │   │   ├── forgotPassword/
     │   │   │   └── page.tsx

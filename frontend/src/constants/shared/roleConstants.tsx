@@ -94,10 +94,6 @@ const pages = {
 export const roleAccess = {
   manager: pages,
   admin: {
-    overview: pages.overview,
-    analytics: pages.analytics,
-    salesReport: pages.salesReport,
-    profitLoss: pages.profitLoss,
     orders: pages.orders,
     branches: pages.branches,
     categories: pages.categories,

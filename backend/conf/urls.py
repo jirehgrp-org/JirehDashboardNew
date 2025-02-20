@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('apis.urls')),
     # path('api-auth/', include('rest_framework.urls')),
-    path('api/v1/auth/', include('dj_rest_auth.urls')),
+    # path('api/v1/auth/', include('dj_rest_auth.urls')),
     # path('api/v1/account/registration/', 
     #      include('dj_rest_auth.registration.urls')),    
     path('api/v1/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

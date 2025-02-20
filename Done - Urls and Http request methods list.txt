@@ -1,0 +1,206 @@
+###
+# Register user 
+POST http://127.0.0.1:8000/api/v1/register/user HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "testuser3",
+    "email": "testuser3@email.com",
+    "password1": "adminPass",
+    "password2": "adminPass",
+    "first_name": "test",
+    "last_name": "user3",
+    "phone": "+2519235689"
+}
+
+###
+# Login User 
+POST http://127.0.0.1:8000/api/v1/auth/token/
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "adminP@$$"
+}
+
+###
+# Business Related Users List
+GET http://127.0.0.1:8000/api/v1/users/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5NzgyMzY3LCJpYXQiOjE3Mzk3NzUxNjcsImp0aSI6IjUxNWJhMGM3ZjZjYzQ2M2U5MjExODI4Y2EwMDM5OTNhIiwidXNlcl9pZCI6Mn0.KcDxW-LSx9Tl15D6UULDWCEYcxBD8pMIhmazaQLKsT8
+Accept: application/json
+
+###
+# Business List View
+GET http://127.0.0.1:8000/api/v1/business/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5NzgyMzY3LCJpYXQiOjE3Mzk3NzUxNjcsImp0aSI6IjUxNWJhMGM3ZjZjYzQ2M2U5MjExODI4Y2EwMDM5OTNhIiwidXNlcl9pZCI6Mn0.KcDxW-LSx9Tl15D6UULDWCEYcxBD8pMIhmazaQLKsT8
+Accept: application/json
+
+###
+# Branch List View to a specific Business
+GET http://127.0.0.1:8000/api/v1/business/branch/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+Accept: application/json
+
+###
+# Branch Item List View
+GET http://127.0.0.1:8000/api/v1/business/branch/item/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5NzgyMzY3LCJpYXQiOjE3Mzk3NzUxNjcsImp0aSI6IjUxNWJhMGM3ZjZjYzQ2M2U5MjExODI4Y2EwMDM5OTNhIiwidXNlcl9pZCI6Mn0.KcDxW-LSx9Tl15D6UULDWCEYcxBD8pMIhmazaQLKsT8
+Accept: application/json
+
+###
+# Categories List View
+GET http://127.0.0.1:8000/api/v1/categories/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5Nzg5OTIzLCJpYXQiOjE3Mzk3ODI3MjMsImp0aSI6IjAyNTZiZmYxMWRmOTRhMGM5ZmM5NDEzMmEzYTAzODQ0IiwidXNlcl9pZCI6Mn0.XnT5Vcce4VFcIjaBoZaN5tYTSBbG3n6bYmgNew1bxxQ
+Accept: application/json
+###
+# Business Expense List View
+GET http://127.0.0.1:8000/api/v1/business/expenses/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5Nzg5OTIzLCJpYXQiOjE3Mzk3ODI3MjMsImp0aSI6IjAyNTZiZmYxMWRmOTRhMGM5ZmM5NDEzMmEzYTAzODQ0IiwidXNlcl9pZCI6Mn0.XnT5Vcce4VFcIjaBoZaN5tYTSBbG3n6bYmgNew1bxxQ
+Accept: application/json
+###
+# Features List View
+GET http://127.0.0.1:8000/api/v1/features/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5Nzg5OTIzLCJpYXQiOjE3Mzk3ODI3MjMsImp0aSI6IjAyNTZiZmYxMWRmOTRhMGM5ZmM5NDEzMmEzYTAzODQ0IiwidXNlcl9pZCI6Mn0.XnT5Vcce4VFcIjaBoZaN5tYTSBbG3n6bYmgNew1bxxQ
+Accept: application/json
+###
+# Plans List View
+GET http://127.0.0.1:8000/api/v1/plans/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5Nzg5OTIzLCJpYXQiOjE3Mzk3ODI3MjMsImp0aSI6IjAyNTZiZmYxMWRmOTRhMGM5ZmM5NDEzMmEzYTAzODQ0IiwidXNlcl9pZCI6Mn0.XnT5Vcce4VFcIjaBoZaN5tYTSBbG3n6bYmgNew1bxxQ
+Accept: application/json
+
+###
+#  Business Branch Orders List View 
+GET http://127.0.0.1:8000/api/v1/orders/list HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+Accept: application/json
+
+###
+#Refresh acess token
+POST http://127.0.0.1:8000/api/v1/auth/token/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczOTAwNTg2OCwiaWF0IjoxNzM4OTE5NDY4LCJqdGkiOiI3OGM1Zjc3MjIyNjQ0MjgyYWNjZWE1MDkwODQ1OWU5OCIsInVzZXJfaWQiOjR9.PT_OYuIA3OHt4d-JMXeqTEzF3I4FySzoc10CYlq-9PM"
+}
+
+###
+#Register a Business
+POST http://127.0.0.1:8000/api/v1/register/business
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+
+{
+    "name": "Business PLC",
+    "address_street": "Yeka",
+    "address_city": "Addis Abeba",
+    "address_country": "Ethiopia",
+    "contact_number": "+2519235689",
+    "registration_number": "00012345645",
+    "owner": null,
+    "admin": null
+}
+
+###
+# Register Branches for a Business 
+POST http://127.0.0.1:8000/api/v1/business/branch/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+
+{
+    "name": "Branch Name 1",
+    "address": "Branch Street 1",
+    "contact_number": "+2519235677"
+}
+
+###
+# Register Categories 
+POST http://127.0.0.1:8000/api/v1/categories/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+
+{
+    "name": "Category Name",
+    "description": "Category Description"
+}
+
+###
+# Register Expenses 
+POST http://127.0.0.1:8000/api/v1/business/expenses/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5ODg2NjkyLCJpYXQiOjE3Mzk4Nzk0OTIsImp0aSI6IjY3MDk1ZDVmOGI5NTRhZmJhOGE1MTBkMzk0YzRlOGU2IiwidXNlcl9pZCI6Mn0.808GwkBytjLdSK6wuGgrmTH3FtPSJCZr7Io0y5ALTnM
+
+{
+    "amount": 500.00,
+    "description": "Monthly office rent payment",
+    "expense_date": "2023-10-01",
+    "payment_method": "Credit Card",
+    "receipt_number": "RCPT123456",
+    "recurring_frequency": "Monthly",
+    "recurring_end_date": "2024-10-01"
+}
+###
+# Register Feature 
+POST http://127.0.0.1:8000/api/v1/feature/register 
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5OTU3NDc4LCJpYXQiOjE3Mzk5NTAyNzgsImp0aSI6IjI3MzEyM2QyZmQ5MjRjYjU4YWM5NDU0YzJmZjFmNDQ2IiwidXNlcl9pZCI6Mn0.8X-7VS9tiNbOGTq89z_oPEZ07seq2CwJJFclI-Yx3yM
+
+{
+    "title_en": "Feature Title EN",
+    "title_am": "Feature Title AM",
+    "included": true,
+    "plan_id": 1
+}
+
+###
+# Register Plan
+POST http://127.0.0.1:8000/api/v1/plan/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5OTU3NDc4LCJpYXQiOjE3Mzk5NTAyNzgsImp0aSI6IjI3MzEyM2QyZmQ5MjRjYjU4YWM5NDU0YzJmZjFmNDQ2IiwidXNlcl9pZCI6Mn0.8X-7VS9tiNbOGTq89z_oPEZ07seq2CwJJFclI-Yx3yM
+
+{
+    "name_en": "Basic Plan",
+    "name_am": "መሰረታዊ እቅድ",
+    "monthly_price": 29.99,
+    "yearly_price": 299.99,
+    "duration": 12,
+    "description_en": "This is the basic plan.",
+    "description_am": "ይህ መሰረታዊ እቅድ ነው።",
+    "is_active": true,
+    "is_hidden": false
+}
+
+###
+# Register Item
+POST http://127.0.0.1:8000/api/v1/item/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5OTU3NDc4LCJpYXQiOjE3Mzk5NTAyNzgsImp0aSI6IjI3MzEyM2QyZmQ5MjRjYjU4YWM5NDU0YzJmZjFmNDQ2IiwidXNlcl9pZCI6Mn0.8X-7VS9tiNbOGTq89z_oPEZ07seq2CwJJFclI-Yx3yM
+
+{
+    "name": "Sample Item 2",
+    "price": 29.99,
+    "quantity": 10,
+    "last_inventory_update": "2023-10-01T12:00:00Z",
+    "is_active": true,
+    "unit_of_measure": "pieces",
+    "category": 9,
+    "business_branch": 1
+}
+###
+# Register order
+POST http://127.0.0.1:8000/api/v1/order/register
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM5OTU3NDc4LCJpYXQiOjE3Mzk5NTAyNzgsImp0aSI6IjI3MzEyM2QyZmQ5MjRjYjU4YWM5NDU0YzJmZjFmNDQ2IiwidXNlcl9pZCI6Mn0.8X-7VS9tiNbOGTq89z_oPEZ07seq2CwJJFclI-Yx3yM
+
+{
+    "order_number": "ORD123456",
+    "customer_name": "John Doe",
+    "customer_phone": "+251923567890",
+    "customer_email": "johndoe@example.com",
+    "order_date": "2023-10-01",
+    "status": "pending",
+    "total_amount": 100.00,
+    "payment_status": "pending",
+    "payment_method": "Cash",
+    "paid_amount": 0.00,
+    "remaining_amount": 100.00
+}

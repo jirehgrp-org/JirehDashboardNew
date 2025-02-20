@@ -1,8 +1,12 @@
 from django.contrib import admin
 from .models import Business
+# from .forms import BusinessChangeForm, BusinessCreationForm
 
 class BusinessAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'contact_number') 
+    # model = Business
+    # add_form = BusinessCreationForm
+    # form = BusinessChangeForm
+    list_display = ('name', 'contact_number') 
 
 
 admin.site.register(Business, BusinessAdmin)

@@ -188,8 +188,8 @@ export const am = {
       logoutDescription: "ከአካውንትዎ ይወጣሉ እና ወደ መግቢያ ገጽ ይመለሳሉ።",
       cancel: "ይቅር",
     },
-    overview: {
-      page: {
+    analytics: {
+      overview: {
         businessOverview: "የቢዝነስ አጠቃላይ እይታ",
         performanceMetrics: "የአፈጻጸም መለኪያዎች",
         timeframes: "የጊዜ ወቅቶች",

@@ -1,4 +1,4 @@
-// @/app/api/sheets/route.ts
+// @/lib/api/sheets/route.ts
 
 import { NextResponse } from "next/server";
 import { createSpreadsheet } from "@/lib/services/googleSheets";

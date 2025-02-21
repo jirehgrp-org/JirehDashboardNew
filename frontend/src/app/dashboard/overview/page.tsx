@@ -36,8 +36,7 @@ import {
 const OverviewPage = () => {
   const { isMobile } = useResponsive();
   const { language } = useLanguage();
-  const t = translations[language].dashboard.overview.page;
-
+  const t = translations[language].dashboard.analytics.overview;
   const { setTimeframe, metrics, chartData, analytics } = useDashboard();
 
   return (

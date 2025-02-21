@@ -119,7 +119,7 @@ frontend/
     │   │       └── useColumn.tsx
     │   │
     │   └── ui/
-    │       ├── Aceternity/
+    │       ├── aceternity/
     │       └── other shadcn/uis ...
     │   
     ├── constants/

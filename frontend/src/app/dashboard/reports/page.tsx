@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/app/dashboard/reports/page.tsx
 
 "use client";
 import React, { useState } from "react";
@@ -21,6 +20,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
+import { useResponsive } from "@/hooks/shared/useResponsive";
 import {
   Popover,
   PopoverContent,
@@ -40,13 +42,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useTransaction } from "@/hooks/features/useTransaction";
 import { useInventory } from "@/hooks/features/useInventory";
 import { useOperation } from "@/hooks/features/useOperation";
 import Papa from "papaparse";
 import { DateRange } from "react-day-picker";
-import { MultiStepLoader as Loader } from "@/components/ui/aceternity/multi-step-loader";
 
 interface SalesReportItem {
   Order_Number: string;
@@ -76,24 +76,9 @@ interface FinancialReportItem {
 type ReportType = "sales" | "inventory" | "financial";
 type TimeframeType = "all" | "today" | "week" | "month" | "year" | "custom";
 
-
-const loadingStates = [
-  {
-    text: "Preparing report data",
-  },
-  {
-    text: "Creating Google Sheet",
-  },
-  {
-    text: "Adding data to sheet",
-  },
-  {
-    text: "Finalizing sheet",
-  },
-];
-
 const ReportsPage = () => {
   const [reportType, setReportType] = useState<ReportType>("sales");
+  const { isMobile } = useResponsive();
   const [timeframe, setTimeframe] = useState<TimeframeType>("all");
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
@@ -103,8 +88,6 @@ const ReportsPage = () => {
   const { data: orders } = useTransaction({});
   const { data: inventory } = useInventory({ endpoint: "items" });
   const { data: expenses } = useOperation({ endpoint: "expenses" });
-
-  const [loading, setLoading] = useState(false);
 
   const getDateRange = () => {
     const now = new Date();
@@ -216,8 +199,6 @@ const ReportsPage = () => {
 
   const openInGoogleSheets = async () => {
     try {
-      setLoading(true);
-
       const data = getReportData();
       const headers = Object.keys(data[0] || {});
 
@@ -228,7 +209,7 @@ const ReportsPage = () => {
         ),
       ];
 
-      const response = await fetch("/api/spreadSheets", {
+      const response = await fetch("/api/sheets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -243,11 +224,15 @@ const ReportsPage = () => {
       if (error) throw new Error(error);
 
       window.open(url, "_blank");
+
+      // Show a message to the user
+      alert(
+        "A new Google Sheet has been created. Please request access to view the sheet."
+      );
     } catch (error) {
       console.error("Error:", error);
+      // Show an error message to the user
       alert("Failed to create the Google Sheet. Please try again later.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -317,15 +302,19 @@ const ReportsPage = () => {
   };
 
   return (
-    <div className="flex flex-1 h-full flex-col overflow-y-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold">Reports</h2>
-        <p className="text-muted-foreground">
-          Download business reports in various formats
-        </p>
-      </div>
+    <div className="flex flex-1 h-full flex-col overflow-y-auto">
+      <ResponsiveWrapper className="pb-6">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <h2 className={cn("text-2xl md:text-3xl font-bold", isMobile && "w-full")}>
+            Reports
+            <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
+              Download business reports in various formats
+            </p>
+          </h2>
+        </div>
 
-      <div className="grid gap-6">
+        {/* Report Generator Card */}
         <Card>
           <CardHeader>
             <CardTitle>Generate Report</CardTitle>
@@ -434,7 +423,8 @@ const ReportsPage = () => {
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Stats Cards Grid */}
+        <div className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-3")}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -482,13 +472,7 @@ const ReportsPage = () => {
             </CardContent>
           </Card>
         </div>
-      </div>
-      <Loader
-        loadingStates={loadingStates}
-        loading={loading}
-        duration={2000}
-        loop={false}
-      />
+      </ResponsiveWrapper>
     </div>
   );
 };

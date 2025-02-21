@@ -2,6 +2,7 @@
 // @/app/dashboard/reports/page.tsx
 
 "use client";
+
 import React, { useState } from "react";
 import {
   format,
@@ -24,7 +25,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
-import { MultiStepLoader } from "@/components/ui/aceternity/multi-step-loader";
 import {
   Popover,
   PopoverContent,
@@ -81,19 +81,12 @@ type TimeframeType = "all" | "today" | "week" | "month" | "year" | "custom";
 const ReportsPage = () => {
   const [reportType, setReportType] = useState<ReportType>("sales");
   const { isMobile } = useResponsive();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [timeframe, setTimeframe] = useState<TimeframeType>("all");
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
-
-  const loadingStates = [
-    { text: "Preparing your data..." },
-    { text: "Creating Google Sheet..." },
-    { text: "Setting up permissions..." },
-    { text: "Getting shareable link..." }
-  ];
 
   const { data: orders } = useTransaction({});
   const { data: inventory } = useInventory({ endpoint: "items" });
@@ -207,45 +200,6 @@ const ReportsPage = () => {
     link.click();
   };
 
-  const openInGoogleSheets = async () => {
-    try {
-      setIsLoading(true);
-      const data = getReportData();
-      const headers = Object.keys(data[0] || {});
-
-      const sheetData = [
-        headers,
-        ...data.map((row) =>
-          headers.map((header) => row[header as keyof typeof row])
-        ),
-      ];
-
-      const response = await fetch("/api/sheets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: `${reportType}_report_${
-            new Date().toISOString().split("T")[0]
-          }`,
-          data: sheetData,
-        }),
-      });
-
-      const { url, error } = await response.json();
-      if (error) throw new Error(error);
-
-      window.open(url, "_blank");
-      alert(
-        "A new Google Sheet has been created. Please request access to view the sheet."
-      );
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to create the Google Sheet. Please try again later.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const downloadPDF = () => {
     const data = getReportData();
     const headers = Object.keys(data[0] || {});
@@ -316,7 +270,12 @@ const ReportsPage = () => {
       <ResponsiveWrapper className="pb-6">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <h2 className={cn("text-2xl md:text-3xl font-bold", isMobile && "w-full")}>
+          <h2
+            className={cn(
+              "text-2xl md:text-3xl font-bold",
+              isMobile && "w-full"
+            )}
+          >
             Reports
             <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
               Download your business reports in various formats
@@ -414,19 +373,19 @@ const ReportsPage = () => {
                 <Button
                   variant="outline"
                   className="flex items-center gap-2"
-                  onClick={openInGoogleSheets}
+                  onClick={downloadPDF}
                 >
-                  <FileText className="h-4 w-4" />
-                  Open in Google Sheets
+                  <Download className="h-4 w-4" />
+                  Download PDF
                 </Button>
 
                 <Button
                   variant="outline"
                   className="flex items-center gap-2"
-                  onClick={downloadPDF}
+                  disabled
                 >
-                  <Download className="h-4 w-4" />
-                  Download PDF
+                  <FileText className="h-4 w-4" />
+                  {isLoading ? "Creating Sheet..." : "Open in Google Sheets"}
                 </Button>
               </div>
             </div>
@@ -434,7 +393,9 @@ const ReportsPage = () => {
         </Card>
 
         {/* Stats Cards Grid */}
-        <div className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-3")}>
+        <div
+          className={cn("grid gap-6", isMobile ? "grid-cols-1" : "grid-cols-3")}
+        >
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -483,12 +444,6 @@ const ReportsPage = () => {
           </Card>
         </div>
       </ResponsiveWrapper>
-      <MultiStepLoader
-        loadingStates={loadingStates}
-        loading={isLoading}
-        duration={1000}
-        loop={true}
-      />
     </div>
   );
 };

@@ -358,7 +358,7 @@ export function RegisterForm() {
                 <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
                 <span>{t.terms}</span>
                 <a
-                  href="https://rbms.jirehgrp.com/legal/terms"
+                  href="https://bms.jirehgrp.com/legal/terms"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
@@ -367,7 +367,7 @@ export function RegisterForm() {
                 </a>
                 <span>{t.and}</span>
                 <a
-                  href="https://rbms.jirehgrp.com/legal/privacy"
+                  href="https://bms.jirehgrp.com/legal/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
@@ -380,7 +380,7 @@ export function RegisterForm() {
                 <Info className="h-3 w-3 text-purple-400 dark:text-purple-500 transition-colors duration-300 animate-gradient" />
                 {t.terms}{" "}
                 <a
-                  href="https://rbms.jirehgrp.com/legal/terms"
+                  href="https://bms.jirehgrp.com/legal/terms"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
@@ -389,7 +389,7 @@ export function RegisterForm() {
                 </a>{" "}
                 {t.and}{" "}
                 <a
-                  href="https://rbms.jirehgrp.com/legal/privacy"
+                  href="https://bms.jirehgrp.com/legal/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"

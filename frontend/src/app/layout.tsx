@@ -27,7 +27,7 @@ const entoto = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://rbms.jirehgrp.com"),
+  metadataBase: new URL("https://bms.jirehgrp.com"),
   title: "JirehDashboard",
   description:
     "A comprehensive and intuitive dashboard designed to manage your business operations. JirehDashboard empowers owners, employees, and managers to oversee, track orders, manage expenses, and optimize inventory across multiple branches. With role-based access and real-time analytics, it offers a seamless user experience for efficient decision-making and growth.",

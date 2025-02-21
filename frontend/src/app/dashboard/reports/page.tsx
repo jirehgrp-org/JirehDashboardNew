@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// @/app/dashboard/reports/page.tsx
 
 "use client";
 import React, { useState } from "react";
@@ -23,6 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
+import { MultiStepLoader } from "@/components/ui/aceternity/multi-step-loader";
 import {
   Popover,
   PopoverContent,
@@ -79,11 +81,19 @@ type TimeframeType = "all" | "today" | "week" | "month" | "year" | "custom";
 const ReportsPage = () => {
   const [reportType, setReportType] = useState<ReportType>("sales");
   const { isMobile } = useResponsive();
+  const [isLoading, setIsLoading] = useState(false);
   const [timeframe, setTimeframe] = useState<TimeframeType>("all");
   const [date, setDate] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
+
+  const loadingStates = [
+    { text: "Preparing your data..." },
+    { text: "Creating Google Sheet..." },
+    { text: "Setting up permissions..." },
+    { text: "Getting shareable link..." }
+  ];
 
   const { data: orders } = useTransaction({});
   const { data: inventory } = useInventory({ endpoint: "items" });
@@ -199,6 +209,7 @@ const ReportsPage = () => {
 
   const openInGoogleSheets = async () => {
     try {
+      setIsLoading(true);
       const data = getReportData();
       const headers = Object.keys(data[0] || {});
 
@@ -224,15 +235,14 @@ const ReportsPage = () => {
       if (error) throw new Error(error);
 
       window.open(url, "_blank");
-
-      // Show a message to the user
       alert(
         "A new Google Sheet has been created. Please request access to view the sheet."
       );
     } catch (error) {
       console.error("Error:", error);
-      // Show an error message to the user
       alert("Failed to create the Google Sheet. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -473,6 +483,12 @@ const ReportsPage = () => {
           </Card>
         </div>
       </ResponsiveWrapper>
+      <MultiStepLoader
+        loadingStates={loadingStates}
+        loading={isLoading}
+        duration={1000}
+        loop={true}
+      />
     </div>
   );
 };

@@ -319,7 +319,7 @@ const ReportsPage = () => {
           <h2 className={cn("text-2xl md:text-3xl font-bold", isMobile && "w-full")}>
             Reports
             <p className="text-sm md:text-base font-semibold text-zinc-600 dark:text-zinc-400">
-              Download business reports in various formats
+              Download your business reports in various formats
             </p>
           </h2>
         </div>

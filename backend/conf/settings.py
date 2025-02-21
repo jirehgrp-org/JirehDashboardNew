@@ -39,6 +39,13 @@ INSTALLED_APPS = [
     'accounts',
     'apis',
     'business',
+    'plans',
+    'features',
+    'branches',
+    'expenses',
+    'categories',
+    'items',
+    'orders',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -65,7 +72,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -164,11 +171,14 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASS':[
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',    
     ],
-    
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
 }
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'apis.serializers.CustomRegisterSerializer',
@@ -176,7 +186,8 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 
 SIMPLE_JWT = {    
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    # 'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),    
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': env.bool('ROTATE_REFRESH_TOKENS'),
     'BLACKLIST_AFTER_ROTATION': env.bool('BLACKLIST_AFTER_ROTATION'),
@@ -189,8 +200,16 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:8000',
 )
 
-CSRF_TRUSTED_ORIGINS=['http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://frontenddomainname.com']
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'

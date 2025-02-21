@@ -195,8 +195,8 @@ export const en = {
         "You will be signed out of your account and redirected to the login page.",
       cancel: "Cancel",
     },
-    overview: {
-      page: {
+    analytics: {
+      overview: {
         businessOverview: "Business Overview",
         performanceMetrics: "Performance Metrics",
         timeframes: "Time Frames",

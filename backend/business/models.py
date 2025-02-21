@@ -3,23 +3,25 @@ from django.db import models
 # Create your models here.
 
 class Business(models.Model):
-    name = models.CharField(max_length=100, null=False)
-    address = models.TextField()
-    contact_number = models.CharField(max_length=100, null=False)
-    email = models.EmailField()
-    website = models.URLField()
-    description = models.TextField()
-    registration_number = models.CharField(max_length=100, null=False)
+    name = models.CharField(max_length=100)
+    address_street = models.TextField(default='Unkown')
+    address_city = models.TextField(default='Unkown')
+    address_country = models.TextField(default='Ethiopia')
+    contact_number = models.CharField(max_length=15)
+    registration_number = models.CharField(max_length=100, unique=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # logo = models.ImageField(upload_to='logos/')
-    # cover_photo = models.ImageField(upload_to='cover_photos/')
-    # business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE)
-    # business_category = models.ForeignKey(BusinessCategory, on_delete=models.CASCADE)
-    # business_sub_category = models.ForeignKey(BusinessSubCategory, on_delete=models.CASCADE)
-    # business_location = models.ForeignKey(BusinessLocation, on_delete=models.CASCADE)
-    # business_owner = models.ForeignKey(BusinessOwner, on_delete=models.CASCADE)
+    owner = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='owner_businesses')
+    admin = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='admin_businesses')
+    # customuser_set = models.ManyToManyField('accounts.CustomUser', related_name='businesses')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['owner', 'is_active'], name='idx_business_owner'),
+            models.Index(fields=['admin', 'is_active'], name='idx_business_admin'),
+        ]
 
     def __str__(self):
         return self.name
+

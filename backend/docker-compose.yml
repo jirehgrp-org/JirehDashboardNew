@@ -17,10 +17,10 @@ services:
     - BLACKLIST_AFTER_ROTATION=False
     - UPDATE_LAST_LOGIN=False
   db:
-    image: postgres:13
+    image: postgres:17
     volumes:
-    - postgres_data:/var/lib/postgresql/data/
+    - jdb_postgres_data:/var/lib/postgresql/data/
     environment:
     - "POSTGRES_HOST_AUTH_METHOD=trust"
 volumes:
-  postgres_data:
+  jdb_postgres_data:

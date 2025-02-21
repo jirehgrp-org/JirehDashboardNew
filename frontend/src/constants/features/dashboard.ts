@@ -5,7 +5,7 @@ import { translations } from "@/translations";
 
 // Get translations for current language
 const getT = (language: "en" | "am") =>
-  translations[language].dashboard.overview.page;
+  translations[language].dashboard.analytics.overview;
 
 export const TIMEFRAME_OPTIONS = (
   language: "en" | "am"
@@ -32,15 +32,15 @@ export const CHART_COLORS = {
 export const METRIC_CARD_VARIANTS = (language: "en" | "am") => ({
   revenue: {
     iconColor: "text-green-600",
-    valuePrefix: `${translations[language].dashboard.overview.page.birr} `,
+    valuePrefix: `${translations[language].dashboard.analytics.overview.birr} `,
   },
   orders: {
     iconColor: "text-blue-600",
-    valueSuffix: ` ${translations[language].dashboard.overview.page.orders}`,
+    valueSuffix: ` ${translations[language].dashboard.analytics.overview.orders}`,
   },
   customers: {
     iconColor: "text-purple-600",
-    valueSuffix: ` ${translations[language].dashboard.overview.page.customers}`,
+    valueSuffix: ` ${translations[language].dashboard.analytics.overview.customers}`,
   },
   growth: {
     iconColor: "text-orange-600",

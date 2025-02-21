@@ -172,6 +172,7 @@ frontend/
     │       ├── card.ts
     │       └── table.ts
     │
+    ├── .env.local
     ├── .gitignore
     ├── components.json
     ├── eslint.config.mjs

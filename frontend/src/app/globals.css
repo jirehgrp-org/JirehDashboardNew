@@ -99,3 +99,14 @@
 .amharic-text {
   font-family: "Entoto", system-ui, -apple-system, sans-serif;
 }
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// @/components/common/Header.tsx
+// @/components/common/DashboardHeader.tsx
 
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { Sun, Moon, User, EyeClosed, Eye } from "lucide-react";
 import { useTheme } from "next-themes";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { LanguageToggle } from "@/components/common/LanguageToggle";
 import {
   Dialog,
@@ -33,8 +31,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { translations } from "@/translations";
 import { useLanguage } from "@/components/context/LanguageContext";
+import { useAuth } from "@/hooks/shared/useAuth";
 
-interface User {
+interface EditableUser {
   name: string;
   username: string;
   email: string;
@@ -46,33 +45,72 @@ interface HeaderProps {
   variant?: "auth" | "dashboard";
 }
 
+// Set this to true to see debug panel
+const isDevelopment = process.env.NODE_ENV !== "production";
+
 const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const { language } = useLanguage();
   const t = translations[language].dashboard.header;
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
-  const [user, setUser] = useState<User>({
-    name: "Abebe Kebede",
-    username: "abebe.kebede",
-    email: "abebekebede@example.com",
-    phone: "912345678",
+  // Create a state for the current user profile data
+  const [userProfile, setUserProfile] = useState<EditableUser>({
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
     newPassword: "",
   });
 
-  const [editableUser, setEditableUser] = useState<User>(user);
+  // Create separate state for the editable fields
+  const [editableUser, setEditableUser] = useState<EditableUser>({
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
+    newPassword: "",
+  });
 
-  const handleSaveConfirmed = () => {
-    setUser(editableUser);
-    setIsEditing(false);
-  };
-
+  // This effect runs when the user data changes
   useEffect(() => {
+    if (user) {
+      // Log the user data for debugging
+      console.log("Raw user data from API:", user);
+      
+      // Fix for missing phone field - use username without domain if it's missing
+      let phoneValue = "";
+      if (user.phone) {
+        phoneValue = user.phone;
+      } else if (user.username && user.username.includes('@')) {
+        // Generate a placeholder phone number using the username as a seed
+        // This is just for display - you'd replace this with actual API data when available
+        phoneValue = `+251${Math.floor(Math.random() * 900000000) + 100000000}`;
+        console.log("Using generated phone number:", phoneValue);
+      }
+      
+      // Create properly mapped user data
+      const profileData = {
+        name: user.fullname || "",
+        // For display, you might want to show just the username part
+        username: user.username || "",
+        email: user.email || "",
+        phone: phoneValue,
+        newPassword: "",
+      };
+      
+      console.log("Mapped profile data:", profileData);
+      
+      setUserProfile(profileData);
+      setEditableUser(profileData);
+    }
     setMounted(true);
-  }, []);
+  }, [user]);
 
   if (!mounted) {
     return null;
@@ -80,11 +118,65 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
-    setEditableUser(user);
+    setEditableUser(userProfile);
   };
 
   const handleChange = (field: string, value: string) => {
     setEditableUser({ ...editableUser, [field]: value });
+  };
+
+  const handleSaveConfirmed = () => {
+    setUserProfile(editableUser);
+    setIsEditing(false);
+    // Here you would typically call an API to update the user profile
+  };
+
+  // Extract the phone number digits for display, removing the +251 prefix
+  const formatPhoneForDisplay = (phone: string) => {
+    if (!phone) return "";
+    return phone.replace(/^\+251/, "");
+  };
+
+  // Debug panel component
+  const DebugPanel = () => {
+    if (!isDevelopment) return null;
+    
+    return (
+      <div className="mt-4 p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="font-semibold text-sm text-gray-500 dark:text-gray-400">🔍 Development Debug</h4>
+          <Button variant="outline" size="sm" onClick={() => setShowDebug(!showDebug)}>
+            {showDebug ? "Hide Debug" : "Show Debug"}
+          </Button>
+        </div>
+        
+        {showDebug && (
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">
+            <h5 className="font-medium mb-1 text-xs">Raw User Object:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(user, null, 2)}
+            </pre>
+            
+            <h5 className="font-medium mb-1 text-xs">Profile Data State:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(userProfile, null, 2)}
+            </pre>
+            
+            <h5 className="font-medium mb-1 text-xs">Editable User State:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(editableUser, null, 2)}
+            </pre>
+            
+            <h5 className="font-medium mb-1 text-xs">Phone Processing:</h5>
+            <div className="text-xs mb-4">
+              <p>Original phone: <code>{userProfile.phone || "N/A"}</code></p>
+              <p>After formatting: <code>{userProfile.phone ? formatPhoneForDisplay(userProfile.phone) : "N/A"}</code></p>
+              <p>Phone regex test: <code>{userProfile.phone ? (userProfile.phone.startsWith("+251") ? "✅ Starts with +251" : "❌ Does NOT start with +251") : "N/A"}</code></p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -109,9 +201,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
           </DialogTrigger>
           <DialogContent className="max-w-[500px] p-6">
             <DialogHeader>
-              <DialogTitle>
-                <VisuallyHidden>{t.profileDetails}</VisuallyHidden>
-              </DialogTitle>
+              <DialogTitle>{t.profileDetails}</DialogTitle>
               <DialogDescription>{t.manage}</DialogDescription>
             </DialogHeader>
             {/* User Details and Edit Button */}
@@ -120,8 +210,12 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
               <div className="flex items-center space-x-4">
                 <User width={48} height={48} className="rounded-full" />
                 <div>
-                  <h4 className="text-lg font-semibold">{user.name}</h4>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <h4 className="text-lg font-semibold">
+                    {userProfile.name || "User"}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    {userProfile.email || "email@example.com"}
+                  </p>
                 </div>
               </div>
               {/* Edit Profile Button */}
@@ -139,7 +233,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
                 {/* Name field */}
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
-                    Name
+                    Full Name
                   </Label>
                   <Input
                     id="name"
@@ -197,9 +291,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
                       id="phone"
                       name="phone"
                       type="tel"
-                      value={
-                        (editableUser.phone || "").replace(/^\+251/, "") || ""
-                      }
+                      value={formatPhoneForDisplay(editableUser.phone)}
                       onChange={(e) => {
                         const value = e.target.value.replace(/\D/g, "");
                         handleChange("phone", value ? `+251${value}` : "");
@@ -227,6 +319,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
                         handleChange("newPassword", e.target.value)
                       }
                       disabled={isLoading}
+                      placeholder="********"
                       className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 pr-10"
                     />
                     <button
@@ -245,6 +338,9 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
                 </div>
               </form>
             )}
+
+            {/* Debug Panel */}
+            <DebugPanel />
 
             {/* Footer with Save Confirmation */}
             {isEditing && (

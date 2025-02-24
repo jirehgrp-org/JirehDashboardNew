@@ -69,8 +69,7 @@ class UserProfileView(APIView):
             'id': user.id,
             'username': user.email,
             'email':user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
+            'fullname': user.fullname,
             'role': user.role,
             'is_active': user.is_active,
             'created_at': user.created_at,
@@ -84,8 +83,7 @@ class UserProfileView(APIView):
         user = request.user
         data = request.data
         
-        user.first_name = data.get('first_name', user.first_name)
-        user.last_name = data.get('last_name', user.last_name)
+        user.fullname = data.get('fullname', user.fullname)
         user.email = data.get('email', user.email)
         user.role = data.get('role', user.role)
         
@@ -95,8 +93,7 @@ class UserProfileView(APIView):
             'id': user.id,
             'username': user.email,
             'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
+            'fullname': user.fullname,
             'role': user.role,
             'is_active': user.is_active,
             'created_at': user.created_at,

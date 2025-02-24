@@ -207,13 +207,16 @@ JirehDashboardNew/
     │   │   └── providers.tsx
     │   │
     │   ├── components/
+    │   │   ├── auth/
+    │   │   │   └── RouteGuard.tsx
     │   │   ├── common/
     │   │   │   ├── DashboardHeader.tsx
     │   │   │   ├── Header.tsx
     │   │   │   ├── LanguageToggle.tsx
     │   │   │   ├── MobileWrapper.tsx
     │   │   │   ├── ResponsiveWrapper.tsx
-    │   │   │   └── ThemeToggle.tsx
+    │   │   │   ├── ThemeToggle.tsx
+    │   │   │   └── ToastHandler.tsx
     │   │   │
     │   │   ├── context/
     │   │   │   ├── AuthContext.tsx
@@ -267,7 +270,9 @@ JirehDashboardNew/
     │   │   ├── features/
     │   │   │   └── dashboard.ts
     │   │   └── shared/
-    │   │       └── roleConstants.tsx
+    │   │       ├── ethiopianCities.ts
+    │   │       ├── roleConstants.ts
+    │   │       └── routes.ts
     │   │   
     │   ├── hooks/
     │   │   ├── features/
@@ -292,6 +297,7 @@ JirehDashboardNew/
     │   │   │   └── transaction.ts
     │   │   ├── services/
     │   │   │   └── auth.ts
+    │   │   ├── axios.ts
     │   │   └── utils.ts
     │   │   
     │   ├── translations/
@@ -311,7 +317,8 @@ JirehDashboardNew/
     │   │       ├── auth.ts
     │   │       ├── card.ts
     │   │       └── table.ts
-    │   └── middleware.ts    
+    │   └── middleware.ts  
+    │  
     ├── .env.local
     ├── .gitignore
     ├── components.json

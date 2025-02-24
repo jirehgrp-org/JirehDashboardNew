@@ -22,7 +22,7 @@ class CustomUserRegisterSerializer(RegisterSerializer):
 
     class Meta:
         model = User
-        fields = ('fullname', 'username', 'email', 'password1', 'password2')
+        fields = ('fullname', 'username', 'email', 'password1', 'password2', 'phone')
 
     def save(self, request):
         user = super().save(request)
@@ -34,8 +34,7 @@ class CustomUserRegisterSerializer(RegisterSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'fullname', 'role', 'is_active']
-
+        fields = ['id', 'username', 'email', 'fullname', 'phone', 'role', 'is_active']
 
 class BusinessRegistrationSerializer(serializers.ModelSerializer):
     class Meta:

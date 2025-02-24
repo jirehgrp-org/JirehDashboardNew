@@ -3,7 +3,7 @@
 
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,9 @@ import { useAuth } from "@/hooks/shared/useAuth";
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
+  
   const { language } = useLanguage();
   const t = translations[language].auth.login;
   
@@ -34,10 +37,17 @@ export function LoginForm() {
     setError("");
   
     try {
-      await login(credentials);
-      // Successful login will redirect to dashboard via middleware
-      router.push("/dashboard");
+      const result = await login(credentials);
+      
+      if (result.success) {
+        // Only redirect if login was successful
+        router.push(callbackUrl);
+      } else {
+        // Handle login failure from the hook response
+        setError(result.error || "Login failed. Please try again.");
+      }
     } catch (err: any) {
+      // Fallback error handling
       setError(
         err.response?.data?.detail || 
         err.response?.data?.message || 

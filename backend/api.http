@@ -13,8 +13,7 @@ Content-Type: application/json
     "email": "testuser3@email.com",
     "password1": "adminP@$$",
     "password2": "adminP@$$",
-    "first_name": "test",
-    "last_name": "user3",
+    "fullname": "test",
     "phone": "+2519235689"
 }
 
@@ -104,7 +103,7 @@ Content-Type: application/json
 {
     "username": "admin",
     "email": "admin@email.com",
-    "first_name": "",
+    "fullname": "",
     "last_name": "",
     "role": "manager"
 }

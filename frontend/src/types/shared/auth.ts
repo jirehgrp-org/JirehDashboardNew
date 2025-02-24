@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/types/shared/auth.ts
-export type UserRole = "owner" | "manager" | "admin" | "sales" | "warehouse";
 
+export type UserRole = "owner" | "manager" | "admin" | "sales" | "warehouse";
 export interface SectionLink {
   label: string;
   href: string;
@@ -33,6 +34,10 @@ export interface RegisterCredentials {
 }
 
 export interface LoginResponse {
+  access_token: any;
+  refresh_token: string;
+  token: any;
+  key: any;
   access: string;
   refresh?: string;
 }
@@ -55,4 +60,26 @@ export interface User {
 export interface AuthResponse {
   success: boolean;
   error?: string;
+}
+
+export interface BusinessData {
+  name: string;
+  address_street: string;
+  address_city: string;
+  address_country: string;
+  contact_number: string;
+  registration_number: string;
+  owner?: string | null;
+  admin?: string | null;
+}
+
+export interface UseAuthReturn {
+  user: User | null;
+  login: (credentials: LoginCredentials) => Promise<AuthResponse>;
+  logout: () => void;
+  register: (data: RegisterCredentials) => Promise<AuthResponse>;
+  registerBusiness: (businessData: BusinessData) => Promise<AuthResponse>;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  checkAuth: () => Promise<void>;
 }

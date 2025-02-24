@@ -8,8 +8,7 @@ Content-Type: application/json
     "email": "testuser3@email.com",
     "password1": "adminPass",
     "password2": "adminPass",
-    "first_name": "test",
-    "last_name": "user3",
+    "fullname": "test",
     "phone": "+2519235689"
 }
 

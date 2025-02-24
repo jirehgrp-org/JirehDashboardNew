@@ -12,9 +12,9 @@ class CustomUser(AbstractUser):
         ('warehouse', 'Warehouse'),
     )
     username = models.CharField(max_length=100, unique=True)
-    fullname = models.CharField(max_length=100, null=False)  # Replace first_name and last_name
+    fullname = models.CharField(max_length=100, blank=True)
     email = models.EmailField(max_length=100, unique=True)
-    phone = models.CharField(max_length=20, null=False)
+    phone = models.CharField(max_length=20)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='manager')
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(auto_now=True, null=True)
@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
     business = models.ForeignKey('business.Business', on_delete=models.SET_NULL, null=True, blank=True)
     business_branch = models.ForeignKey('branches.Branches', on_delete=models.SET_NULL, null=True, blank=True)
 
-    # Remove the first_name and last_name fields from AbstractUser
+    # These are crucial to avoid any AbstractUser fields
     first_name = None
     last_name = None
 

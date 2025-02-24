@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/auth/RegisterForm.tsx
 
@@ -23,6 +24,7 @@ import { MobileWrapper } from "@/components/common/MobileWrapper";
 import { MultiStepLoader } from "@/components/ui/aceternity/multi-step-loader";
 import { CitySelect } from "@/constants/shared/ethiopianCIties";
 import { useToast } from "@/hooks/shared/useToast";
+import { authService } from "@/lib/services/auth";
 
 interface Address {
   businessName: string;
@@ -94,8 +96,14 @@ export function RegisterForm() {
   };
 
   useEffect(() => {
-    const generatedUsername = generateUsername(formData.fullname);
-    setUsername(generatedUsername);
+    if (formData.fullname) {
+      const generatedUsername = generateUsername(formData.fullname);
+      setUsername(generatedUsername);
+      setFormData((prev) => ({
+        ...prev,
+        username: generatedUsername,
+      }));
+    }
   }, [formData.fullname]);
 
   const validatePassword = (password: string): string | null => {
@@ -112,101 +120,193 @@ export function RegisterForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    // Validate required fields
-    if (
-      !formData.fullname ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.password1 ||
-      !formData.password2 ||
-      !addressDetails.businessName ||
-      !addressDetails.businessPhone ||
-      !addressDetails.street ||
-      !addressDetails.city ||
-      !addressDetails.country
-    ) {
-      setError("Please fill in all required fields");
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate passwords match
-    if (formData.password1 !== formData.password2) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
-    const passwordError = validatePassword(formData.password1);
-    if (passwordError) {
-      setError(passwordError);
-      setIsLoading(false);
-      return;
-    }
-
-    // Password match validation
-    if (formData.password1 !== formData.password2) {
-      setError("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
+  
     try {
-      // Register user first
-      const userRegistered = await register({
-        ...formData,
-        phone: `+251${formData.phone}`, // Format phone number
-      });
-
+      // Validate required fields for user registration
+      if (
+        !formData.fullname ||
+        !formData.email ||
+        !formData.phone ||
+        !formData.password1 ||
+        !formData.password2
+      ) {
+        setError("Please fill in all required user information");
+        setIsLoading(false);
+        return;
+      }
+  
+      // Validate password match
+      if (formData.password1 !== formData.password2) {
+        setError("Passwords do not match");
+        setIsLoading(false);
+        return;
+      }
+  
+      // Validate password complexity
+      const passwordError = validatePassword(formData.password1);
+      if (passwordError) {
+        setError(passwordError);
+        setIsLoading(false);
+        return;
+      }
+  
+      // Format phone number - try without the country code prefix first
+      // since the backend might be adding it automatically
+      const formattedPhone = formData.phone.replace(/^\+?251/, "");
+      
+      // Prepare a minimal registration payload to avoid potential validation issues
+      const registrationData = {
+        username: formData.username,
+        email: formData.email,
+        password1: formData.password1,
+        password2: formData.password2,
+        fullname: formData.fullname,
+        phone: formattedPhone
+        // Remove user_role as it might be causing validation issues
+      };
+      
+      console.log("Submitting minimal registration data:", registrationData);
+      
+      // Register user
+      const userRegistered = await register(registrationData);
+  
       if (userRegistered.success) {
         toast({
-          title: "Account created",
-          description: "Setting up your business profile...",
+          title: "Account created successfully!",
+          description: "Now setting up your business profile...",
+          variant: "default",
         });
-        // Register the business
-        const businessData = {
-          name: addressDetails.businessName,
-          address_street: addressDetails.street,
-          address_city: addressDetails.city,
-          address_country: addressDetails.country,
-          contact_number: `+251${addressDetails.businessPhone}`,
-          registration_number: `BMS${Date.now()}`, // Generate a temporary registration number
-        };
-
-        const businessRegistered = await registerBusiness(businessData);
-
-        if (businessRegistered.success) {
-          toast({
-            title: "Success!",
-            description:
-              "Registration complete. Setting up your subscription...",
-            variant: "default",
-          });
-          setTimeout(() => {
-            router.push("/auth/subscription"); // Changed from /auth/login
-          }, 2000);
-        } else {
-          throw new Error(businessRegistered.error);
-        }
+        
+        // Add significant delay to ensure authentication is completed
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Continue with business registration
+        await handleBusinessRegistration();
       } else {
-        throw new Error(userRegistered.error);
+        throw new Error(userRegistered.error || "Registration failed");
       }
     } catch (err: any) {
+      console.error("User registration error:", err);
+      
       toast({
         title: "Error",
-        description:
-          err.response?.data?.message || err.message || "Registration failed",
+        description: err.message || "Registration failed",
         variant: "destructive",
       });
-      setError(
-        err.response?.data?.message || err.message || "Registration failed"
-      );
+      
+      setError(err.message || "Registration failed");
+      setIsLoading(false);
+    }
+  };
+  
+  const handleBusinessRegistration = async () => {
+    try {
+      // Validate business fields
+      if (
+        !addressDetails.businessName ||
+        !addressDetails.businessPhone ||
+        !addressDetails.street ||
+        !addressDetails.city
+      ) {
+        throw new Error("Please complete all business information");
+      }
+      
+      // Format business phone
+      const formattedBusinessPhone = addressDetails.businessPhone.startsWith("+251") 
+        ? addressDetails.businessPhone 
+        : `+251${addressDetails.businessPhone}`;
+      
+      // Create business registration data matching the API format
+      const businessData = {
+        name: addressDetails.businessName,
+        address_street: addressDetails.street,
+        address_city: addressDetails.city,
+        address_country: addressDetails.country,
+        contact_number: formattedBusinessPhone,
+        registration_number: `BMS${Date.now()}`,
+        // owner and admin should be null to let the backend use the authenticated user
+        owner: null,
+        admin: null
+      };
+      
+      console.log("Registering business with data:", businessData);
+      
+      // Use the direct fetch API with the latest token
+      const token = authService.getToken();
+      console.log("Using token for business registration:", token ? `${token.substring(0, 10)}...` : "No token");
+      
+      if (!token) {
+        console.error("No authentication token available for business registration");
+        throw new Error("Authentication required to register business");
+      }
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+      
+      // Make sure we're using the exact endpoint from your API
+      const response = await fetch(`${API_URL}/register/business`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(businessData)
+      });
+      
+      const responseText = await response.text();
+      console.log(`Business registration response (${response.status}):`, responseText);
+      
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : {};
+      } catch (e) {
+        console.warn("Could not parse response as JSON:", responseText);
+        responseData = {};
+      }
+      
+      if (response.ok) {
+        toast({
+          title: "Business registered!",
+          description: "Redirecting to subscription setup...",
+          variant: "default",
+        });
+        
+        // Redirect to subscription page
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1500);
+      } else {
+        if (response.status === 401) {
+          console.error("Token invalid for business registration. Refreshing authentication...");
+          
+          // Try to refresh the token
+          const refreshed = await authService.refreshAccessToken();
+          if (refreshed) {
+            console.log("Token refreshed successfully. Retrying business registration...");
+            // Retry with the new token
+            return handleBusinessRegistration();
+          } else {
+            throw new Error("Authentication expired. Please log in again.");
+          }
+        }
+        
+        throw new Error(responseData.detail || `Failed to register business (${response.status})`);
+      }
+    } catch (error: any) {
+      console.error("Business registration error:", error);
+      
+      toast({
+        title: "Business Setup Error",
+        description: error.message || "Failed to set up business",
+        variant: "destructive",
+      });
+      
+      setError(error.message || "Business setup failed");
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  
   const loadingStates = [
     { text: "Creating your account..." },
     { text: "Setting up business profile..." },

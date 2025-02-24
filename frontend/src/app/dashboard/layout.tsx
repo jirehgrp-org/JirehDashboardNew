@@ -1,6 +1,7 @@
 // @/app/dashboard/layout.tsx
 
 import { Metadata } from "next";
+import { RouteGuard } from "@/components/auth/RouteGuard";
 import { SidebarDashboard } from "@/components/layout/dashboard/Sidebar";
 
 export const metadata: Metadata = {
@@ -14,7 +15,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="h-screen flex">
-      <SidebarDashboard>{children}</SidebarDashboard>
+      <RouteGuard>
+        <SidebarDashboard>{children}</SidebarDashboard>
+      </RouteGuard>
     </div>
   );
 }

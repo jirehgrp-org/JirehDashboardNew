@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/auth/RegisterForm.tsx
 
 "use client";
 import React, { useState, useEffect } from "react";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
+import { useAuth } from "@/hooks/shared/useAuth";
+import { useRouter } from "next/navigation";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Eye, EyeClosed, Info, MapPin } from "lucide-react";
 import {
@@ -17,8 +20,13 @@ import { translations } from "@/translations";
 import { LinkPreview } from "@/components/ui/aceternity/link-preview";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { MobileWrapper } from "@/components/common/MobileWrapper";
+import { MultiStepLoader } from "@/components/ui/aceternity/multi-step-loader";
+import { CitySelect } from "@/constants/shared/ethiopianCIties";
+import { useToast } from "@/hooks/shared/useToast";
 
 interface Address {
+  businessName: string;
+  businessPhone: string;
   street: string;
   city: string;
   country: string;
@@ -26,20 +34,41 @@ interface Address {
 
 export function RegisterForm() {
   const { language } = useLanguage();
+  const { register, registerBusiness } = useAuth();
+  const router = useRouter();
   const t = translations[language].auth.register;
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const [addressDetails, setAddress] = useState<Address>({
+    businessName: "",
+    businessPhone: "",
     street: "",
     city: "",
-    country: "",
+    country: "Ethiopia",
   });
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password1: "",
+    password2: "",
+    fullname: "",
+    phone: "",
+    user_role: "owner",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
   const handleAddressChange = (field: keyof Address, value: string) => {
     setAddress((prev) => ({
@@ -65,31 +94,125 @@ export function RegisterForm() {
   };
 
   useEffect(() => {
-    const generatedUsername = generateUsername(name);
+    const generatedUsername = generateUsername(formData.fullname);
     setUsername(generatedUsername);
-  }, [name]);
+  }, [formData.fullname]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!/\d/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    const address =
-      `${addressDetails.street}, ${addressDetails.city}, ${addressDetails.country}`.trim();
-
-    console.log("Individual fields:", addressDetails);
-    console.log("Full address:", address);
-
-    const formData = {
-      address: address, // combined address
-      addressDetails: addressDetails, // individual fields
-    };
-
-    console.log("Form submitted:", formData);
-
-    setTimeout(() => {
+    // Validate required fields
+    if (
+      !formData.fullname ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.password1 ||
+      !formData.password2 ||
+      !addressDetails.businessName ||
+      !addressDetails.businessPhone ||
+      !addressDetails.street ||
+      !addressDetails.city ||
+      !addressDetails.country
+    ) {
+      setError("Please fill in all required fields");
       setIsLoading(false);
-    }, 3000);
+      return;
+    }
+
+    // Validate passwords match
+    if (formData.password1 !== formData.password2) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    const passwordError = validatePassword(formData.password1);
+    if (passwordError) {
+      setError(passwordError);
+      setIsLoading(false);
+      return;
+    }
+
+    // Password match validation
+    if (formData.password1 !== formData.password2) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Register user first
+      const userRegistered = await register({
+        ...formData,
+        phone: `+251${formData.phone}`, // Format phone number
+      });
+
+      if (userRegistered.success) {
+        toast({
+          title: "Account created",
+          description: "Setting up your business profile...",
+        });
+        // Register the business
+        const businessData = {
+          name: addressDetails.businessName,
+          address_street: addressDetails.street,
+          address_city: addressDetails.city,
+          address_country: addressDetails.country,
+          contact_number: `+251${addressDetails.businessPhone}`,
+          registration_number: `BMS${Date.now()}`, // Generate a temporary registration number
+        };
+
+        const businessRegistered = await registerBusiness(businessData);
+
+        if (businessRegistered.success) {
+          toast({
+            title: "Success!",
+            description:
+              "Registration complete. Setting up your subscription...",
+            variant: "default",
+          });
+          setTimeout(() => {
+            router.push("/auth/subscription"); // Changed from /auth/login
+          }, 2000);
+        } else {
+          throw new Error(businessRegistered.error);
+        }
+      } else {
+        throw new Error(userRegistered.error);
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description:
+          err.response?.data?.message || err.message || "Registration failed",
+        variant: "destructive",
+      });
+      setError(
+        err.response?.data?.message || err.message || "Registration failed"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const loadingStates = [
+    { text: "Creating your account..." },
+    { text: "Setting up business profile..." },
+    { text: "Preparing your subscription..." },
+    { text: "Almost done..." },
+  ];
 
   return (
     <MobileWrapper>
@@ -102,6 +225,11 @@ export function RegisterForm() {
         </p>
 
         <form className="my-8" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 text-red-500 p-3 rounded-md mb-6">
+              {error}
+            </div>
+          )}
           <div className="flex flex-col md:flex-row">
             {/* Personal Information Section */}
             <div className="flex-1 md:pr-8">
@@ -117,13 +245,16 @@ export function RegisterForm() {
                     {t.name}
                   </Label>
                   <Input
-                    id="name"
+                    id="fullname"
                     placeholder={t.namePlaceholder}
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={formData.fullname}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      // This will trigger the useEffect to generate username
+                    }}
                     disabled={isLoading}
-                    className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                    className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
                   />
                 </LabelInputContainer>
                 <LabelInputContainer>
@@ -155,8 +286,10 @@ export function RegisterForm() {
                   id="email"
                   placeholder={t.emailPlaceholder}
                   type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   disabled={isLoading}
-                  className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                  className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
                 />
               </LabelInputContainer>
               <LabelInputContainer className="mb-4">
@@ -169,10 +302,12 @@ export function RegisterForm() {
                     id="phone"
                     placeholder={t.phonePlaceholder}
                     type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     disabled={isLoading}
-                    className="rounded-l-none border-l-0"
                     maxLength={9}
                     minLength={9}
+                    className="rounded-l-none border-l-0"
                   />
                 </div>
               </LabelInputContainer>
@@ -180,12 +315,37 @@ export function RegisterForm() {
                 <Label htmlFor="password">{t.password}</Label>
                 <div className="relative">
                   <Input
-                    id="password"
+                    id="password1"
                     placeholder="••••••••"
                     type={showPassword ? "text" : "password"}
+                    value={formData.password1}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      // Clear error if password becomes valid
+                      const error = validatePassword(e.target.value);
+                      if (!error) setError("");
+                    }}
                     disabled={isLoading}
-                    className="pr-10"
+                    className={cn(
+                      "pr-10",
+                      validatePassword(formData.password1)
+                        ? "border-red-500"
+                        : ""
+                    )}
                   />
+                  {formData.password1 && (
+                    <span
+                      className={cn(
+                        "text-xs",
+                        validatePassword(formData.password1)
+                          ? "text-red-500"
+                          : "text-green-500"
+                      )}
+                    >
+                      {validatePassword(formData.password1) ||
+                        "Password meets requirements"}
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -205,9 +365,11 @@ export function RegisterForm() {
                 <Label htmlFor="cpassword">{t.confirmPassword}</Label>
                 <div className="relative">
                   <Input
-                    id="cpassword"
+                    id="password2" // Changed from "cpassword"
                     placeholder="••••••••"
                     type={showConfirmPassword ? "text" : "password"}
+                    value={formData.password2}
+                    onChange={handleInputChange}
                     disabled={isLoading}
                     className="pr-10"
                   />
@@ -248,8 +410,12 @@ export function RegisterForm() {
                   id="businessName"
                   placeholder={t.businessNamePlaceholder}
                   type="text"
+                  value={addressDetails.businessName}
+                  onChange={(e) =>
+                    handleAddressChange("businessName", e.target.value)
+                  }
                   disabled={isLoading}
-                  className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
+                  className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
                 />
               </LabelInputContainer>
               <div className="flex items-center justify-between mb-1">
@@ -297,28 +463,19 @@ export function RegisterForm() {
                 </LabelInputContainer>
 
                 <LabelInputContainer>
-                  <Input
-                    id="city"
-                    placeholder="City"
+                  <CitySelect
                     value={addressDetails.city}
-                    onChange={(e) =>
-                      handleAddressChange("city", e.target.value)
-                    }
+                    onChange={(value) => handleAddressChange("city", value)}
                     disabled={isLoading}
-                    className="border-neutral-200 dark:border-neutral-800"
                   />
                 </LabelInputContainer>
 
                 <LabelInputContainer>
                   <Input
                     id="country"
-                    placeholder="Country"
-                    value={addressDetails.country}
-                    onChange={(e) =>
-                      handleAddressChange("country", e.target.value)
-                    }
-                    disabled={isLoading}
-                    className="border-neutral-200 dark:border-neutral-800"
+                    value="Ethiopia"
+                    disabled={true}
+                    className="border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800"
                   />
                 </LabelInputContainer>
               </div>
@@ -329,9 +486,13 @@ export function RegisterForm() {
                     +251
                   </div>
                   <Input
-                    id="phone"
+                    id="businessPhone" // Changed from "phone" to avoid ID conflict
                     placeholder={t.businessPhonePlaceholder}
                     type="tel"
+                    value={addressDetails.businessPhone}
+                    onChange={(e) =>
+                      handleAddressChange("businessPhone", e.target.value)
+                    }
                     disabled={isLoading}
                     className="rounded-l-none border-l-0"
                     maxLength={9}
@@ -413,6 +574,11 @@ export function RegisterForm() {
           </div>
         </form>
       </div>
+      <MultiStepLoader
+        loadingStates={loadingStates}
+        loading={isLoading}
+        duration={2000}
+      />
     </MobileWrapper>
   );
 }

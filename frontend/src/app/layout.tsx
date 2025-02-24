@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
+import { ToastHandler } from "@/components/common/ToastHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,6 +86,7 @@ export default function RootLayout({
         <Providers>
           <div className="min-h-screen bg-background transition-colors duration-300">
             {children}
+            <ToastHandler />
           </div>
         </Providers>
         <Toaster />

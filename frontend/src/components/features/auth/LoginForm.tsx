@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/auth/LoginForm.tsx
 
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Eye, EyeClosed } from "lucide-react";
 import { translations } from "@/translations";
@@ -31,14 +32,20 @@ export function LoginForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    const result = await login(credentials);
-    if (result.success) {
+  
+    try {
+      await login(credentials);
+      // Successful login will redirect to dashboard via middleware
       router.push("/dashboard");
-    } else {
-      setError(result.error);
+    } catch (err: any) {
+      setError(
+        err.response?.data?.detail || 
+        err.response?.data?.message || 
+        "Invalid credentials. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

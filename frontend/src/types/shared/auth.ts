@@ -1,6 +1,5 @@
 // @/types/shared/auth.ts
-
-export type UserRole = "manager" | "admin" | "sales" | "warehouse";
+export type UserRole = "owner" | "manager" | "admin" | "sales" | "warehouse";
 
 export interface SectionLink {
   label: string;
@@ -16,11 +15,21 @@ export interface Section {
 export interface UserRoleInfo {
   title: string;
   description: string;
-  
 }
+
 export interface LoginCredentials {
   username: string;
   password: string;
+}
+
+export interface RegisterCredentials {
+  username: string;
+  email: string;
+  password1: string;
+  password2: string;
+  fullname: string; 
+  phone: string;
+  user_role?: string;
 }
 
 export interface LoginResponse {
@@ -37,7 +46,13 @@ export interface PageInfo {
 export interface User {
   id: string;
   username: string;
+  email: string;
+  fullname: string;
+  phone: string;
   role: UserRole;
-  email?: string;
-  phone?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  error?: string;
 }

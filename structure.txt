@@ -1,0 +1,329 @@
+// structure.txt
+
+JirehDashboardNew/
+├── backend/
+│   ├── .qodo/
+│   │   └── history.sqlite
+│   ├── .venv
+│   ├── accounts/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   ├── 0001_initial.py
+│   │   │   └── 0002_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── forms.py
+│   │   ├── models.py
+│   │   ├── permissions.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── apis/
+│   │   ├── migrations/
+│   │   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── branches/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   └── 0001_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── business/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   ├── 0001_initial.py
+│   │   │   └── 0002_alter_business_registration_number.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── forms.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── categories/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   ├── 0001_initial.py
+│   │   │   ├── 0002_remove_categories_idx_category_business_branch_and_more.py
+│   │   │   └── 0003_remove_categories_idx_category_business_branch_and_more.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── conf/
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── expenses/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   └── 0001_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── features/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   └── 0001_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── items/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   ├── 0001_initial.py
+│   │   │   ├── 0002_items_unit_of_measure.py
+│   │   │   └── 0003_items_business_branch.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── media/
+│   │   └── orders/
+│   │      └── .keep
+│   ├── orders/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   └── 0001_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── plans/
+│   │   ├── migrations/
+│   │   │   ├── __init__.py
+│   │   │   └── 0001_initial.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── static/
+│   │   └── .keep
+│   ├── subscriptions
+│   │   └── migrations/
+│   │       └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   └── views.py
+│   ├── .dockerignore
+│   ├──.gitignore
+│   ├── api.http
+│   ├── db.sqlite3
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   ├── manage.py
+│   └── requirements.txt
+├── frontend/
+    ├── next/
+    ├── node_modules/
+    ├── public/
+    │   ├── fonts/
+    │   │   ├── entoto.ttf
+    │   │   └── fantuwua.ttf
+    │   └── images/
+    │       └── previewImage.png
+    │
+    ├── src/
+    │   ├── app/
+    │   │   ├── auth/
+    │   │   │   ├── forgotPassword/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── login/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── register/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── resetPassword/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── subscription/
+    │   │   │   │   └── page.tsx
+    │   │   │   └── layout.tsx
+    │   │   │
+    │   │   ├── dashboard/
+    │   │   │   ├── analytics/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── branches/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── categories/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── expenses/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── items/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── orders/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── overview/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── profitLoss/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── salesReport/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── users/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── layout.tsx
+    │   │   │   └── page.tsx
+    │   │   │
+    │   │   ├── legal/
+    │   │   │   ├── privacy/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── terms/
+    │   │   │   │   └── page.tsx
+    │   │   │   └── layout.tsx
+    │   │   │
+    │   │   ├── favicon.ico
+    │   │   ├── globals.css
+    │   │   ├── layout.tsx
+    │   │   ├── page.tsx
+    │   │   └── providers.tsx
+    │   │
+    │   ├── components/
+    │   │   ├── common/
+    │   │   │   ├── DashboardHeader.tsx
+    │   │   │   ├── Header.tsx
+    │   │   │   ├── LanguageToggle.tsx
+    │   │   │   ├── MobileWrapper.tsx
+    │   │   │   ├── ResponsiveWrapper.tsx
+    │   │   │   └── ThemeToggle.tsx
+    │   │   │
+    │   │   ├── context/
+    │   │   │   ├── AuthContext.tsx
+    │   │   │   ├── LanguageContext.tsx
+    │   │   │   └── ThemeContext.tsx
+    │   │   │
+    │   │   ├── features/
+    │   │   │   ├── auth/
+    │   │   │   │   ├── ForgotPasswordForm.tsx
+    │   │   │   │   ├── LoginForm.tsx
+    │   │   │   │   ├── PaymentDialog.tsx
+    │   │   │   │   ├── RegisterForm.tsx
+    │   │   │   │   ├── ResetPasswordForm.tsx
+    │   │   │   │   └── SubscriptionForm.tsx
+    │   │   │   └── dashboard/
+    │   │   │       └── OrderDetailsDialog.tsx
+    │   │   │
+    │   │   ├── layout/
+    │   │   │   └── dashboard/
+    │   │   │       └── Sidebar.tsx
+    │   │   │
+    │   │   ├── Legal/
+    │   │   │   ├── Privacy.tsx
+    │   │   │   └── Terms.tsx
+    │   │   │
+    │   │   ├── Shared/
+    │   │   │   ├── cards/
+    │   │   │   │   ├── ChartCard.tsx
+    │   │   │   │   ├── ListCard.tsx
+    │   │   │   │   └── MetricCard.tsx
+    │   │   │   ├── charts/
+    │   │   │   │   ├── BarChart.tsx
+    │   │   │   │   ├── LineChart.tsx
+    │   │   │   │   └── PieChart.tsx
+    │   │   │   ├── forms/
+    │   │   │   │   ├── InventoryForm.tsx
+    │   │   │   │   ├── operationForm.tsx
+    │   │   │   │   └── TransactionFrom.tsx
+    │   │   │   └── tables/
+    │   │   │       ├── DataTable.tsx
+    │   │   │       ├── TableHeader.tsx
+    │   │   │       ├── TablePagination.tsx
+    │   │   │       ├── TableRow.tsx
+    │   │   │       └── useColumn.tsx
+    │   │   │
+    │   │   └── ui/
+    │   │       ├── aceternity/
+    │   │       └── other shadcn/uis ...
+    │   │   
+    │   ├── constants/
+    │   │   ├── features/
+    │   │   │   └── dashboard.ts
+    │   │   └── shared/
+    │   │       └── roleConstants.tsx
+    │   │   
+    │   ├── hooks/
+    │   │   ├── features/
+    │   │   │   ├── useDashboard.ts
+    │   │   │   ├── useInventory.ts
+    │   │   │   ├── useOperation.ts
+    │   │   │   ├── usePlan.ts
+    │   │   │   ├── useSubscription.ts
+    │   │   │   └── useTransaction.ts
+    │   │   │
+    │   │   └── shared/
+    │   │       ├── useAuth.ts
+    │   │       ├── useCalendar.ts
+    │   │       ├── useOutsideClick.ts
+    │   │       ├── useResponsive.ts
+    │   │       └── useToast.ts
+    │   │   
+    │   ├── lib/
+    │   │   ├── schemas/
+    │   │   │   ├── inventory.ts
+    │   │   │   ├── operation.ts
+    │   │   │   └── transaction.ts
+    │   │   ├── services/
+    │   │   │   └── auth.ts
+    │   │   └── utils.ts
+    │   │   
+    │   ├── translations/
+    │   │   ├── am.ts
+    │   │   ├── en.ts
+    │   │   └── index.ts
+    │   │   
+    │   ├── types/
+    │   │   ├── features/
+    │   │   │   ├── dashboard.ts
+    │   │   │   ├── inventory.ts
+    │   │   │   ├── operation.ts
+    │   │   │   ├── plan.ts
+    │   │   │   ├── subscription.ts
+    │   │   │   └── transaction.ts
+    │   │   └── shared/
+    │   │       ├── auth.ts
+    │   │       ├── card.ts
+    │   │       └── table.ts
+    │   └── middleware.ts    
+    ├── .env.local
+    ├── .gitignore
+    ├── components.json
+    ├── eslint.config.mjs
+    ├── next-env.d.ts
+    ├── next.config.ts
+    ├── package-lock.json
+    ├── package.json
+    ├── postcss.config.ts
+    ├── tailwind.config.ts
+    └── tsconfig.json
+├── .gitignore
+├── LIICENSE.md
+├── README.md
+└── structure.txt

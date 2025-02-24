@@ -1,3 +1,5 @@
+# apis/urls.py
+
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
@@ -23,6 +25,7 @@ urlpatterns = [
     path('register/business', BusinessRegisterAPIView.as_view(), name='business_register'),
     path('user/', UserProfileView.as_view(), name='user_profile'),
     path('users/list/', BusinessRelatedUsersView.as_view(), name='business_related_users'),
+    path('auth/user/', UserProfileView.as_view(), name='current_user'),
     path('business/list', BusinessListAPIView.as_view(), name='business-list'),
     path('business/branch/list', BusinessBranchListAPIView.as_view(), name='business-branch-list'),
     path('business/branch/item/list', BusinessBranchRelatedItemView.as_view(), name='business-branch-item-list'),

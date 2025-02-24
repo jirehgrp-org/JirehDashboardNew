@@ -19,6 +19,9 @@ import {
 import { User } from "lucide-react";
 
 export const roleIcons = {
+  owner: (
+    <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
+  ),
   manager: (
     <IconTower className="h-5 w-6 text-black dark:text-white flex-shrink-0" />
   ),
@@ -92,6 +95,7 @@ const pages = {
 } as const;
 
 export const roleAccess = {
+  owner: pages,
   manager: pages,
   admin: {
     orders: pages.orders,

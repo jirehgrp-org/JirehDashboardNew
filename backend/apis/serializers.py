@@ -1,3 +1,5 @@
+# apis/serializers.py
+
 from rest_framework import serializers
 from business.models import Business
 from items.models import Items
@@ -15,26 +17,24 @@ from rest_framework import serializers
 User = get_user_model()
 
 class CustomUserRegisterSerializer(RegisterSerializer):
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    fullname = serializers.CharField(required=True)
     phone = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username', 'email', 'password1', 'password2')
+        fields = ('fullname', 'username', 'email', 'password1', 'password2')
 
     def save(self, request):
         user = super().save(request)
-        user.first_name = self.validated_data.get('first_name', '')
-        user.last_name = self.validated_data.get('last_name', '')
-        user.phone = self.validated_data.get('role', '')
+        user.fullname = self.validated_data.get('fullname', '')
+        user.phone = self.validated_data.get('phone', '')
         user.save()
         return user
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'role', 'is_active']
+        fields = ['id', 'username', 'email', 'fullname', 'role', 'is_active']
 
 
 class BusinessRegistrationSerializer(serializers.ModelSerializer):

@@ -49,6 +49,7 @@ class BusinessRegisterAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         # If you want to enforce that the owner/admin come from the authenticated user,
         # you can also pass the request to the serializer context here.
+        
         serializer.save()
 
 

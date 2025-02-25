@@ -2,9 +2,11 @@
 
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Authentication | JirehDashboard",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Authentication | JirehDashboard",
+  };
+}
 
 export default function AuthLayout({
   children,

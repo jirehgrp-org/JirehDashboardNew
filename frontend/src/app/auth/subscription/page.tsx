@@ -1,6 +1,11 @@
 // @/app/auth/login/page.tsx
 
+import { Metadata } from "next";
 import { SubscriptionForm } from "@/components/features/auth/SubscriptionForm";
+
+export const metadata: Metadata = {
+  title: "Subscription | JirehDashboard",
+};
 
 export default function SubscriptionPage() {
   return (

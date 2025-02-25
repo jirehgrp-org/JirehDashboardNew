@@ -49,6 +49,7 @@ export const ItemSchema = (language: SupportedLanguages = "en") => {
     branchId: z
       .string()
       .min(1, t.itemSchema?.branchRequired || "Branch is required"),
+    unitOfMeasure: z.string().optional(),
   });
 };
 

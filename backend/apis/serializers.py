@@ -75,12 +75,13 @@ class BusinessModelSerializer(serializers.ModelSerializer):
 class BusinessBranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Branches
-        fields = ('name', 'address', 'contact_number', 'business')
+        fields = ('id', 'name', 'address', 'contact_number', 'business', 'is_active', 'created_at', 'updated_at')
 
 class ItemsBranchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Items
         fields = [
+            'id',
             'name',
             'price',
             'quantity',
@@ -88,7 +89,9 @@ class ItemsBranchSerializer(serializers.ModelSerializer):
             'is_active',
             'unit_of_measure',
             'category',
-            'business_branch'
+            'business_branch',
+            'created_at',
+            'updated'
         ]
 
 class CategoriesSerializer(serializers.ModelSerializer):

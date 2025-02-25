@@ -1,3 +1,5 @@
+# items/models.py
+
 from django.db import models
 
 # Create your models here.
@@ -22,6 +24,8 @@ class Items(models.Model):
     unit_of_measure = models.CharField( max_length=10, choices=UNIT_OF_MEASURE_CHOICES, null=True, blank=True )
     category = models.ForeignKey('categories.Categories', on_delete=models.CASCADE)
     business_branch = models.ForeignKey('branches.Branches', on_delete=models.SET_NULL, null=True, blank=True)
+    business = models.ForeignKey('business.Business', on_delete=models.CASCADE, null=True)  # Add this line
+
 
     class Meta:
         indexes = [

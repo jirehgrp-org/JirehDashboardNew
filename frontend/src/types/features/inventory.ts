@@ -22,6 +22,7 @@ export interface InventoryItem {
   branchId?: string;
   price?: number;
   quantity?: number;
+  unitOfMeasure?: string;
 }
 
 export interface InventoryFormProps {
@@ -99,4 +100,4 @@ export type StockItem = Required<
     | "branchId"
     | "quantity"
   >
->;
+> & { unitOfMeasure?: string };

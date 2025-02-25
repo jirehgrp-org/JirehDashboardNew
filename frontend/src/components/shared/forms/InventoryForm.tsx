@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/shared/forms/InventoryForm.tsx
 "use client";
 
@@ -67,13 +68,38 @@ export function InventoryForm({
         quantity: 0,
         categoryId: "",
         branchId: "",
+        unitOfMeasure: "pieces", // Set a default unit of measure
       }),
     },
   });
 
+  // Custom submit handler to ensure proper data formatting
+  // When submitting the item form
+  const handleSubmit = (data: any) => {
+    // Format the data if needed before passing to parent onSubmit
+    if (variant === "item") {
+      // Ensure numeric fields are properly typed
+      const formattedData = {
+        ...data,
+        price:
+          typeof data.price === "string" ? parseFloat(data.price) : data.price,
+        quantity:
+          typeof data.quantity === "string"
+            ? parseInt(data.quantity, 10)
+            : data.quantity,
+        // Make sure these fields are properly set:
+        branchId: data.branchId,
+        categoryId: data.categoryId,
+      };
+      onSubmit(formattedData);
+    } else {
+      onSubmit(data);
+    }
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         {/* Common fields for all variants */}
         <FormField
           control={form.control}
@@ -307,6 +333,43 @@ export function InventoryForm({
                                 {branch.name}
                               </SelectItem>
                             ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="unitOfMeasure"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-4">
+                    <FormLabel className="w-1/4 text-right">
+                      {formT.unitOfMeasure}
+                    </FormLabel>
+                    <FormControl className="w-3/4">
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="h-10 w-3/4">
+                          <SelectValue
+                            placeholder={formT.unitOfMeasurePlaceholder}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pieces">{formT.pieces}</SelectItem>
+                          <SelectItem value="kg">{formT.kg}</SelectItem>
+                          <SelectItem value="g">{formT.g}</SelectItem>
+                          <SelectItem value="L">{formT.L}</SelectItem>
+                          <SelectItem value="ml">{formT.ml}</SelectItem>
+                          <SelectItem value="m">{formT.m}</SelectItem>
+                          <SelectItem value="box">{formT.box}</SelectItem>
+                          <SelectItem value="pack">{formT.pack}</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>

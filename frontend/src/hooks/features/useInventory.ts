@@ -1,14 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 // @/hooks/features/useInventory.ts
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/shared/useToast";
-import type {
-  InventoryItem,
-  UseInventoryOptions,
-} from "@/types/features/inventory";
+import type { InventoryItem, UseInventoryOptions } from "@/types/features/inventory";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
+import { inventoryService } from "@/lib/services/inventory";
 
+// Mock data for fallback when API fails
 const mockBranches: InventoryItem[] = [
   {
     id: "1",
@@ -18,43 +19,7 @@ const mockBranches: InventoryItem[] = [
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Branch Office",
-    address: "456 Market St, Addis Ababa",
-    contactNumber: "922345678",
-    active: true,
-    createdAt: "2023-12-20T12:00:00Z",
-    updatedAt: "2024-01-10T12:00:00Z",
-  },
-  {
-    id: "3",
-    name: "Warehouse",
-    address: "789 Industrial Ave, Addis Ababa",
-    contactNumber: "933456789",
-    active: false,
-    createdAt: "2023-11-15T12:00:00Z",
-    updatedAt: "2023-12-05T12:00:00Z",
-  },
-  {
-    id: "4",
-    name: "Airport Branch",
-    address: "Bole Road, Addis Ababa",
-    contactNumber: "944567890",
-    active: true,
-    createdAt: "2023-10-30T12:00:00Z",
-    updatedAt: "2023-11-20T12:00:00Z",
-  },
-  {
-    id: "5",
-    name: "City Center",
-    address: "Kirkos District, Addis Ababa",
-    contactNumber: "955678901",
-    active: true,
-    createdAt: "2023-09-15T12:00:00Z",
-    updatedAt: "2023-10-10T12:00:00Z",
-  },
+  }
 ];
 
 const mockCategories: InventoryItem[] = [
@@ -65,39 +30,7 @@ const mockCategories: InventoryItem[] = [
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Office Supplies",
-    description: "General office materials and supplies",
-    active: true,
-    createdAt: "2024-01-02T12:00:00Z",
-    updatedAt: "2024-01-16T12:00:00Z",
-  },
-  {
-    id: "3",
-    name: "Furniture",
-    description: "Office and home furniture",
-    active: false,
-    createdAt: "2024-01-03T12:00:00Z",
-    updatedAt: "2024-01-17T12:00:00Z",
-  },
-  {
-    id: "4",
-    name: "Clothing",
-    description: "",
-    active: true,
-    createdAt: "2024-01-04T12:00:00Z",
-    updatedAt: "2024-01-18T12:00:00Z",
-  },
-  {
-    id: "5",
-    name: "Home Decor",
-    description: "",
-    active: true,
-    createdAt: "2024-01-05T12:00:00Z",
-    updatedAt: "2024-01-19T12:00:00Z",
-  },
+  }
 ];
 
 const mockItems: InventoryItem[] = [
@@ -108,54 +41,11 @@ const mockItems: InventoryItem[] = [
     quantity: 5,
     categoryId: "1",
     branchId: "1",
+    unitOfMeasure: "pieces",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Printer",
-    price: 500,
-    quantity: 3,
-    categoryId: "2",
-    branchId: "3",
-    active: true,
-    createdAt: "2024-01-02T12:00:00Z",
-    updatedAt: "2024-01-16T12:00:00Z",
-  },
-  {
-    id: "3",
-    name: "Monitor",
-    price: 800,
-    quantity: 2,
-    categoryId: "1",
-    branchId: "3",
-    active: false,
-    createdAt: "2024-01-03T12:00:00Z",
-    updatedAt: "2024-01-17T12:00:00Z",
-  },
-  {
-    id: "4",
-    name: "Keyboard",
-    price: 200,
-    quantity: 4,
-    categoryId: "2",
-    branchId: "2",
-    active: false,
-    createdAt: "2024-01-04T12:00:00Z",
-    updatedAt: "2024-01-18T12:00:00Z",
-  },
-  {
-    id: "5",
-    name: "Mouse",
-    price: 100,
-    quantity: 6,
-    categoryId: "1",
-    branchId: "3",
-    active: true,
-    createdAt: "2024-01-05T12:00:00Z",
-    updatedAt: "2024-01-19T12:00:00Z",
-  },
+  }
 ];
 
 export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
@@ -163,14 +53,87 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const t = translations[language].dashboard.inventory;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<InventoryItem[]>(() => {
-    if (endpoint === "branches") return mockBranches;
-    if (endpoint === "categories") return mockCategories;
-    if (endpoint === "items") return mockItems;
-    return [];
-  });
-
+  const [data, setData] = useState<InventoryItem[]>([]);
+  const [isMockData, setIsMockData] = useState(false);
+  
   const { toast } = useToast();
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      if (isMockData) {
+        // Return mock data based on endpoint
+        switch (endpoint) {
+          case "branches":
+            setData(mockBranches);
+            break;
+          case "categories":
+            setData(mockCategories);
+            break;
+          case "items":
+            setData(mockItems);
+            break;
+          default:
+            setData([]);
+        }
+      } else {
+        // Try to fetch real data
+        try {
+          let response: InventoryItem[] = []; 
+          
+          switch (endpoint) {
+            case "branches":
+              response = await inventoryService.fetchBranches();
+              break;
+            case "categories":
+              response = await inventoryService.fetchCategories();
+              break;
+            case "items":
+              response = await inventoryService.fetchItems();
+              break;
+          }
+          
+          setData(response);
+        } catch (error: any) {
+          console.error(`API error for ${endpoint}:`, error);
+          
+          // Fall back to mock data on any error
+          setIsMockData(true);
+          
+          switch (endpoint) {
+            case "branches":
+              setData(mockBranches);
+              break;
+            case "categories":
+              setData(mockCategories);
+              break;
+            case "items":
+              setData(mockItems);
+              break;
+            default:
+              setData([]);
+          }
+          
+          toast({
+            title: "Using Demo Data",
+            description: "Could not connect to the server. Using sample data instead.",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [endpoint, isMockData, toast]);
+
+  // Initial data loading
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getToastMessages = (variant: string) => {
     const commonMessages = {
@@ -197,40 +160,87 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
       },
     };
 
-    const selectedVariant =
-      variantMessages[variant as keyof typeof variantMessages] ||
-      variantMessages.branches;
-
     return {
       ...commonMessages,
-      ...selectedVariant,
+      ...variantMessages[variant as keyof typeof variantMessages] || variantMessages.branches
     };
   };
 
-  const handleCreate = async (newData: Partial<InventoryItem>) => {
+  const handleCreate = async (newData: Partial<InventoryItem>): Promise<InventoryItem | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result: InventoryItem = {
-        ...newData,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as InventoryItem;
+      let result: InventoryItem | null = null;
+      
+      if (isMockData) {
+        // Create mock item
+        result = {
+          ...newData,
+          active: newData.active !== undefined ? newData.active : true,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as InventoryItem;
+      } else {
+        try {
+          // Ensure we set active to true by default
+          const dataWithActive = {
+            ...newData,
+            active: newData.active !== undefined ? newData.active : true
+          };
+          
+          switch (endpoint) {
+            case "branches":
+              result = await inventoryService.createBranch(dataWithActive);
+              break;
+            case "categories":
+              result = await inventoryService.createCategory(dataWithActive);
+              break;
+            case "items":
+              result = await inventoryService.createItem(dataWithActive);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to create ${endpoint}:`, error);
+          setIsMockData(true);
+          
+          // Fall back to mock creation
+          result = {
+            ...newData,
+            active: newData.active !== undefined ? newData.active : true,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as InventoryItem;
+          
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
+      }
 
-      setData((prev) => [...prev, result]);
+      // Add the new item to the state
+      if (result) {
+        setData((prev) => [...prev, result as InventoryItem]);
 
-      const messages = getToastMessages(endpoint);
-      toast({
-        title: messages.added,
-        description: `${result.name} ${messages.createdSuccess}`,
-      });
+        const messages = getToastMessages(endpoint);
+        toast({
+          title: messages.added,
+          description: `${result.name} ${messages.createdSuccess}`,
+        });
 
-      onSuccess?.();
+        onSuccess?.();
+      }
+      
       return result;
     } catch (err) {
       handleError(err);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -239,31 +249,82 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const handleUpdate = async (
     id: string,
     updateData: Partial<InventoryItem>
-  ) => {
+  ): Promise<InventoryItem | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const result: InventoryItem = {
-        ...updateData,
-        id,
-        updatedAt: new Date().toISOString(),
-      } as InventoryItem;
+      let result: InventoryItem | null = null;
+      
+      if (isMockData) {
+        // Update mock item
+        const existingItem = data.find(item => item.id === id);
+        if (!existingItem) {
+          throw new Error(`Item with ID ${id} not found`);
+        }
+        
+        result = {
+          ...existingItem,
+          ...updateData,
+          updatedAt: new Date().toISOString(),
+        };
+      } else {
+        try {
+          switch (endpoint) {
+            case "branches":
+              result = await inventoryService.updateBranch(id, updateData);
+              break;
+            case "categories":
+              result = await inventoryService.updateCategory(id, updateData);
+              break;
+            case "items":
+              result = await inventoryService.updateItem(id, updateData);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to update ${endpoint}:`, error);
+          setIsMockData(true);
+          
+          const existingItem = data.find(item => item.id === id);
+          if (!existingItem) {
+            throw new Error(`Item with ID ${id} not found`);
+          }
+          
+          result = {
+            ...existingItem,
+            ...updateData,
+            updatedAt: new Date().toISOString(),
+          };
+          
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
+      }
 
-      setData((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, ...result } : item))
-      );
+      // Update item in state
+      if (result) {
+        setData((prev) =>
+          prev.map((item) => (item.id === id ? result as InventoryItem : item))
+        );
 
-      const messages = getToastMessages(endpoint);
-      toast({
-        title: messages.updated,
-        description: `${result.name} ${messages.updatedSuccess}`,
-      });
+        const messages = getToastMessages(endpoint);
+        toast({
+          title: messages.updated,
+          description: `${result.name} ${messages.updatedSuccess}`,
+        });
 
-      onSuccess?.();
+        onSuccess?.();
+      }
+      
       return result;
     } catch (err) {
       handleError(err);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -272,17 +333,48 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   const handleDelete = async (id: string) => {
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const itemToDelete = data.find((item) => item.id === id);
+      if (!itemToDelete) {
+        throw new Error(`Item with ID ${id} not found`);
+      }
+      
+      if (!isMockData) {
+        try {
+          switch (endpoint) {
+            case "branches":
+              await inventoryService.deleteBranch(id);
+              break;
+            case "categories":
+              await inventoryService.deleteCategory(id);
+              break;
+            case "items":
+              await inventoryService.deleteItem(id);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to delete ${endpoint}:`, error);
+          setIsMockData(true);
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
+      }
+  
+      // Remove from UI
       setData((prev) => prev.filter((item) => item.id !== id));
-
+  
       const messages = getToastMessages(endpoint);
       toast({
         title: messages.deleted,
-        description: `${itemToDelete?.name} ${messages.deletedSuccess}`,
+        description: `${itemToDelete.name} ${messages.deletedSuccess}`,
       });
-
+  
       onSuccess?.();
     } catch (err) {
       handleError(err);
@@ -292,29 +384,51 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
   };
 
   const handleError = (err: unknown) => {
-    const message = err instanceof Error ? err.message : "An error occurred";
+    console.error('Error in useInventory:', err);
+    let message = "An error occurred";
+    
+    if (err instanceof Error) {
+      message = err.message;
+    }
+    
     setError(message);
+    
     toast({
       title: "Error",
       description: message,
-      variant: "destructive",
+      variant: "destructive"
     });
   };
 
-  const handleSubmit = async (data: Partial<InventoryItem>, id?: string) => {
-    if (id) {
-      return handleUpdate(id, data);
+  const handleSubmit = async (data: Partial<InventoryItem>, id?: string): Promise<InventoryItem | null> => {
+    const formattedData = {
+      ...data,
+      active: id ? data.active : true,
+    };
+    
+    try {
+      return id 
+        ? await handleUpdate(id, formattedData)
+        : await handleCreate(formattedData);
+    } catch (err) {
+      console.error(`Error in handleSubmit for ${endpoint}:`, err);
+      return null;
     }
-    return handleCreate(data);
   };
 
   return {
     isLoading,
     error,
     data,
+    isMockData,
+    toggleMockData: () => {
+      setIsMockData(!isMockData);
+      fetchData();
+    },
     handleSubmit,
     handleCreate,
     handleUpdate,
     handleDelete,
+    refreshData: fetchData
   };
 }

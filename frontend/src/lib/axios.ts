@@ -1,14 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/lib/axios.ts
 
 import axios, { InternalAxiosRequestConfig } from 'axios';
 import { authService } from './services/auth';
 
-// Create a custom instance to avoid polluting the global axios
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1",
 });
 
-// Request interceptor
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = authService.getToken();
@@ -23,20 +22,16 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Check if the error is due to an expired token
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
-        // Try to refresh the token
         const refreshed = await authService.refreshAccessToken();
         if (refreshed) {
-          // Update the Authorization header with the new token
           originalRequest.headers['Authorization'] = `Bearer ${authService.getToken()}`;
           return api(originalRequest);
         }
@@ -44,7 +39,6 @@ api.interceptors.response.use(
         console.error("Token refresh error:", refreshError);
       }
       
-      // If we reach here, refresh failed, so log out
       authService.removeToken();
       if (typeof window !== 'undefined') {
         window.location.href = '/auth/login?expired=true';
@@ -54,5 +48,84 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
+// AUTHENTICATION & USER MANAGEMENT
+export const registerUser = (data: any) => api.post('/register/user/', data);
+export const getUserProfile = () => api.get('/user/');
+export const getCurrentUser = () => api.get('/auth/user/');
+export const getUserDetail = (userId: number) => api.get(`/user/${userId}/`);
+export const updateUserProfile = (userId: number, data: any) => api.put(`/user/${userId}/`, data);
+export const deleteUser = (userId: number) => api.delete(`/user/${userId}/`);
+
+
+// BUSINESS MANAGEMENT
+export const registerBusiness = (data: any) => api.post('/register/business/', data);
+export const getBusinessList = () => api.get('/business/list/');
+export const getBusinessDetail = (businessId: number) => api.get(`/business/${businessId}/`);
+export const getBusinessRelatedUsers = () => api.get('/users/list/');
+
+
+// BRANCH MANAGEMENT
+export const getBusinessBranchList = () => api.get('/business/branch/list/');
+export const getBusinessBranchDetail = (branchId: number) => api.get(`/business/branch/${branchId}/`);
+export const registerBusinessBranch = (data: any) => api.post('/business/branch/register/', data);
+export const updateBranchDetail = (branchId: number, data: any) => api.put(`/business/branch/${branchId}/`, data);
+export const deleteBranch = (branchId: number) => api.delete(`/business/branch/${branchId}/`);
+
+
+// CATEGORY MANAGEMENT
+export const getCategoriesList = () => api.get('/categories/list/');
+export const getCategoryDetail = (categoryId: number) => api.get(`/categories/${categoryId}/`);
+export const registerCategory = (data: any) => api.post('/categories/register/', data);
+export const updateCategoryDetail = (categoryId: number, data: any) => api.put(`/categories/${categoryId}/`, data);
+export const deleteCategory = (categoryId: number) => api.delete(`/categories/${categoryId}/`);
+
+
+// INVENTORY/ITEM MANAGEMENT
+export const getBusinessBranchItemList = (queryParams = '') => {
+  const url = queryParams ? `/business/branch/item/list/${queryParams}` : '/business/branch/item/list/';
+  console.log('Fetching items with URL:', url);
+  return api.get(url);
+};
+export const getItemDetail = (itemId: number) => api.get(`/item/${itemId}/`);
+export const registerItem = (data: any) => {
+  console.log('Registering item with data:', data);
+  return api.post('/item/register/', data);
+};
+export const updateItemDetail = (itemId: number, data: any) => api.put(`/item/${itemId}/`, data);
+export const deleteItem = (itemId: number) => api.delete(`/item/${itemId}/`);
+
+
+// EXPENSE MANAGEMENT
+export const getBusinessExpensesList = () => api.get('/business/expenses/list/');
+export const getExpenseDetail = (expenseId: number) => api.get(`/business/expenses/${expenseId}/`);
+export const registerBusinessExpense = (data: any) => api.post('/business/expenses/register/', data);
+export const updateExpenseDetail = (expenseId: number, data: any) => api.put(`/business/expenses/${expenseId}/`, data);
+export const deleteExpense = (expenseId: number) => api.delete(`/business/expenses/${expenseId}/`);
+
+
+// ORDER MANAGEMENT
+export const getOrdersList = () => api.get('/orders/list/');
+export const getOrderDetail = (orderId: number) => api.get(`/order/${orderId}/`);
+export const registerOrder = (data: any) => api.post('/order/register/', data);
+export const updateOrderDetail = (orderId: number, data: any) => api.put(`/order/${orderId}/`, data);
+export const deleteOrder = (orderId: number) => api.delete(`/order/${orderId}/`);
+
+
+// SUBSCRIPTION & FEATURES MANAGEMENT
+export const getFeaturesList = () => api.get('/features/list/');
+export const getFeatureDetail = (featureId: number) => api.get(`/feature/${featureId}/`);
+export const registerFeature = (data: any) => api.post('/feature/register/', data);
+export const updateFeatureDetail = (featureId: number, data: any) => api.put(`/feature/${featureId}/`, data);
+export const deleteFeature = (featureId: number) => api.delete(`/feature/${featureId}/`);
+
+
+// PLAN MANAGEMENT
+export const getPlansList = () => api.get('/plans/list/');
+export const getPlanDetail = (planId: number) => api.get(`/plan/${planId}/`);
+export const registerPlan = (data: any) => api.post('/plan/register/', data);
+export const updatePlanDetail = (planId: number, data: any) => api.put(`/plan/${planId}/`, data);
+export const deletePlan = (planId: number) => api.delete(`/plan/${planId}/`);
 
 export default api;

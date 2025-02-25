@@ -225,66 +225,174 @@ class BusinessBranchRegisterAPIView(APIView):
         
         serializer = BusinessBranchSerializer(branch)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class BusinessBranchDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def get_object(self, branch_id):
+        try:
+            return Branches.objects.get(id=branch_id)
+        except Branches.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, branch_id):
+        branch = self.get_object(branch_id)
+        # Check if user has permission to access this branch
+        if request.user.business != branch.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = BusinessBranchSerializer(branch)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, branch_id):
+        branch = self.get_object(branch_id)
+        # Check if user has permission to edit this branch
+        if request.user.business != branch.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = BusinessBranchSerializer(branch, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, branch_id):
+        branch = self.get_object(branch_id)
+        # Check if user has permission to delete this branch
+        if request.user.business != branch.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Soft delete by updating is_active to False
+        branch.is_active = False
+        branch.save()
+        return Response({"message": "Branch deactivated successfully"}, status=status.HTTP_200_OK)
 
 class BusinessBranchRelatedItemView(APIView):
     authentication_classes = [JWTAuthentication]
-    permissions_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
 
     def get(self, request):
         user = request.user
         branch = user.business_branch
-        # print(branch)
+        
+        # Check if branch_id is provided as query parameter
+        branch_id = request.query_params.get('branch_id')
+        if branch is None and branch_id:
+            try:
+                branch = Branches.objects.get(id=branch_id)
+            except Branches.DoesNotExist:
+                return Response({'error': f'Branch with id {branch_id} does not exist'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
         if branch is None:
-            return Response({'error': 'User is not registered with any business branch'}, status=status.HTTP_400_BAD_REQUEST)
+            # Return empty array instead of error when no branch
+            return Response([], status=status.HTTP_200_OK)
+                
         items = Items.objects.filter(business_branch=branch)
         serializer = ItemsBranchSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
-
-        # return Response({'GET-message': 'Business related products View'}, status=status.HTTP_200_OK)
-    # def post(self, reques):
-    #     return Response({'POST-message': 'Business related products View'}, status=status.HTTP_200_OK)
 
 class BusinessBranchRelatedRegisterItemView(APIView):
     authentication_classes = [JWTAuthentication]
-    permissions_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
 
     def post(self, request):
         user = request.user
         branch = user.business_branch
+        
+        # Allow explicit business_branch in request data
+        if branch is None and 'business_branch' in request.data:
+            try:
+                branch_id = request.data.get('business_branch')
+                branch = Branches.objects.get(id=branch_id)
+            except Branches.DoesNotExist:
+                return Response({'error': f'Branch with id {branch_id} does not exist'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+            
         if branch is None:
-            return Response({'error': 'User is not registered with any business branch'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User is not registered with any business branch and no branch ID was provided'}, 
+                         status=status.HTTP_400_BAD_REQUEST)
         
         data = request.data
-        print(data)
-        # item = Items(
-        #     name=data.get('name'),
-        #     price=data.get('price'),
-        #     quantity=data.get('quantity'),
-        #     last_inventory_update=data.get('last_inventory_update'),
-        #     is_active=data.get('is_active', True),
-        #     unit_of_measure=data.get('unit_of_measure'),
-        #     category_id=data.get('category'),
-        #     business_branch=branch
-        # )
-        # item.save()
+        # Validate required fields
+        required_fields = ['name', 'price', 'quantity', 'category']
+        for field in required_fields:
+            if not data.get(field):
+                return Response(
+                    {'error': f'Missing required field: {field}'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
-        # serializer = ItemsBranchSerializer(item)
-        # return Response(serializer.data, status=status.HTTP_201_CREATED)
-        item = Items(
-            name=data.get('name'),
-            price=data.get('price'),
-            quantity=data.get('quantity'),
-            last_inventory_update=data.get('last_inventory_update'),
-            is_active=data.get('is_active', True),
-            unit_of_measure=data.get('unit_of_measure'),
-            category_id=data.get('category'),
-            business_branch=branch
-        )
-        item.save()
+        try:
+            # Verify category exists
+            try:
+                category = Categories.objects.get(id=data.get('category'))
+            except Categories.DoesNotExist:
+                return Response(
+                    {'error': f'Category with id {data.get("category")} does not exist'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            item = Items(
+                name=data.get('name'),
+                price=data.get('price'),
+                quantity=data.get('quantity'),
+                last_inventory_update=data.get('last_inventory_update'),
+                is_active=data.get('is_active', True),
+                unit_of_measure=data.get('unit_of_measure'),
+                category_id=data.get('category'),
+                business_branch=branch,
+                business=branch.business
+            )
+            item.save()
+            
+            serializer = ItemsBranchSerializer(item)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+class ItemsDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def get_object(self, item_id):
+        try:
+            return Items.objects.get(id=item_id)
+        except Items.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, item_id):
+        item = self.get_object(item_id)
+        # Check if user has permission to access this item
+        if request.user.business_branch != item.business_branch:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = ItemsBranchSerializer(item)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, item_id):
+        item = self.get_object(item_id)
+        # Check if user has permission to edit this item
+        if request.user.business_branch != item.business_branch:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = ItemsBranchSerializer(item, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, item_id):
+        item = self.get_object(item_id)
+        # Check if user has permission to delete this item
+        if request.user.business_branch != item.business_branch:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Soft delete by updating is_active to False
+        item.is_active = False
+        item.save()
+        return Response({"message": "Item deactivated successfully"}, status=status.HTTP_200_OK)
 
 class CategoriesListAPIView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -304,16 +412,64 @@ class CategoriesRegisterAPIView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
 
     def post(self, request):
+        user = request.user
+        business = user.business
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, status=status.HTTP_400_BAD_REQUEST)
+        
         data = request.data
         category = Categories(
             name=data.get('name'),
             description=data.get('description'),
-            is_active=data.get('is_active', True)
+            is_active=data.get('is_active', True),
+            business=business  # Set the business field
         )
         category.save()
         
         serializer = CategoriesSerializer(category)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class CategoriesDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def get_object(self, category_id):
+        try:
+            return Categories.objects.get(id=category_id)
+        except Categories.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, category_id):
+        category = self.get_object(category_id)
+        # Check if user has permission to access this category
+        if category.business and request.user.business != category.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = CategoriesSerializer(category)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, category_id):
+        category = self.get_object(category_id)
+        # Check if user has permission to edit this category
+        if category.business and request.user.business != category.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = CategoriesSerializer(category, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, category_id):
+        category = self.get_object(category_id)
+        # Check if user has permission to delete this category
+        if category.business and request.user.business != category.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Soft delete by updating is_active to False
+        category.is_active = False
+        category.save()
+        return Response({"message": "Category deactivated successfully"}, status=status.HTTP_200_OK)
     
 
 class BusinessExpensesAPIView(APIView):

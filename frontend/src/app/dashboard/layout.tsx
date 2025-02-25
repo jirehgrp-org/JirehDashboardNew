@@ -1,8 +1,7 @@
-// @/app/dashboard/layout.tsx
+// src/app/dashboard/layout.tsx
 
 import { Metadata } from "next";
-import { RouteGuard } from "@/components/auth/RouteGuard";
-import { SidebarDashboard } from "@/components/layout/dashboard/Sidebar";
+import { DashboardClient } from "./DashboardClient";
 
 export const metadata: Metadata = {
   title: "Dashboard | JirehDashboard",
@@ -13,11 +12,5 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="h-screen flex">
-      <RouteGuard>
-        <SidebarDashboard>{children}</SidebarDashboard>
-      </RouteGuard>
-    </div>
-  );
+  return <DashboardClient>{children}</DashboardClient>;
 }

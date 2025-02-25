@@ -2,7 +2,7 @@
 // @/components/auth/LoginForm.tsx
 
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -13,16 +13,16 @@ import Header from "@/components/common/Header";
 import { useLanguage } from "@/components/context/LanguageContext";
 import type { LoginCredentials } from "@/types/shared/auth";
 import { useAuth } from "@/hooks/shared/useAuth";
+import { toast } from 'sonner';
 
 export function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const authToast = searchParams?.get('toast');
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
-  
   const { language } = useLanguage();
   const t = translations[language].auth.login;
-  
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -64,6 +64,14 @@ export function LoginForm() {
       [e.target.id]: e.target.value,
     });
   };
+
+  useEffect(() => {
+    if (authToast === 'auth-required') {
+      toast.error('Please log in to access the dashboard', {
+        description: 'Authentication is required to view dashboard content'
+      });
+    }
+  }, [authToast]);
 
   return (
     <>

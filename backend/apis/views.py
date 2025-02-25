@@ -56,51 +56,81 @@ class CustomUserRegisterAPIView(RegisterView):
     serializer_class = CustomUserRegisterSerializer
 
 class UserProfileView(APIView):
-    # serializer_class = UserSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
 
-    # def get_object(self, request):
-    def get(self, request):
-        user = request.user
-        # print(user)
+    def get_object(self, user_id=None):
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+                return user
+            except User.DoesNotExist:
+                raise Http404
+        return self.request.user
 
+    def get(self, request, user_id=None):
+        user = self.get_object(user_id)
+        
         data = {
             'id': user.id,
-            'username': user.email,
-            'email':user.email,
+            'username': user.username,
+            'email': user.email,
             'fullname': user.fullname,
             'role': user.role,
+            'phone': user.phone,
             'is_active': user.is_active,
             'created_at': user.created_at,
             'last_login': user.last_login,
             'updated_at': user.updated_at
-
         }
         return Response(data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        user = request.user
+    def put(self, request, user_id=None):
+        user = self.get_object(user_id)
         data = request.data
         
+        # Update user fields
         user.fullname = data.get('fullname', user.fullname)
         user.email = data.get('email', user.email)
         user.role = data.get('role', user.role)
+        user.phone = data.get('phone', user.phone)
+        
+        # If username is provided and different, update it
+        new_username = data.get('username')
+        if new_username and new_username != user.username:
+            # Check if username is already taken
+            if User.objects.filter(username=new_username).exists():
+                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            user.username = new_username
         
         user.save()
         
         response_data = {
             'id': user.id,
-            'username': user.email,
+            'username': user.username,
             'email': user.email,
             'fullname': user.fullname,
             'role': user.role,
+            'phone': user.phone,
             'is_active': user.is_active,
             'created_at': user.created_at,
             'last_login': user.last_login,
             'updated_at': user.updated_at
         }
         return Response(response_data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, user_id=None):
+        if user_id is None:
+            return Response({"error": "Cannot delete current user"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = self.get_object(user_id)
+        
+        # Safety check to prevent deleting yourself
+        if user.id == request.user.id:
+            return Response({"error": "Cannot delete yourself"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.delete()
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
     # def get(self, request):
     #     return Response({'message': 'You are authed Manager or Admin'})
@@ -135,9 +165,15 @@ class BusinessListAPIView(APIView):
     def get(self, request):
         user = request.user
         business = user.business_branch
+        
+        # Return empty list with message instead of 400 error if no business
         if business is None:
-            return Response({'error': 'User is not registered with any business'}, status=status.HTTP_400_BAD_REQUEST)
-        # businesses = Business.objects.filter(id=business.id)
+            return Response({
+                'data': [],
+                'message': 'User is not registered with any business'
+            }, status=status.HTTP_200_OK)
+            
+        # Get all businesses or filter by the user's business
         businesses = Business.objects.all()
         serializer = BusinessModelSerializer(businesses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

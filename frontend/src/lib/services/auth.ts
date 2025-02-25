@@ -265,6 +265,7 @@ async register(data: RegisterCredentials): Promise<AuthResponse> {
         if (response.ok) {
           const userData = await response.json();
           console.log("User data fetched successfully:", userData);
+          console.log("USERNAME FROM API:", userData.username);
           console.log("Raw user data from API:", userData);
           this.currentUser = userData;
           return userData;
@@ -358,6 +359,10 @@ async register(data: RegisterCredentials): Promise<AuthResponse> {
     return this.currentUser;
   }
 
+  updateUserCache(userData: User): void {
+    this.currentUser = { ...this.currentUser, ...userData };
+  }
+  
   getAuthHeader(): Record<string, string> | undefined {
     return this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : undefined;
   }

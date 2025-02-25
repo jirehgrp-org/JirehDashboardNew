@@ -41,5 +41,13 @@ urlpatterns = [
     path('plan/register', PlansRegisterAPIView.as_view(), name='plan-register'),
     path('item/register',BusinessBranchRelatedRegisterItemView.as_view(), name='item-register'),
     path('order/register',BusinessOrdersRegisterAPIView.as_view(), name='order-register'),
-    
+    path('business/<int:business_id>', BusinessListAPIView.as_view(), name='business-detail'),
+    path('business/branch/<int:branch_id>', BusinessBranchListAPIView.as_view(), name='business-branch-detail'),
+    path('categories/<int:category_id>', CategoriesListAPIView.as_view(), name='category-detail'),
+    path('business/expenses/<int:expense_id>', BusinessExpensesAPIView.as_view(), name='expense-detail'),
+    path('feature/<int:feature_id>', FeaturesAPIView.as_view(), name='feature-detail'),
+    path('plan/<int:plan_id>', PlansAPIView.as_view(), name='plan-detail'),
+    path('item/<int:item_id>', BusinessBranchRelatedItemView.as_view(), name='item-detail'),
+    path('order/<int:order_id>', BusinessOrdersAPIView.as_view(), name='order-detail'),
+    path('user/<int:user_id>/', UserProfileView.as_view(), name='user-detail'),
 ]

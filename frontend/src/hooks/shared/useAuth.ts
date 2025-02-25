@@ -11,6 +11,7 @@ import type {
   BusinessData,
   AuthResponse,
 } from "@/types/shared/auth";
+import api from "@/lib/axios";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -172,12 +173,38 @@ export function useAuth() {
     }
   };
 
+  const updateUser = async (userData: Partial<User>): Promise<AuthResponse> => {
+    setIsLoading(true);
+    try {
+      const response = await api.put('/user/', userData);
+      
+      if (response.data) {
+        // Update local user state
+        setUser(prev => prev ? { ...prev, ...response.data } : response.data);
+        // Update cached user in authService
+        authService.updateUserCache(response.data);
+        return { success: true };
+      }
+      
+      return { success: false, error: "Failed to update user data" };
+    } catch (error: any) {
+      console.error("Update user error:", error);
+      return {
+        success: false,
+        error: error.message || "Update failed"
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     user,
     login,
     logout,
     register,
     registerBusiness,
+    updateUser, 
     isLoading,
     isAuthenticated: !!user,
     checkAuth,

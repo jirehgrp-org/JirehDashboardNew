@@ -19,7 +19,9 @@ export interface InventoryItem {
 
   // Item fields
   categoryId?: string;
+  categoryName?: string;
   branchId?: string;
+  branchName?: string;
   price?: number;
   quantity?: number;
   unitOfMeasure?: string;

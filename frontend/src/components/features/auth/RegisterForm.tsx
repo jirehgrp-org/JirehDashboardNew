@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/auth/RegisterForm.tsx
 
@@ -25,6 +24,7 @@ import { MultiStepLoader } from "@/components/ui/aceternity/multi-step-loader";
 import { CitySelect } from "@/constants/shared/ethiopianCIties";
 import { useToast } from "@/hooks/shared/useToast";
 import { authService } from "@/lib/services/auth";
+import { registerBusiness } from "@/lib/axios";
 
 interface Address {
   businessName: string;
@@ -36,7 +36,7 @@ interface Address {
 
 export function RegisterForm() {
   const { language } = useLanguage();
-  const { register, registerBusiness } = useAuth();
+  const { register } = useAuth();
   const router = useRouter();
   const t = translations[language].auth.register;
   const [showPassword, setShowPassword] = useState(false);
@@ -116,6 +116,12 @@ export function RegisterForm() {
     return null;
   };
 
+  const formattedBusinessPhone = addressDetails.businessPhone.startsWith("+251") 
+  ? addressDetails.businessPhone 
+  : addressDetails.businessPhone.startsWith("251")
+    ? `+${addressDetails.businessPhone}`
+    : `+251${addressDetails.businessPhone}`;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -149,27 +155,42 @@ export function RegisterForm() {
         setIsLoading(false);
         return;
       }
-  
-      // Format phone number - try without the country code prefix first
-      // since the backend might be adding it automatically
-      const formattedPhone = formData.phone.replace(/^\+?251/, "");
       
-      // Prepare a minimal registration payload to avoid potential validation issues
+      // Validate business fields early to save time
+      if (
+        !addressDetails.businessName ||
+        !addressDetails.businessPhone ||
+        !addressDetails.street ||
+        !addressDetails.city
+      ) {
+        setError("Please complete all business information");
+        setIsLoading(false);
+        return;
+      }
+
+      // Format phone number - ensure it has +251 prefix
+      const formattedPhone = formData.phone.startsWith("+251") 
+        ? formData.phone 
+        : formData.phone.startsWith("251")
+          ? `+${formData.phone}`
+          : `+251${formData.phone}`;
+      
+      // Prepare registration data
       const registrationData = {
         username: formData.username,
         email: formData.email,
         password1: formData.password1,
         password2: formData.password2,
         fullname: formData.fullname,
-        phone: formattedPhone
-        // Remove user_role as it might be causing validation issues
+        phone: formattedPhone,
+        role: "owner" // Explicitly set role to owner for business registration
       };
       
-      console.log("Submitting minimal registration data:", registrationData);
+      console.log("Submitting registration data:", registrationData);
       
-      // Register user
+      // STEP 1: Register the user
       const userRegistered = await register(registrationData);
-  
+
       if (userRegistered.success) {
         toast({
           title: "Account created successfully!",
@@ -177,16 +198,38 @@ export function RegisterForm() {
           variant: "default",
         });
         
-        // Add significant delay to ensure authentication is completed
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Create business data
+        const businessData = {
+          name: addressDetails.businessName,
+          address_street: addressDetails.street,
+          address_city: addressDetails.city,
+          address_country: addressDetails.country,
+          contact_number: formattedBusinessPhone,
+          registration_number: `BMS${Date.now()}`
+        };
+
+        // Use registerBusiness from useAuth instead of direct API call
+      const businessRegistered = await registerBusiness(businessData);
+      
+      if (businessRegistered.success) {
+        toast({
+          title: "Setup complete!",
+          description: "Redirecting to login...",
+          variant: "default",
+        });
         
-        // Continue with business registration
-        await handleBusinessRegistration();
+        // Redirect to login
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1500);
       } else {
-        throw new Error(userRegistered.error || "Registration failed");
+        throw new Error(businessRegistered.error || "Business registration failed");
       }
+    } else {
+      throw new Error(userRegistered.error || "Registration failed");
+    }
     } catch (err: any) {
-      console.error("User registration error:", err);
+      console.error("Registration error:", err);
       
       toast({
         title: "Error",
@@ -195,117 +238,10 @@ export function RegisterForm() {
       });
       
       setError(err.message || "Registration failed");
-      setIsLoading(false);
-    }
-  };
-  
-  const handleBusinessRegistration = async () => {
-    try {
-      // Validate business fields
-      if (
-        !addressDetails.businessName ||
-        !addressDetails.businessPhone ||
-        !addressDetails.street ||
-        !addressDetails.city
-      ) {
-        throw new Error("Please complete all business information");
-      }
-      
-      // Format business phone
-      const formattedBusinessPhone = addressDetails.businessPhone.startsWith("+251") 
-        ? addressDetails.businessPhone 
-        : `+251${addressDetails.businessPhone}`;
-      
-      // Create business registration data matching the API format
-      const businessData = {
-        name: addressDetails.businessName,
-        address_street: addressDetails.street,
-        address_city: addressDetails.city,
-        address_country: addressDetails.country,
-        contact_number: formattedBusinessPhone,
-        registration_number: `BMS${Date.now()}`,
-        // owner and admin should be null to let the backend use the authenticated user
-        owner: null,
-        admin: null
-      };
-      
-      console.log("Registering business with data:", businessData);
-      
-      // Use the direct fetch API with the latest token
-      const token = authService.getToken();
-      console.log("Using token for business registration:", token ? `${token.substring(0, 10)}...` : "No token");
-      
-      if (!token) {
-        console.error("No authentication token available for business registration");
-        throw new Error("Authentication required to register business");
-      }
-      
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
-      
-      // Make sure we're using the exact endpoint from your API
-      const response = await fetch(`${API_URL}/register/business`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(businessData)
-      });
-      
-      const responseText = await response.text();
-      console.log(`Business registration response (${response.status}):`, responseText);
-      
-      let responseData;
-      try {
-        responseData = responseText ? JSON.parse(responseText) : {};
-      } catch (e) {
-        console.warn("Could not parse response as JSON:", responseText);
-        responseData = {};
-      }
-      
-      if (response.ok) {
-        toast({
-          title: "Business registered!",
-          description: "Redirecting to subscription setup...",
-          variant: "default",
-        });
-        
-        // Redirect to subscription page
-        setTimeout(() => {
-          router.push("/auth/login");
-        }, 1500);
-      } else {
-        if (response.status === 401) {
-          console.error("Token invalid for business registration. Refreshing authentication...");
-          
-          // Try to refresh the token
-          const refreshed = await authService.refreshAccessToken();
-          if (refreshed) {
-            console.log("Token refreshed successfully. Retrying business registration...");
-            // Retry with the new token
-            return handleBusinessRegistration();
-          } else {
-            throw new Error("Authentication expired. Please log in again.");
-          }
-        }
-        
-        throw new Error(responseData.detail || `Failed to register business (${response.status})`);
-      }
-    } catch (error: any) {
-      console.error("Business registration error:", error);
-      
-      toast({
-        title: "Business Setup Error",
-        description: error.message || "Failed to set up business",
-        variant: "destructive",
-      });
-      
-      setError(error.message || "Business setup failed");
     } finally {
       setIsLoading(false);
     }
   };
-  
   
   const loadingStates = [
     { text: "Creating your account..." },
@@ -465,7 +401,7 @@ export function RegisterForm() {
                 <Label htmlFor="cpassword">{t.confirmPassword}</Label>
                 <div className="relative">
                   <Input
-                    id="password2" // Changed from "cpassword"
+                    id="password2"
                     placeholder="••••••••"
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.password2}
@@ -586,7 +522,7 @@ export function RegisterForm() {
                     +251
                   </div>
                   <Input
-                    id="businessPhone" // Changed from "phone" to avoid ID conflict
+                    id="businessPhone"
                     placeholder={t.businessPhonePlaceholder}
                     type="tel"
                     value={addressDetails.businessPhone}

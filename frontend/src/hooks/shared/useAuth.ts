@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/hooks/shared/useAuth.ts - Fixed implementation
+// @/hooks/shared/useAuth.ts
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,6 @@ import type {
   BusinessData,
   AuthResponse,
 } from "@/types/shared/auth";
-import api from "@/lib/axios";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,12 +35,9 @@ export function useAuth() {
           userData = await authService.fetchUserData();
         }
         
-        console.log("Auth check - User data:", userData ? "Found" : "Not found");
-        
         if (userData) {
           setUser(userData);
         } else {
-          // If we couldn't get user data but have a token, something's wrong
           console.warn("Has token but couldn't get user data - possible auth issue");
           setUser(null);
         }
@@ -108,7 +104,7 @@ export function useAuth() {
         await checkAuth();
         
         // Double-check we have a valid user/token
-        if (!authService.isAuthenticated() || !authService.getUser()) {
+        if (!authService.isAuthenticated()) {
           console.warn("Registration succeeded but auth check failed. Attempting login...");
           
           // Try explicit login as fallback
@@ -144,9 +140,7 @@ export function useAuth() {
     }
   };
 
-  const registerBusiness = async (
-    businessData: BusinessData
-  ): Promise<AuthResponse> => {
+  const registerBusiness = async (businessData: BusinessData): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
       console.log("Starting business registration");
@@ -159,8 +153,14 @@ export function useAuth() {
         };
       }
 
-      // Use the method from authService directly
+      // Use the method from authService
       const result = await authService.registerBusiness(businessData);
+      
+      if (result.success) {
+        // Refresh auth to get updated user info
+        await checkAuth();
+      }
+      
       return result;
     } catch (error: any) {
       console.error("Business registration error:", error);
@@ -176,17 +176,40 @@ export function useAuth() {
   const updateUser = async (userData: Partial<User>): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
-      const response = await api.put('/user/', userData);
+      // Assuming your backend has an API to update user data
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+      const token = authService.getToken();
       
-      if (response.data) {
+      if (!token) {
+        return { success: false, error: "Authentication required" };
+      }
+      
+      const response = await fetch(`${API_URL}/user/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      if (response.ok) {
+        const updatedData = await response.json();
+        
         // Update local user state
-        setUser(prev => prev ? { ...prev, ...response.data } : response.data);
+        setUser(prev => prev ? { ...prev, ...updatedData } : updatedData);
+        
         // Update cached user in authService
-        authService.updateUserCache(response.data);
+        authService.updateUserCache(updatedData);
+        
         return { success: true };
       }
       
-      return { success: false, error: "Failed to update user data" };
+      const errorData = await response.json();
+      return { 
+        success: false, 
+        error: errorData.detail || "Failed to update user data" 
+      };
     } catch (error: any) {
       console.error("Update user error:", error);
       return {

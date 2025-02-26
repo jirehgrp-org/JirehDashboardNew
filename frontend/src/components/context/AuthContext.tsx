@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/components/context/AuthContext.tsx
-
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { 
@@ -10,6 +8,7 @@ import type {
   AuthResponse 
 } from '@/types/shared/auth';
 import { authService } from '@/lib/services/auth';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface AuthContextType {
   user: User | null;
@@ -164,9 +163,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     registerBusiness,
   };
 
-  // Don't render children until initial auth check is complete
   if (isLoading) {
-    return <div>Loading authentication...</div>;
+    return <LoadingSpinner />;
   }
 
   return (

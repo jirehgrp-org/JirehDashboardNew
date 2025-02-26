@@ -2,8 +2,6 @@
 
 from django.shortcuts import render
 
-# Create your views here.
-
 from dj_rest_auth.registration.views import RegisterView
 from business.models import Business
 from branches.models import Branches
@@ -42,15 +40,20 @@ class BusinessAPIViewSet(viewsets.ModelViewSet):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class BusinessRegisterAPIView(generics.CreateAPIView):
-    # queryset = Business.objects.all()
     serializer_class = BusinessRegistrationSerializer
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # If you want to enforce that the owner/admin come from the authenticated user,
-        # you can also pass the request to the serializer context here.
+        # Explicitly set the owner to the requesting user
+        business = serializer.save(owner=self.request.user)
         
-        serializer.save()
+        # Update the user's business field to point to this business
+        self.request.user.business = business
+        self.request.user.save()
+        
+        # Return the created business
+        return business
 
 
 class CustomUserRegisterAPIView(RegisterView):
@@ -263,10 +266,12 @@ class BusinessBranchDetailAPIView(APIView):
         if request.user.business != branch.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Soft delete by updating is_active to False
-        branch.is_active = False
-        branch.save()
-        return Response({"message": "Branch deactivated successfully"}, status=status.HTTP_200_OK)
+        # Hard delete the branch from the database
+        branch.delete()
+        
+        return Response({"message": "Branch deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+# apis/views.py - Update the BusinessBranchRelatedItemView
 
 class BusinessBranchRelatedItemView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -278,17 +283,31 @@ class BusinessBranchRelatedItemView(APIView):
         
         # Check if branch_id is provided as query parameter
         branch_id = request.query_params.get('branch_id')
+        
+        # Log the request parameters for debugging
+        print(f"Fetching items. User branch: {branch}, branch_id param: {branch_id}, query params: {request.query_params}")
+        
         if branch is None and branch_id:
             try:
                 branch = Branches.objects.get(id=branch_id)
+                print(f"Found branch by ID: {branch.id}, {branch.name}")
             except Branches.DoesNotExist:
                 return Response({'error': f'Branch with id {branch_id} does not exist'}, 
                             status=status.HTTP_400_BAD_REQUEST)
         
         if branch is None:
-            # Return empty array instead of error when no branch
-            return Response([], status=status.HTTP_200_OK)
+            # If user has a business, return all items from all of their branches
+            if user.business:
+                print(f"No branch specified, fetching all items for business: {user.business}")
+                items = Items.objects.filter(business=user.business)
+                serializer = ItemsBranchSerializer(items, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                # Return empty array instead of error when no branch and no business
+                print("No branch or business found, returning empty array")
+                return Response([], status=status.HTTP_200_OK)
                 
+        print(f"Fetching items for branch: {branch.id}, {branch.name}")
         items = Items.objects.filter(business_branch=branch)
         serializer = ItemsBranchSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -364,8 +383,8 @@ class ItemsDetailAPIView(APIView):
     
     def get(self, request, item_id):
         item = self.get_object(item_id)
-        # Check if user has permission to access this item
-        if request.user.business_branch != item.business_branch:
+        # Modified permission check - check business instead of branch
+        if request.user.business and item.business and request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = ItemsBranchSerializer(item)
@@ -373,8 +392,8 @@ class ItemsDetailAPIView(APIView):
     
     def put(self, request, item_id):
         item = self.get_object(item_id)
-        # Check if user has permission to edit this item
-        if request.user.business_branch != item.business_branch:
+        # Modified permission check - check business instead of branch
+        if request.user.business and item.business and request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = ItemsBranchSerializer(item, data=request.data, partial=True)
@@ -385,27 +404,39 @@ class ItemsDetailAPIView(APIView):
     
     def delete(self, request, item_id):
         item = self.get_object(item_id)
-        # Check if user has permission to delete this item
-        if request.user.business_branch != item.business_branch:
+        # Modified permission check - check business instead of branch
+        if request.user.business and item.business and request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Soft delete by updating is_active to False
-        item.is_active = False
-        item.save()
-        return Response({"message": "Item deactivated successfully"}, status=status.HTTP_200_OK)
+        # Hard delete the item from the database
+        item.delete()
+        
+        return Response({"message": "Item deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 class CategoriesListAPIView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
 
     def get(self, request):
-        categories = Categories.objects.all()
+        user = request.user
+        business = user.business
+        
+        # Filter categories by the user's business
+        if business:
+            categories = Categories.objects.filter(business=business)
+        else:
+            # If user has no business, return empty list with message
+            return Response({
+                'data': [],
+                'message': 'User is not registered with any business'
+            }, status=status.HTTP_200_OK)
+        
         if not categories:
-            return Response({'message': 'No categories available'}, status=status.HTTP_200_OK)
+            return Response({'message': 'No categories available for your business'}, 
+                           status=status.HTTP_200_OK)
+        
         serializer = CategoriesSerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    # def post(self, request):
-    #     return Response({'POST-message': 'Categories List View'}, status=status.HTTP_200_OK)
 
 class CategoriesRegisterAPIView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -466,10 +497,10 @@ class CategoriesDetailAPIView(APIView):
         if category.business and request.user.business != category.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-        # Soft delete by updating is_active to False
-        category.is_active = False
-        category.save()
-        return Response({"message": "Category deactivated successfully"}, status=status.HTTP_200_OK)
+        # Hard delete the category from the database
+        category.delete()
+        
+        return Response({"message": "Category deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     
 
 class BusinessExpensesAPIView(APIView):

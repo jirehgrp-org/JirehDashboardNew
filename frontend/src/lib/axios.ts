@@ -84,10 +84,19 @@ export const deleteCategory = (categoryId: number) => api.delete(`/categories/${
 
 // INVENTORY/ITEM MANAGEMENT
 export const getBusinessBranchItemList = (queryParams = '') => {
-  const url = queryParams ? `/business/branch/item/list/${queryParams}` : '/business/branch/item/list/';
+  let url = '/business/branch/item/list/';
+  
+  // Convert string parameter to proper query string format
+  if (queryParams && !queryParams.startsWith('?')) {
+    url += `?${queryParams}`;
+  } else if (queryParams) {
+    url += queryParams;
+  }
+  
   console.log('Fetching items with URL:', url);
   return api.get(url);
 };
+
 export const getItemDetail = (itemId: number) => api.get(`/item/${itemId}/`);
 export const registerItem = (data: any) => {
   console.log('Registering item with data:', data);

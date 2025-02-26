@@ -210,7 +210,7 @@ class InventoryService {
         quantity: itemData.quantity,
         category: itemData.categoryId,
         business_branch: itemData.branchId,
-        unit_of_measure: itemData.unitOfMeasure || 'pieces',
+        unit_of_measure: itemData.unitOfMeasure,
         is_active: itemData.active === undefined ? true : itemData.active,
       };
       
@@ -246,6 +246,7 @@ class InventoryService {
 
   async updateItem(id: string, itemData: Partial<InventoryItem>): Promise<InventoryItem> {
     try {
+      console.log("Updating item:", id, itemData);
       const payload = {
         name: itemData.name,
         price: itemData.price,
@@ -255,10 +256,13 @@ class InventoryService {
         unit_of_measure: itemData.unitOfMeasure,
         is_active: itemData.active,
       };
-
+      console.log("Update payload:", payload);
+  
       const response = await updateItemDetail(parseInt(id), payload);
+      console.log("Update response:", response);
       return this.transformItemData(response.data);
     } catch (error: any) {
+      console.error("Update item error response:", error.response?.data);
       this.handleApiError("updateItem", error);
       throw error;
     }
@@ -266,8 +270,10 @@ class InventoryService {
 
   async deleteItem(id: string): Promise<void> {
     try {
+      console.log("Deleting item:", id);
       await deleteItem(parseInt(id));
     } catch (error: any) {
+      console.error("Delete item error response:", error.response?.data);
       this.handleApiError("deleteItem", error);
       throw error;
     }
@@ -296,6 +302,13 @@ class InventoryService {
   // Data transformation methods
   private transformBranchesData(data: any[]): InventoryItem[] {
     return data.map((item) => this.transformBranchData(item));
+  }
+
+  private handleSoftDelete(data: any): InventoryItem {
+    return {
+      ...data,
+      active: data.is_active !== undefined ? Boolean(data.is_active) : true,
+    };
   }
 
   private transformBranchData(data: any): InventoryItem {
@@ -329,20 +342,23 @@ class InventoryService {
     return data.map((item) => this.transformItemData(item));
   }
 
-  private transformItemData(data: any): InventoryItem {
-    return {
-      id: String(data.id || ""),
-      name: data.name || "",
-      price: typeof data.price === "number" ? data.price : parseFloat(data.price) || 0,
-      quantity: typeof data.quantity === "number" ? data.quantity : parseInt(data.quantity) || 0,
-      categoryId: String(data.category || ""),
-      branchId: String(data.business_branch || ""),
-      unitOfMeasure: data.unit_of_measure || "",
-      active: data.is_active !== undefined ? Boolean(data.is_active) : true,
-      createdAt: data.created_at || new Date().toISOString(),
-      updatedAt: data.updated_at || data.created_at || new Date().toISOString(),
-    };
-  }
+  
+private transformItemData(data: any): InventoryItem {
+  return {
+    id: String(data.id || ""),
+    name: data.name || "",
+    price: typeof data.price === "number" ? data.price : parseFloat(data.price) || 0,
+    quantity: typeof data.quantity === "number" ? data.quantity : parseInt(data.quantity) || 0,
+    categoryId: String(data.category || ""),
+    categoryName: data.category_name || "", // Add this field
+    branchId: String(data.business_branch || ""),
+    branchName: data.branch_name || "", // Add this field
+    unitOfMeasure: data.unit_of_measure || "",
+    active: data.is_active !== undefined ? Boolean(data.is_active) : true,
+    createdAt: data.created_at || new Date().toISOString(),
+    updatedAt: data.updated || data.created_at || new Date().toISOString(),
+  };
+}
 }
 
 export const inventoryService = new InventoryService();

@@ -78,21 +78,20 @@ class BusinessBranchSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'address', 'contact_number', 'business', 'is_active', 'created_at', 'updated_at')
 
 class ItemsBranchSerializer(serializers.ModelSerializer):
+    category_name = serializers.SerializerMethodField()
+    branch_name = serializers.SerializerMethodField()
+    
     class Meta:
         model = Items
-        fields = [
-            'id',
-            'name',
-            'price',
-            'quantity',
-            'last_inventory_update',
-            'is_active',
-            'unit_of_measure',
-            'category',
-            'business_branch',
-            'created_at',
-            'updated'
-        ]
+        fields = ['id', 'name', 'price', 'quantity', 'category', 'category_name', 
+                 'business_branch', 'branch_name', 'is_active', 'unit_of_measure', 
+                 'created_at', 'updated']
+    
+    def get_category_name(self, obj):
+        return obj.category.name if obj.category else None
+    
+    def get_branch_name(self, obj):
+        return obj.business_branch.name if obj.business_branch else None
 
 class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:

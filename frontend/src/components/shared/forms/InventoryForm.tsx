@@ -68,7 +68,7 @@ export function InventoryForm({
         quantity: 0,
         categoryId: "",
         branchId: "",
-        unitOfMeasure: "pieces", // Set a default unit of measure
+        unitOfMeasure: "",
       }),
     },
   });

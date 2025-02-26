@@ -48,17 +48,21 @@ interface BusinessInfo {
   updated_at: string;
 }
 
+
 interface HeaderProps {
   variant?: "auth" | "dashboard";
 }
+
+// Set this to true to see debug panel
+const isDevelopment = process.env.NODE_ENV !== "production";
 
 const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
-  const { language } = useLanguage();
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
   const [businessLoading, setBusinessLoading] = useState(false);
+  const { language } = useLanguage();
   const t = translations[language].dashboard.header;
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,31 +87,12 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   const fetchBusinessData = async () => {
     try {
       setBusinessLoading(true);
-      const response = await api.get("/business/list");
-
-      // Check the response format
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        // We have a list of businesses
-        setBusinessInfo(response.data[0]);
-      } else if (response.data.data !== undefined) {
-        // We have the new format with data and message properties
-        if (
-          Array.isArray(response.data.data) &&
-          response.data.data.length > 0
-        ) {
-          setBusinessInfo(response.data.data[0]);
-        } else {
-          // No businesses available, but API returned successfully
-          console.log("Business message:", response.data.message);
-          setBusinessInfo(null);
-        }
-      } else {
-        // Unknown format, just set to null
-        setBusinessInfo(null);
+      const response = await api.get('/business/list');
+      if (response.data && response.data.length > 0) {
+        setBusinessInfo(response.data[0]); // Assuming the first business in the list is the user's
       }
     } catch (error) {
       console.error("Error fetching business data:", error);
-      setBusinessInfo(null);
     } finally {
       setBusinessLoading(false);
     }
@@ -129,6 +114,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
 
       setUserProfile(profileData);
       setEditableUser(profileData);
+
       fetchBusinessData();
     }
     setMounted(true);
@@ -143,46 +129,114 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
     setEditableUser({ ...editableUser, [field]: value });
   };
 
-  const { updateUser } = useAuth();
-  
-  const handleSaveConfirmed = async () => {
-    try {
-      setIsLoading(true);
-
-      // Map our editableUser to match the expected API format
-      const userData = {
-        fullname: editableUser.name,
-        username: editableUser.username,
-        email: editableUser.email,
-        phone: editableUser.phone
-      };
-
-      // Call the updateUser method from useAuth hook
-    const result = await updateUser(userData);
-    
-    if (result.success) {
-      setUserProfile({
-        name: editableUser.name,
-        username: editableUser.username,
-        email: editableUser.email,
-        phone: editableUser.phone
-      });
-    } else {
-      // Show error message if available
-      console.error("Update failed:", result.error);
-    }
-  } catch (error) {
-    console.error("Error updating profile:", error);
-  } finally {
-    setIsLoading(false);
+  const handleSaveConfirmed = () => {
+    setUserProfile(editableUser);
     setIsEditing(false);
-  }
-};
+    // Here you would typically call an API to update the user profile
+  };
 
   // Extract the phone number digits for display, removing the +251 prefix
   const formatPhoneForDisplay = (phone: string) => {
     if (!phone) return "";
     return phone.replace(/^\+251/, "");
+  };
+
+  // Debug panel component
+  const DebugPanel = () => {
+    if (!isDevelopment) return null;
+
+    return (
+      <div className="mt-4 p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="font-semibold text-sm text-gray-500 dark:text-gray-400">
+            🔍 Development Debug
+          </h4>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDebug(!showDebug)}
+          >
+            {showDebug ? "Hide Debug" : "Show Debug"}
+          </Button>
+        </div>
+
+        {showDebug && (
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">
+            <h5 className="font-medium mb-1 text-xs">Raw User Object:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(user, null, 2)}
+            </pre>
+
+            <h5 className="font-medium mb-1 text-xs">Profile Data State:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(userProfile, null, 2)}
+            </pre>
+
+            <h5 className="font-medium mb-1 text-xs">Editable User State:</h5>
+            <pre className="text-xs overflow-auto max-h-40 mb-4">
+              {JSON.stringify(editableUser, null, 2)}
+            </pre>
+
+            <h5 className="font-medium mb-1 text-xs">Phone Processing:</h5>
+            <div className="text-xs mb-4">
+              <p>
+                Original phone: <code>{userProfile.phone || "N/A"}</code>
+              </p>
+              <p>
+                After formatting:{" "}
+                <code>
+                  {userProfile.phone
+                    ? formatPhoneForDisplay(userProfile.phone)
+                    : "N/A"}
+                </code>
+              </p>
+              <p>
+                Phone regex test:{" "}
+                <code>
+                  {userProfile.phone
+                    ? userProfile.phone.startsWith("+251")
+                      ? "✅ Starts with +251"
+                      : "❌ Does NOT start with +251"
+                    : "N/A"}
+                </code>
+              </p>
+            </div>
+
+            {/* New Business Info Section */}
+            <h5 className="font-medium mb-1 text-xs">Business Information:</h5>
+            {businessLoading ? (
+              <p className="text-xs">Loading business data...</p>
+            ) : businessInfo ? (
+              <div className="text-xs mb-4">
+                <p>
+                  Business Name: <code>{businessInfo.name}</code>
+                </p>
+                <p>
+                  Contact Number: <code>{businessInfo.contact_number}</code>
+                </p>
+                <p>
+                  Created At:{" "}
+                  <code>
+                    {new Date(businessInfo.created_at).toLocaleString()}
+                  </code>
+                </p>
+                <p>
+                  Updated At:{" "}
+                  <code>
+                    {new Date(businessInfo.updated_at).toLocaleString()}
+                  </code>
+                </p>
+                <pre className="text-xs overflow-auto max-h-40 mt-2">
+                  {JSON.stringify(businessInfo, null, 2)}
+                </pre>
+              </div>
+            ) : (
+              <p className="text-xs">No business data available</p>
+            )}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -311,6 +365,9 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
                 </div>
               </form>
             )}
+
+            {/* Debug Panel */}
+            <DebugPanel />
 
             {/* Footer with Save Confirmation */}
             {isEditing && (

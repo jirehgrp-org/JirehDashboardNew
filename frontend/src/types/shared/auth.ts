@@ -60,6 +60,8 @@ export interface User {
 export interface AuthResponse {
   success: boolean;
   error?: string;
+  warning?: string;
+  data?: any;
 }
 
 export interface BusinessData {

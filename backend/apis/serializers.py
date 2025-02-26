@@ -19,16 +19,44 @@ User = get_user_model()
 class CustomUserRegisterSerializer(RegisterSerializer):
     fullname = serializers.CharField(required=True)
     phone = serializers.CharField(required=True)
+    business_name = serializers.CharField(required=False)  # Optional business name field
 
     class Meta:
         model = User
-        fields = ('fullname', 'username', 'email', 'password1', 'password2', 'phone')
+        fields = ('fullname', 'username', 'email', 'password1', 'password2', 'phone', 'business_name')
 
     def save(self, request):
         user = super().save(request)
         user.fullname = self.validated_data.get('fullname', '')
         user.phone = self.validated_data.get('phone', '')
         user.save()
+        
+        # Create business if business_name is provided
+        business_name = self.validated_data.get('business_name')
+        if business_name:
+            import time
+            registration_number = f"BMS{int(time.time())}"
+            
+            try:
+                from business.models import Business
+                business = Business.objects.create(
+                    name=business_name,
+                    contact_number=user.phone,
+                    registration_number=registration_number,
+                    owner=user
+                )
+                
+                # Update user's business field - fetch fresh instance
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
+                user_obj = User.objects.get(id=user.id)
+                user_obj.business = business
+                user_obj.save(update_fields=['business'])  # Force update specific field
+                print(f"Business created: {business.name}, ID: {business.id}")
+                print(f"Updated user {user.username} business reference to: {business.name} (ID: {business.id})")
+            except Exception as e:
+                print(f"Error creating business during registration: {e}")
+        
         return user
 
 class UserSerializer(serializers.ModelSerializer):
@@ -52,19 +80,41 @@ class BusinessRegistrationSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     def validate(self, data):
+        print(f"Validating business data: {data}")
         
-        if data.get('registration_number') == 'UnRegistered':
+        # Check if registration number is provided or use dynamic one
+        if not data.get('registration_number'):
+            import time
+            data['registration_number'] = f"BMS{int(time.time())}"
+            print(f"Generated registration number: {data['registration_number']}")
+        elif data.get('registration_number') == 'UnRegistered':
             raise serializers.ValidationError("Please provide a valid registration number.")
+            
         return data
 
     def create(self, validated_data):
         request = self.context.get('request')
-        if request:
-            if not validated_data.get('owner'):
-                validated_data['owner'] = request.user
+        print(f"Creating business from validated data: {validated_data}")
+        
+        if request and not validated_data.get('owner'):
+            print(f"Setting owner to requesting user: {request.user.username}")
+            validated_data['owner'] = request.user
+        
+        # Create the business
+        try:
+            business = Business.objects.create(**validated_data)
+            print(f"Business created successfully: {business.name} (ID: {business.id})")
+            
+            # Ensure user's business reference is updated
+            if request and request.user:
+                request.user.business = business
+                request.user.save()
+                print(f"Updated user {request.user.username} business reference")
                 
-        business = Business.objects.create(**validated_data)
-        return business
+            return business
+        except Exception as e:
+            print(f"Error creating business: {e}")
+            raise serializers.ValidationError(f"Failed to create business: {str(e)}")
 
 
 class BusinessModelSerializer(serializers.ModelSerializer):

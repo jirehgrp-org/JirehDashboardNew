@@ -20,7 +20,7 @@ const Header: React.FC = () => {
   return (
     <div className="fixed top-4 w-full px-4 flex items-center justify-between z-50">
       {isSubscriptionPage && (
-        <Link href="/auth/register">
+        <Link href="/auth/registerUser">
           <Button variant="ghost" className="gap-2">
             <MoveLeft className="h-5 w-5" />
             {t.page.back}

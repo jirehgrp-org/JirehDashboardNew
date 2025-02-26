@@ -91,7 +91,7 @@ export function useAuth() {
   }, [router]);
 
   // Register function
-  const register = async (data: RegisterCredentials): Promise<AuthResponse> => {
+  const register = async (data: RegisterCredentials, businessData?: BusinessData): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
       console.log("Starting registration process with username:", data.username);
@@ -99,28 +99,30 @@ export function useAuth() {
       
       if (result.success) {
         console.log("Registration successful, checking auth...");
-        // Add a delay to ensure backend processes are complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Wait longer to ensure backend processes complete and token is set
+        await new Promise(resolve => setTimeout(resolve, 2000));
         await checkAuth();
         
-        // Double-check we have a valid user/token
-        if (!authService.isAuthenticated()) {
-          console.warn("Registration succeeded but auth check failed. Attempting login...");
-          
-          // Try explicit login as fallback
+        // If business data is provided, automatically register the business
+        if (businessData && authService.isAuthenticated()) {
           try {
-            const loginResult = await authService.login({
-              username: data.username,
-              password: data.password1
-            });
+            console.log("Registering business with data:", businessData);
+            const businessResult = await authService.registerBusiness(businessData);
             
-            if (loginResult.success) {
-              await checkAuth();
-            } else {
-              console.error("Post-registration login failed:", loginResult.error);
+            if (!businessResult.success) {
+              console.error("Business registration failed:", businessResult.error);
+              return { 
+                success: true, 
+                warning: "User created but business registration failed: " + businessResult.error 
+              };
             }
-          } catch (loginError) {
-            console.error("Error during post-registration login:", loginError);
+          } catch (bizError) {
+            console.error("Business registration error:", bizError);
+            return { 
+              success: true, 
+              warning: "User created but business registration failed" 
+            };
           }
         }
         
@@ -138,7 +140,7 @@ export function useAuth() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const registerBusiness = async (businessData: BusinessData): Promise<AuthResponse> => {
     setIsLoading(true);

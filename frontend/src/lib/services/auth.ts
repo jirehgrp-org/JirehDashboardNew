@@ -9,10 +9,11 @@ import type {
   RegisterCredentials,
   LoginResponse,
   AuthResponse,
-  BusinessData
+  BusinessData,
 } from "@/types/shared/auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
 class AuthService {
   private static instance: AuthService;
@@ -50,11 +51,11 @@ class AuthService {
   async register(data: RegisterCredentials): Promise<AuthResponse> {
     try {
       // Ensure phone is properly formatted with +251
-      const formattedPhone = data.phone.startsWith("+251") 
-        ? data.phone 
+      const formattedPhone = data.phone.startsWith("+251")
+        ? data.phone
         : data.phone.startsWith("251")
-          ? `+${data.phone}`
-          : `+251${data.phone}`;
+        ? `+${data.phone}`
+        : `+251${data.phone}`;
 
       // Prepare registration data
       const registerData = {
@@ -64,57 +65,97 @@ class AuthService {
         password2: data.password2,
         fullname: data.fullname,
         phone: formattedPhone,
+        role: data.user_role || "owner",
       };
 
       console.log("Sending registration data:", registerData);
 
       // Make sure endpoint path has a trailing slash
-      const response = await axios.post(`${API_URL}/register/user/`, registerData);
-      
+      const response = await axios.post(
+        `${API_URL}/register/user/`,
+        registerData
+      );
+
       console.log("Registration response:", response.data);
 
       // Handle various token formats that might be returned
+      let tokenFound = false;
+
       if (response.data.access) {
         console.log("Found access token in response");
         this.setTokens(response.data.access, response.data.refresh || "");
-        return { success: true };
-      } 
-      else if (response.data.key) {
+        tokenFound = true;
+      } else if (response.data.key) {
         console.log("Found key token in response");
         this.setTokens(response.data.key, "");
-        return { success: true };
-      }
-      else if (response.data.token) {
+        tokenFound = true;
+      } else if (response.data.token) {
         console.log("Found token in response");
         this.setTokens(response.data.token, response.data.refresh_token || "");
-        return { success: true };
+        tokenFound = true;
       }
 
-      // If no token was found but registration was successful, try to login
-      console.log("Registration successful but no token found. Attempting login...");
-      
-      try {
-        const loginResponse = await this.login({
-          username: data.username,
-          password: data.password1,
-        });
-        
-        return loginResponse;
-      } catch (loginError) {
-        console.error("Auto-login after registration failed:", loginError);
-        // Return success anyway since registration worked
-        return {
-          success: true,
-          error: "Registration successful but auto-login failed",
-        };
+      // If no token was found but registration was successful, try to login automatically
+      if (!tokenFound) {
+        console.log(
+          "Registration successful but no token found. Attempting auto-login..."
+        );
+
+        try {
+          const loginResponse = await this.login({
+            username: data.username,
+            password: data.password1,
+          });
+
+          if (!loginResponse.success) {
+            console.warn("Auto-login failed after registration");
+            return {
+              success: true,
+              warning:
+                "Account created, but auto-login failed. Please log in manually.",
+            };
+          }
+
+          tokenFound = true;
+        } catch (loginError) {
+          console.error("Auto-login after registration failed:", loginError);
+          // Return success anyway since registration worked
+          return {
+            success: true,
+            warning:
+              "Registration successful but auto-login failed. Please log in manually.",
+          };
+        }
       }
+
+      if (tokenFound) {
+        try {
+          console.log("Token found, attempting to fetch user data");
+          const userData = await this.fetchUserData();
+          console.log(
+            "User data fetch result:",
+            userData ? "SUCCESS" : "FAILED"
+          );
+
+          if (!userData) {
+            console.warn("Token is valid but fetchUserData returned null");
+          }
+        } catch (fetchError) {
+          console.error(
+            "Error fetching user data after registration:",
+            fetchError
+          );
+        }
+      }
+
+      return { success: true };
     } catch (error: any) {
       console.error("Registration error:", error);
-      
+
       // Extract error details
       if (error.response?.data) {
         const errorMessages = [];
-        
+
         for (const field in error.response.data) {
           if (Array.isArray(error.response.data[field])) {
             error.response.data[field].forEach((msg: string) => {
@@ -124,80 +165,158 @@ class AuthService {
             errorMessages.push(`${field}: ${error.response.data[field]}`);
           }
         }
-        
+
         if (errorMessages.length > 0) {
           return { success: false, error: errorMessages.join(", ") };
         }
       }
-      
+
       return {
         success: false,
-        error: error.response?.data?.detail || error.message || "Registration failed"
+        error:
+          error.response?.data?.detail ||
+          error.message ||
+          "Registration failed",
       };
     }
   }
 
   async registerBusiness(businessData: BusinessData): Promise<AuthResponse> {
     try {
+      // Check for token
       if (!this.accessToken) {
-        return { success: false, error: "Authentication required" };
+        console.error("Cannot register business: No access token");
+        return {
+          success: false,
+          error: "Authentication required. Please log in first.",
+        };
       }
 
-      console.log("Registering business with data:", businessData);
-    
-      // Make sure endpoint has trailing slash
-      const response = await axios.post(`${API_URL}/register/business/`, businessData, {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`
-        }
-      });
+      console.log(
+        "Using access token for business registration:",
+        this.accessToken.substring(0, 10) + "..."
+      );
 
-      console.log("Business registration response:", response.data);
+      // Format phone number
+      const formattedBusinessData = {
+        ...businessData,
+        contact_number: businessData.contact_number.startsWith("+251")
+          ? businessData.contact_number
+          : businessData.contact_number.startsWith("251")
+          ? `+${businessData.contact_number}`
+          : `+251${businessData.contact_number}`,
+      };
 
-      
-      
+      console.log("Sending business registration data:", formattedBusinessData);
+
+      // Make the API request
       try {
-        // Always ensure the endpoint has a trailing slash
-        const response = await axios.post(`${API_URL}/register/business/`, businessData, {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`
+        const response = await axios.post(
+          `${API_URL}/register/business/`,
+          formattedBusinessData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${this.accessToken}`,
+            },
           }
-        });
+        );
 
-        console.log("Business registration response:", response.data);
-        return { success: true };
+        console.log("Business registration successful:", response.data);
+
+        // After business is registered, update user data
+        await this.fetchUserData();
+
+        return { success: true, data: response.data };
       } catch (apiError: any) {
-        console.error("Business registration API error:", apiError.response?.data || apiError);
-        
-        // Check for token expiration
+        console.error("Business registration API error:");
+        console.error("Status:", apiError.response?.status);
+        console.error("Data:", apiError.response?.data);
+
+        // Handle token expiration
         if (apiError.response?.status === 401) {
-          console.log("Token expired during business registration, attempting refresh...");
+          console.log(
+            "Token expired during business registration, attempting refresh..."
+          );
           const refreshed = await this.refreshAccessToken();
-          
+
           if (refreshed) {
             console.log("Token refreshed, retrying business registration");
             // Retry with new token
-            const retryResponse = await axios.post(`${API_URL}/register/business/`, businessData, {
-              headers: {
-                Authorization: `Bearer ${this.accessToken}`
-              }
-            });
-            
-            console.log("Business registration retry response:", retryResponse.data);
-            return { success: true };
+            try {
+              const retryResponse = await axios.post(
+                `${API_URL}/register/business/`,
+                formattedBusinessData,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.accessToken}`,
+                  },
+                }
+              );
+
+              console.log(
+                "Business registration retry successful:",
+                retryResponse.data
+              );
+
+              // After business is registered on retry, update user data
+              await this.fetchUserData();
+
+              return { success: true, data: retryResponse.data };
+            } catch (retryError: any) {
+              console.error("Business registration retry failed:", retryError);
+
+              // Extract detailed error message
+              const errorDetail =
+                retryError.response?.data?.detail ||
+                "Business registration failed after token refresh";
+
+              return { success: false, error: errorDetail };
+            }
+          } else {
+            return {
+              success: false,
+              error:
+                "Your session has expired. Please log in again before registering a business.",
+            };
           }
         }
-        
-        return {
-          success: false, 
-          error: apiError.response?.data?.detail || "Business registration failed"
-        };
+
+        // Process error response for better user feedback
+        let errorMessage = "Business registration failed";
+
+        if (apiError.response?.data) {
+          if (typeof apiError.response.data === "string") {
+            errorMessage = apiError.response.data;
+          } else if (apiError.response.data.detail) {
+            errorMessage = apiError.response.data.detail;
+          } else {
+            // Try to extract field-specific errors
+            const fieldErrors = [];
+            for (const field in apiError.response.data) {
+              if (Array.isArray(apiError.response.data[field])) {
+                fieldErrors.push(
+                  `${field}: ${apiError.response.data[field].join(", ")}`
+                );
+              } else if (typeof apiError.response.data[field] === "string") {
+                fieldErrors.push(`${field}: ${apiError.response.data[field]}`);
+              }
+            }
+
+            if (fieldErrors.length > 0) {
+              errorMessage = fieldErrors.join("; ");
+            }
+          }
+        }
+
+        return { success: false, error: errorMessage };
       }
     } catch (error: any) {
       console.error("Business registration error:", error);
       return {
         success: false,
-        error: error.message || "Business registration failed"
+        error: error.message || "Business registration failed",
       };
     }
   }
@@ -207,7 +326,10 @@ class AuthService {
       console.log("Logging in with username:", credentials.username);
 
       // Always ensure endpoint has trailing slash
-      const response = await axios.post<LoginResponse>(`${API_URL}/auth/token/`, credentials);
+      const response = await axios.post<LoginResponse>(
+        `${API_URL}/auth/token/`,
+        credentials
+      );
 
       console.log("Login response:", response.data);
 
@@ -218,15 +340,15 @@ class AuthService {
       } else {
         return {
           success: false,
-          error: "Login successful but no token provided"
+          error: "Login successful but no token provided",
         };
       }
     } catch (error: any) {
       console.error("Login error:", error);
 
-      return { 
-        success: false, 
-        error: error.response?.data?.detail || "Invalid credentials" 
+      return {
+        success: false,
+        error: error.response?.data?.detail || "Invalid credentials",
       };
     }
   }
@@ -237,23 +359,31 @@ class AuthService {
         console.warn("Cannot fetch user data: No token available");
         return null;
       }
-      
-      console.log("Fetching user data with token");
-      
+
+      console.log(
+        "Fetching user data with token:",
+        this.accessToken.substring(0, 10) + "..."
+      );
+
       try {
-        // Always ensure endpoint has trailing slash
+        console.log("API endpoint for user data:", `${API_URL}/auth/user/`);
+
         const response = await axios.get(`${API_URL}/auth/user/`, {
           headers: {
-            Authorization: `Bearer ${this.accessToken}`
-          }
+            Authorization: `Bearer ${this.accessToken}`,
+          },
         });
-        
-        console.log("User data fetched successfully");
+
+        console.log("User data response status:", response.status);
+        console.log("User data received:", response.data);
+
         this.currentUser = response.data;
         return response.data;
       } catch (apiError: any) {
-        console.error("API error when fetching user data:", apiError.response?.status);
-        
+        console.error("API error when fetching user data:");
+        console.error("Status:", apiError.response?.status);
+        console.error("Response:", apiError.response?.data);
+
         if (apiError.response?.status === 401) {
           // Try to refresh the token
           const refreshed = await this.refreshAccessToken();
@@ -261,18 +391,18 @@ class AuthService {
             // Retry with new token
             const retryResponse = await axios.get(`${API_URL}/auth/user/`, {
               headers: {
-                Authorization: `Bearer ${this.accessToken}`
-              }
+                Authorization: `Bearer ${this.accessToken}`,
+              },
             });
-            
+
             this.currentUser = retryResponse.data;
             return retryResponse.data;
           }
-          
+
           // If refresh failed, clear tokens
           this.removeToken();
         }
-        
+
         return null;
       }
     } catch (error) {
@@ -290,7 +420,7 @@ class AuthService {
 
       // Always ensure endpoint has trailing slash
       const response = await axios.post(`${API_URL}/auth/token/refresh/`, {
-        refresh: this.refreshToken
+        refresh: this.refreshToken,
       });
 
       let newAccessToken = null;
@@ -403,7 +533,13 @@ class AuthService {
             return axios(originalRequest);
           }
 
-          if (typeof window !== "undefined") {
+          // Instead of redirecting, just log the error
+          console.error("Token validation failed and refresh was unsuccessful");
+          // Only redirect if it's not during registration flow
+          const isRegisterFlow =
+            window.location.pathname.includes("/auth/register") ||
+            window.location.pathname.includes("/auth/businessSetup");
+          if (!isRegisterFlow && typeof window !== "undefined") {
             this.logout();
             window.location.href = "/auth/login?expired=true";
           }

@@ -161,7 +161,9 @@ JirehDashboardNew/
     │   │   │   │   └── page.tsx
     │   │   │   ├── login/
     │   │   │   │   └── page.tsx
-    │   │   │   ├── register/
+    │   │   │   ├── registerBusiness/
+    │   │   │   │   └── page.tsx
+    │   │   │   ├── registerUser/
     │   │   │   │   └── page.tsx
     │   │   │   ├── resetPassword/
     │   │   │   │   └── page.tsx
@@ -210,9 +212,11 @@ JirehDashboardNew/
     │   │   ├── auth/
     │   │   │   └── RouteGuard.tsx
     │   │   ├── common/
+    │   │   │   ├── ApiErrorAlert.tsx
     │   │   │   ├── DashboardHeader.tsx
     │   │   │   ├── Header.tsx
     │   │   │   ├── LanguageToggle.tsx
+    │   │   │   ├── LoadingSpinner.tsx
     │   │   │   ├── MobileWrapper.tsx
     │   │   │   ├── ResponsiveWrapper.tsx
     │   │   │   ├── ThemeToggle.tsx
@@ -228,7 +232,8 @@ JirehDashboardNew/
     │   │   │   │   ├── ForgotPasswordForm.tsx
     │   │   │   │   ├── LoginForm.tsx
     │   │   │   │   ├── PaymentDialog.tsx
-    │   │   │   │   ├── RegisterForm.tsx
+    │   │   │   │   ├── RegisterBusinessForm.tsx
+    │   │   │   │   ├── RegisterUserForm.tsx
     │   │   │   │   ├── ResetPasswordForm.tsx
     │   │   │   │   └── SubscriptionForm.tsx
     │   │   │   └── dashboard/
@@ -296,7 +301,8 @@ JirehDashboardNew/
     │   │   │   ├── operation.ts
     │   │   │   └── transaction.ts
     │   │   ├── services/
-    │   │   │   └── auth.ts
+    │   │   │   ├── auth.ts
+    │   │   │   └── inventory.ts
     │   │   ├── axios.ts
     │   │   └── utils.ts
     │   │   

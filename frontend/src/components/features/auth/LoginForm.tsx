@@ -155,7 +155,7 @@ export function LoginForm() {
             <div className="text-neutral-600 dark:text-neutral-400">
               <span>{t.noAccount} </span>
               <a
-                href="./register"
+                href="./registerUser"
                 className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-blue-500 dark:from-purple-400 dark:to-blue-400 hover:opacity-80"
               >
                 {t.register}

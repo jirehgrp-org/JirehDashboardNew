@@ -29,6 +29,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from categories.models import Categories
 from .serializers import CategoriesSerializer
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class BusinessAPIViewSet(viewsets.ModelViewSet):
@@ -45,15 +47,51 @@ class BusinessRegisterAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        # Get the current user
+        user = self.request.user
+        print(f"Creating business for user: {user.username}")
+        
         # Explicitly set the owner to the requesting user
-        business = serializer.save(owner=self.request.user)
+        business = serializer.save(owner=user)
+        print(f"Business created: {business.name}, ID: {business.id}")
         
         # Update the user's business field to point to this business
-        self.request.user.business = business
-        self.request.user.save()
+        # Fetch a fresh user instance to avoid caching issues
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user_obj = User.objects.get(id=user.id)
+        user_obj.business = business
+        user_obj.save(update_fields=['business'])  # Force update specific field
+        print(f"Updated user {user.username} business reference to: {business.name} (ID: {business.id})")
         
         # Return the created business
         return business
+
+    def create(self, request, *args, **kwargs):
+        print(f"Business registration request from user: {request.user.username}")
+        print(f"Business registration data: {request.data}")
+        
+        # Standard create method from CreateAPIView with added logging
+        serializer = self.get_serializer(data=request.data)
+        
+        try:
+            serializer.is_valid(raise_exception=True)
+            print("Serializer validation successful")
+        except Exception as e:
+            print(f"Serializer validation error: {e}")
+            raise
+        
+        try:
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            print("Business created successfully")
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as e:
+            print(f"Error in business creation: {e}")
+            return Response(
+                {"detail": f"Failed to create business: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class CustomUserRegisterAPIView(RegisterView):
@@ -75,6 +113,15 @@ class UserProfileView(APIView):
     def get(self, request, user_id=None):
         user = self.get_object(user_id)
         
+        # Business information
+        business_info = None
+        if user.business:
+            business_info = {
+                'id': user.business.id,
+                'name': user.business.name,
+                'contact_number': user.business.contact_number
+            }
+        
         data = {
             'id': user.id,
             'username': user.username,
@@ -85,7 +132,8 @@ class UserProfileView(APIView):
             'is_active': user.is_active,
             'created_at': user.created_at,
             'last_login': user.last_login,
-            'updated_at': user.updated_at
+            'updated_at': user.updated_at,
+            'business': business_info
         }
         return Response(data, status=status.HTTP_200_OK)
 
@@ -109,6 +157,15 @@ class UserProfileView(APIView):
         
         user.save()
         
+        # Business information
+        business_info = None
+        if user.business:
+            business_info = {
+                'id': user.business.id,
+                'name': user.business.name,
+                'contact_number': user.business.contact_number
+            }
+        
         response_data = {
             'id': user.id,
             'username': user.username,
@@ -119,7 +176,8 @@ class UserProfileView(APIView):
             'is_active': user.is_active,
             'created_at': user.created_at,
             'last_login': user.last_login,
-            'updated_at': user.updated_at
+            'updated_at': user.updated_at,
+            'business': business_info
         }
         return Response(response_data, status=status.HTTP_200_OK)
     

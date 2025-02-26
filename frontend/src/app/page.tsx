@@ -43,7 +43,7 @@ const Home = () => {
           <TypewriterEffectSmooth words={words} />
         </div>
         <button
-          onClick={() => router.push("/auth/register")}
+          onClick={() => router.push("/auth/registerUser")}
           className="bg-slate-900 dark:bg-white rounded-full w-fit text-white dark:text-slate-900 px-6 py-3 hover:opacity-90 transition-all"
         >
           {t.getStarted}

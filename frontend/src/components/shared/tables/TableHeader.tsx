@@ -336,10 +336,16 @@ export const getColumns = (
           />
         ),
         cell: ({ row }: CellProps) => {
+          // First try to use branchName if available
+          if (row.original.branchName) {
+            return row.original.branchName;
+          }
+          
+          // Fall back to looking up branch name from the branches array
           const branch = branches?.find(
             (loc) => loc.id === row.original.branchId
           );
-          return branch?.name || row.original.branchId;
+          return branch?.name || row.original.branchId || "-";
         },
       },
       {

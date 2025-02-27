@@ -1,4 +1,5 @@
 // components/features/auth/SubscriptionGuard.tsx
+
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -7,9 +8,9 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 // Routes that should bypass subscription check
 const EXEMPT_ROUTES = [
-  '/auth/subscription',
-  '/auth/login',
-  '/dashboard/profile',
+  "/auth/subscription",
+  "/auth/login",
+  "/dashboard/profile",
   // Add more exempt routes as needed
 ];
 
@@ -21,26 +22,26 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const checkSubscription = async () => {
       if (!isMounted) return;
-      
+
       // Allow exempt routes to bypass subscription check
-      if (EXEMPT_ROUTES.some(route => pathname?.startsWith(route))) {
+      if (EXEMPT_ROUTES.some((route) => pathname?.startsWith(route))) {
         setIsChecking(false);
         return;
       }
-      
+
       // If auth is still loading, wait for it
       if (isLoading) {
         return;
       }
-      
+
       try {
         // If no user, try refreshing auth once before redirecting
         if (!user) {
           await checkAuth();
-          
+
           // After refresh, if still no user, redirect to login
           if (!user && isMounted) {
             console.log("No user after auth check, redirecting to login");
@@ -48,21 +49,27 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
             return;
           }
         }
-        
+
         // Check for subscription status from user object
         if (user?.subscription) {
           const subscription = user.subscription;
-          const isExpired = subscription.subscription_status === 'EXPIRED';
-          
-          if (isExpired && isMounted) {
-            console.log("Subscription expired, redirecting to subscription page");
+          const isInactive =
+            subscription.subscription_status === "EXPIRED" ||
+            subscription.subscription_status === "CANCELLED";
+
+          if (isInactive && isMounted) {
+            console.log(
+              "Subscription inactive, redirecting to subscription page"
+            );
             router.push("/auth/subscription");
             return;
           }
         } else if (user?.business && !user.subscription) {
           // If user has business but no subscription, redirect to subscription page
           if (isMounted) {
-            console.log("User has business but no subscription, redirecting to subscription page");
+            console.log(
+              "User has business but no subscription, redirecting to subscription page"
+            );
             router.push("/auth/subscription");
             return;
           }
@@ -75,15 +82,15 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
         }
       }
     };
-    
+
     checkSubscription();
-    
+
     return () => {
       isMounted = false;
     };
   }, [user, router, pathname, isLoading, checkAuth]);
 
-  // Show a loading spinner while checking 
+  // Show a loading spinner while checking
   // but don't redirect immediately
   if (isChecking || isLoading) {
     return <LoadingSpinner />;

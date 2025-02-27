@@ -192,3 +192,42 @@ class PlansSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plans
         fields = "__all__"
+
+
+
+class UserOperationSerializer(serializers.ModelSerializer):
+    branch_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'fullname', 'phone', 'role', 
+                  'business_branch', 'branch_name', 'is_active', 
+                  'created_at', 'updated_at']
+    
+    def get_branch_name(self, obj):
+        try:
+            if hasattr(obj, 'business_branch') and obj.business_branch:
+                return obj.business_branch.name
+            return None
+        except Exception as e:
+            print(f"Error getting branch name for user {obj.id}: {e}")
+            return None
+
+class ExpenseOperationSerializer(serializers.ModelSerializer):
+    branch_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+    frequency = serializers.CharField(source='recurring_frequency', required=False)
+    active = serializers.BooleanField(source='is_active', required=False)
+    
+    class Meta:
+        model = Expenses
+        fields = ['id', 'name', 'amount', 'description', 'expense_date', 'payment_method',
+                  'receipt_number', 'frequency', 'recurring_frequency', 'recurring_end_date',
+                  'business', 'business_branch', 'branch_name', 'created_by', 
+                  'created_by_name', 'created_at', 'updated_at', 'active', 'is_active']
+    
+    def get_branch_name(self, obj):
+        return obj.business_branch.name if obj.business_branch else None
+        
+    def get_created_by_name(self, obj):
+        return obj.created_by.fullname if obj.created_by else None

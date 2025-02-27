@@ -437,6 +437,8 @@ export const en = {
       emailPlaceholder: "Enter Email",
       phone: "Phone",
       phonePlaceholder: "Enter Phone",
+      password: "Password",
+      passwordPlaceholder: "Enter Password",
       role: "Role",
       rolePlaceholder: "Select Role",
       amount: "Amount",
@@ -528,6 +530,7 @@ export const en = {
         usernameIsRequired: "Username is required",
         emailIsRequired: "Email is required",
         phoneIsRequired: "Phone number is required",
+        phoneMaxLength: "Phone number must be less than 10 digits",
         roleIsRequired: "Role is required",
       },
       expenseSchema: {

@@ -120,9 +120,10 @@ class InventoryService {
       const payload = {
         name: categoryData.name,
         description: categoryData.description || "",
-        is_active: categoryData.active,
+        is_active: categoryData.active
       };
   
+      console.log("Updating category with payload:", payload);
       const response = await updateCategoryDetail(parseInt(id), payload);
       return this.transformCategoryData(response.data);
     } catch (error: any) {

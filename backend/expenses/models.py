@@ -1,7 +1,5 @@
 from django.db import models
 
-# Create your models here.
-
 class Expenses(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('Cash', 'Cash'),
@@ -11,14 +9,17 @@ class Expenses(models.Model):
     ]
 
     RECURRING_FREQUENCY_CHOICES = [
+        ('once', 'One Time'),  # Added to match frontend
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),
         ('quarterly', 'Quarterly'),
+        ('halfYearly', 'Half Yearly'),  # Added to match frontend
         ('yearly', 'Yearly')
     ]
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    name = models.CharField(max_length=100, default="Expense")  # Add name field to match frontend
     description = models.TextField(null=True, blank=True)
     expense_date = models.DateField()
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
@@ -30,6 +31,7 @@ class Expenses(models.Model):
     business = models.ForeignKey('business.Business', on_delete=models.CASCADE)
     business_branch = models.ForeignKey('branches.Branches', on_delete=models.SET_NULL, null=True, blank=True)
     created_by = models.ForeignKey('accounts.CustomUser', on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         indexes = [

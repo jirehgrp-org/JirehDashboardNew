@@ -1,8 +1,7 @@
 // @/components/shared/forms/operationForm.tsx
 
 "use client";
-
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getSchemaForVariant } from "@/lib/schemas/operation";
+import { Eye, EyeOff } from "lucide-react";
 
 const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
@@ -40,13 +40,12 @@ export function OperationForm({
 }: OperationFormProps) {
   const { language } = useLanguage();
   const formT = translations[language].dashboard.form;
+  const schema = getSchemaForVariant(variant, language);
 
   // Fetch branches for the branch select field
   const { data: branches } = useInventory({
     endpoint: "branches",
   });
-
-  const schema = getSchemaForVariant(variant, language);
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -59,6 +58,7 @@ export function OperationForm({
         email: "",
         phone: "",
         role: "",
+        password: "", // Add password field
       }),
       ...(variant === "expense" && {
         amount: 0,
@@ -84,9 +84,23 @@ export function OperationForm({
     return "";
   };
 
+  const handleFormSubmit = (data: any) => {
+    
+    // Format phone number if needed
+    if (variant === "user" && data.phone) {
+      data.phone = data.phone.startsWith("+251") 
+        ? data.phone 
+        : data.phone.startsWith("251") 
+          ? `+${data.phone}` 
+          : `+251${data.phone.replace(/^0+/, "")}`;
+    }
+    
+    onSubmit(data);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         {/* Common fields for all variants */}
         <FormField
           control={form.control}
@@ -105,7 +119,7 @@ export function OperationForm({
                     className="h-10"
                     onChange={(e) => {
                       field.onChange(e);
-                      if (variant === "user") {
+                      if (variant === "user" && !initialData) {
                         const generatedUsername = generateUsername(
                           e.target.value
                         );
@@ -138,7 +152,7 @@ export function OperationForm({
                         {...field}
                         placeholder={formT.usernamePlaceholder}
                         className="h-10 bg-neutral-100 dark:bg-neutral-800"
-                        readOnly
+                        readOnly={!initialData}
                       />
                     </FormControl>
                   </div>
@@ -182,12 +196,21 @@ export function OperationForm({
                       <RequiredIndicator />
                     </FormLabel>
                     <FormControl className="w-3/4">
-                      <Input
-                        {...field}
-                        type="tel"
-                        placeholder={formT.phonePlaceholder}
-                        className="h-10"
-                      />
+                      <div className="flex items-center">
+                        <div className="flex items-center justify-center px-3 h-10 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                          +251
+                        </div>
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder={formT.phonePlaceholder}
+                          className="h-10 rounded-l-none"
+                          maxLength={9}
+                          minLength={9}
+                          pattern="[0-9]{9,10}"
+                          value={field.value?.replace(/^\+251/, "")}
+                        />
+                      </div>
                     </FormControl>
                   </div>
                   <FormMessage />
@@ -215,6 +238,7 @@ export function OperationForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="admin">{formT.admin}</SelectItem>
+                          <SelectItem value="manager">{formT.manager}</SelectItem>
                           <SelectItem value="sales">{formT.sales}</SelectItem>
                           <SelectItem value="warehouse">
                             {formT.warehouse}

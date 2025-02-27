@@ -21,7 +21,7 @@ from .serializers import (BusinessRegistrationSerializer, BusinessModelSerialize
                           BusinessBranchOrdersSerializer, PlansSerializer)
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from accounts.permissions import IsOwnerOrAdmin, IsAdminOrOwnerOrManager, IsAdmin, IsManager,IsSales,IsWarehouse
+from accounts.permissions import IsAuthenticatedEmployee, IsOwnerOrAdmin, IsAdminOrOwnerOrManager, IsAdmin, IsManager,IsSales,IsWarehouse
 from django.http import Http404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import generics
@@ -29,7 +29,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from categories.models import Categories
 from .serializers import CategoriesSerializer
+from django.utils import timezone
+from .serializers import (UserOperationSerializer, ExpenseOperationSerializer)
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from subscriptions.models import Subscriptions
 User = get_user_model()
 
 
@@ -116,6 +120,429 @@ class BusinessRegisterAPIView(generics.CreateAPIView):
                 {"detail": f"Failed to create business: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+
+class UserOperationAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+
+    def get(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Use select_related to efficiently load branch data
+        users = User.objects.filter(business=business).select_related('business_branch')
+        
+        # Enhanced debug logging to check branch data
+        print(f"Fetching users for business: {business.name} (ID: {business.id})")
+        for u in users:
+            branch_id = u.business_branch.id if u.business_branch else None
+            branch_name = u.business_branch.name if u.business_branch else None
+            print(f"User: {u.id} {u.username}, Branch ID: {branch_id}, Branch Name: {branch_name}")
+        
+        serializer = UserOperationSerializer(users, many=True)
+        
+        # Additional debug logging for serialized data
+        for user_data in serializer.data:
+            print(f"Serialized user {user_data.get('id')}: branch_id={user_data.get('business_branch')}, branch_name={user_data.get('branch_name')}")
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserOperationRegisterAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def post(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        data = request.data
+        
+        # Check if username already exists
+        if User.objects.filter(username=data.get('username')).exists():
+            return Response({'error': 'Username already exists'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if email already exists
+        if User.objects.filter(email=data.get('email')).exists():
+            return Response({'error': 'Email already exists'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get branch if provided
+        branch = None
+        try:
+            if data.get('business_branch'):
+                branch = Branches.objects.get(id=data.get('business_branch'))
+            elif user.business_branch:
+                branch = user.business_branch
+                
+            if not branch:
+                return Response({'error': 'Branch is required'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        except Branches.DoesNotExist:
+            return Response({'error': f'Branch with id {data.get("business_branch")} does not exist'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Format phone number if needed
+        phone = data.get('phone', '')
+        if phone:
+            # Remove any spaces and dashes
+            phone = phone.replace(' ', '').replace('-', '')
+            if not phone.startswith('+251'):
+                # If it starts with 0, remove it before adding +251
+                phone = f"+251{phone.lstrip('0')}"
+        
+        # Always generate a password
+        import string
+        import random
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        
+        try:
+            # Use fullname instead of name
+            fullname = data.get('fullname', data.get('name', ''))
+            
+            new_user = User.objects.create_user(
+                username=data.get('username'),
+                email=data.get('email'),
+                password=password,
+                fullname=fullname,
+                phone=phone,
+                role=data.get('role', 'sales'),
+                business=business,
+                business_branch=branch,
+                is_active=data.get('is_active', True)
+            )
+            
+            serializer = UserOperationSerializer(new_user)
+            
+            # Add the generated password to the response data
+            response_data = serializer.data
+            response_data['password_info'] = f'Password has been generated: {password}'
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserOperationDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def get_object(self, user_id):
+        try:
+            return User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, user_id):
+        user_obj = self.get_object(user_id)
+        # Check permission - only allow access to users in the same business
+        if request.user.business != user_obj.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = UserOperationSerializer(user_obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, user_id):
+        user_obj = self.get_object(user_id)
+        # Check permission
+        if request.user.business != user_obj.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        data = request.data
+        
+        # Check if branch exists if provided
+        if data.get('business_branch'):
+            try:
+                branch = Branches.objects.get(id=data.get('business_branch'))
+                user_obj.business_branch = branch
+            except Branches.DoesNotExist:
+                return Response({'error': 'Branch does not exist'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update fields - use fullname consistently instead of name
+        user_obj.fullname = data.get('fullname', user_obj.fullname)
+        user_obj.email = data.get('email', user_obj.email)
+        user_obj.role = data.get('role', user_obj.role)
+        user_obj.is_active = data.get('is_active', user_obj.is_active)
+        
+        # Format phone if provided
+        if data.get('phone'):
+            phone = data.get('phone')
+            # Remove any spaces and dashes
+            phone = phone.replace(' ', '').replace('-', '')
+            if not phone.startswith('+251'):
+                # If it starts with 0, remove it before adding +251
+                phone = f"+251{phone.lstrip('0')}"
+            user_obj.phone = phone
+        
+        user_obj.save()
+        
+        serializer = UserOperationSerializer(user_obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, user_id):
+        user_obj = self.get_object(user_id)
+        # Check permission
+        if request.user.business != user_obj.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Prevent deleting yourself
+        if user_obj.id == request.user.id:
+            return Response({'error': 'Cannot delete yourself'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Hard delete (or you could set is_active=False for soft delete)
+        user_obj.delete()
+        
+        return Response({"message": "User deleted successfully"}, 
+                      status=status.HTTP_204_NO_CONTENT)
+
+class ExpenseOperationAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+
+    def get(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        expenses = Expenses.objects.filter(business=business)
+        serializer = ExpenseOperationSerializer(expenses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ExpenseOperationRegisterAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def post(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        data = request.data
+        
+        # Check if branch exists if provided
+        branch = None
+        if data.get('business_branch') or data.get('branchId'):
+            branch_id = data.get('business_branch') or data.get('branchId')
+            try:
+                branch = Branches.objects.get(id=branch_id)
+            except Branches.DoesNotExist:
+                return Response({'error': 'Branch does not exist'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        elif user.business_branch:
+            branch = user.business_branch
+            
+        if not branch:
+            return Response({'error': 'Branch is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate amount 
+        try:
+            amount = float(data.get('amount', 0))
+            if amount <= 0:
+                return Response({'error': 'Amount must be greater than zero'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, TypeError):
+            return Response({'error': 'Invalid amount'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Handle both frequency and recurring_frequency fields
+            recurring_frequency = data.get('frequency') or data.get('recurring_frequency', 'once')
+            
+            # Handle name and description
+            name = data.get('name')
+            description = data.get('description', '')
+            
+            if not name and description:
+                # If name is empty but description exists, use part of description as name
+                name = description[:50]
+            elif not name and not description:
+                # If both are empty, use default name
+                name = "Expense"
+            
+            expense = Expenses.objects.create(
+                name=name,
+                amount=amount,
+                description=description,
+                expense_date=data.get('expense_date', timezone.now().date()),
+                payment_method=data.get('payment_method', 'Cash'),
+                receipt_number=data.get('receipt_number', ''),
+                recurring_frequency=recurring_frequency,
+                recurring_end_date=data.get('recurring_end_date'),
+                business=business,
+                business_branch=branch,
+                created_by=user,
+                is_active=data.get('is_active', data.get('active', True))
+            )
+            
+            serializer = ExpenseOperationSerializer(expense)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class ExpenseOperationDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    
+    def get_object(self, expense_id):
+        try:
+            return Expenses.objects.get(id=expense_id)
+        except Expenses.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, expense_id):
+        expense = self.get_object(expense_id)
+        # Check permission
+        if request.user.business != expense.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = ExpenseOperationSerializer(expense)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, expense_id):
+        expense = self.get_object(expense_id)
+        # Check permission
+        if request.user.business != expense.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        data = request.data
+        
+        # Check if branch exists if provided
+        if data.get('business_branch') or data.get('branchId'):
+            branch_id = data.get('business_branch') or data.get('branchId')
+            try:
+                branch = Branches.objects.get(id=branch_id)
+                expense.business_branch = branch
+            except Branches.DoesNotExist:
+                return Response({'error': 'Branch does not exist'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Update fields
+        if 'amount' in data:
+            try:
+                amount = float(data.get('amount', 0))
+                if amount <= 0:
+                    return Response({'error': 'Amount must be greater than zero'}, 
+                                status=status.HTTP_400_BAD_REQUEST)
+                expense.amount = amount
+            except (ValueError, TypeError):
+                return Response({'error': 'Invalid amount'}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Handle name field
+        if 'name' in data:
+            expense.name = data.get('name')
+                
+        if 'description' in data:
+            expense.description = data.get('description')
+        
+        # Support both frequency and recurring_frequency
+        if 'frequency' in data:
+            expense.recurring_frequency = data.get('frequency')
+        elif 'recurring_frequency' in data:
+            expense.recurring_frequency = data.get('recurring_frequency')
+        
+        if 'expense_date' in data:
+            expense.expense_date = data.get('expense_date')
+        if 'payment_method' in data:
+            expense.payment_method = data.get('payment_method')
+        
+        # Support both active and is_active
+        if 'active' in data:
+            expense.is_active = data.get('active')
+        elif 'is_active' in data:
+            expense.is_active = data.get('is_active')
+        
+        expense.save()
+        
+        serializer = ExpenseOperationSerializer(expense)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, expense_id):
+        expense = self.get_object(expense_id)
+        # Check permission
+        if request.user.business != expense.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Hard delete
+        expense.delete()
+        
+        return Response({"message": "Expense deleted successfully"}, 
+                      status=status.HTTP_204_NO_CONTENT)
+    
+
+        
+class SubscriptionCancelAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Get the active subscription for this business
+            subscription = Subscriptions.objects.filter(
+                business=business,
+                subscription_status__in=['ACTIVE', 'TRIAL']
+            ).order_by('-end_date').first()
+            
+            if not subscription:
+                return Response({'error': 'No active subscription found'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update subscription status to CANCELLED but keep end date the same
+            # This allows users to continue using the service until the end of their paid period
+            subscription.subscription_status = 'CANCELLED'
+            subscription.save()
+            
+            # Calculate days remaining
+            from django.utils import timezone
+            today = timezone.now().date()
+            days_remaining = (subscription.end_date - today).days if today <= subscription.end_date else 0
+            
+            return Response({
+                'success': True,
+                'message': 'Subscription cancelled successfully',
+                'subscription': {
+                    'id': subscription.id,
+                    'plan_id': subscription.plan.id,
+                    'plan_name': subscription.plan.name_en,
+                    'subscription_status': subscription.subscription_status,
+                    'payment_status': subscription.payment_status,
+                    'start_date': subscription.start_date,
+                    'end_date': subscription.end_date,
+                    'is_trial': subscription.is_trial,
+                    'days_remaining': days_remaining
+                }
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'error': f'Failed to cancel subscription: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CustomUserRegisterAPIView(RegisterView):
@@ -123,7 +550,7 @@ class CustomUserRegisterAPIView(RegisterView):
 
 class UserProfileView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
 
     def get_object(self, user_id=None):
         if user_id:
@@ -260,12 +687,19 @@ class BusinessRelatedUsersView(APIView):
 
     def get(self, request):
         user = request.user
-        # print(user)
-        business = user.business_branch
-        # print(business)
+        business = user.business
+        
         if business is None:
-            return Response({'error': 'User is not registered with any business'}, status=status.HTTP_400_BAD_REQUEST)
-        users = business.customuser_set.all()
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get all users associated with the business
+        users = User.objects.filter(business=business)
+        
+        # If user has a specific branch and isn't an owner or admin, filter by branch
+        if user.business_branch and user.role not in ['owner', 'admin']:
+            users = users.filter(business_branch=user.business_branch)
+            
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
         # users = business.owner.all()
@@ -273,7 +707,6 @@ class BusinessRelatedUsersView(APIView):
         # serializer = UserSerializer(users, many=True)
         # return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({'GET-message': 'business related users view'}, status=status.HTTP_200_OK)
     def post(self, request):
         return Response({'POST-message': 'Business related users view'}, status=status.HTTP_200_OK)
 
@@ -303,14 +736,16 @@ class BusinessListAPIView(APIView):
 
 class BusinessBranchListAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
     
-    def get(self,request):
+    def get(self, request):
         user = request.user
         business = user.business
-        # print(business)
+        
         if business is None:
-            return Response({'error': 'User is not registered with any business'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
         branches = Branches.objects.filter(business=business)
         serializer = BusinessBranchSerializer(branches, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -390,7 +825,7 @@ class BusinessBranchDetailAPIView(APIView):
 
 class BusinessBranchRelatedItemView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
 
     def get(self, request):
         user = request.user
@@ -488,9 +923,10 @@ class BusinessBranchRelatedRegisterItemView(APIView):
     
 class ItemsDetailAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
     
     def get_object(self, item_id):
+
         try:
             return Items.objects.get(id=item_id)
         except Items.DoesNotExist:
@@ -498,17 +934,17 @@ class ItemsDetailAPIView(APIView):
     
     def get(self, request, item_id):
         item = self.get_object(item_id)
-        # Modified permission check - check business instead of branch
-        if request.user.business and item.business and request.user.business != item.business:
+        # Simplified permission check
+        if request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = ItemsBranchSerializer(item)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def put(self, request, item_id):
         item = self.get_object(item_id)
-        # Modified permission check - check business instead of branch
-        if request.user.business and item.business and request.user.business != item.business:
+        # Simplified permission check
+        if request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = ItemsBranchSerializer(item, data=request.data, partial=True)
@@ -516,21 +952,22 @@ class ItemsDetailAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     def delete(self, request, item_id):
         item = self.get_object(item_id)
-        # Modified permission check - check business instead of branch
-        if request.user.business and item.business and request.user.business != item.business:
+        # Simplified permission check
+        if request.user.business != item.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         # Hard delete the item from the database
         item.delete()
         
-        return Response({"message": "Item deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Item deleted successfully"}, 
+                    status=status.HTTP_204_NO_CONTENT)
 
 class CategoriesListAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
 
     def get(self, request):
         user = request.user
@@ -577,7 +1014,7 @@ class CategoriesRegisterAPIView(APIView):
     
 class CategoriesDetailAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
     
     def get_object(self, category_id):
         try:
@@ -600,11 +1037,24 @@ class CategoriesDetailAPIView(APIView):
         if category.business and request.user.business != category.business:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
-        serializer = CategoriesSerializer(category, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+        # Get data from request and prepare for update
+        data = request.data
+        update_data = {
+            'name': data.get('name', category.name),
+            'description': data.get('description', category.description),
+            'is_active': data.get('is_active', data.get('active', category.is_active))
+        }
+        
+        # Update the category directly
+        for key, value in update_data.items():
+            setattr(category, key, value)
+        
+        try:
+            category.save()
+            serializer = CategoriesSerializer(category)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request, category_id):
         category = self.get_object(category_id)
@@ -647,20 +1097,33 @@ class BusinessExpensesRegisterAPIView(APIView):
         user = request.user
         branch = user.business_branch
         if branch is None:
-            return Response({'error': 'User is not registered with any business branch'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User is not registered with any business branch'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
         
         data = request.data
+        
+        # Validate amount
+        try:
+            amount = float(data.get('amount', 0))
+            if amount <= 0:
+                return Response({'error': 'Amount must be greater than zero'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, TypeError):
+            return Response({'error': 'Invalid amount'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
         expense = Expenses(
-            amount=data.get('amount'),
+            amount=amount,
             description=data.get('description'),
-            expense_date=data.get('expense_date'),
-            payment_method=data.get('payment_method'),
-            receipt_number=data.get('receipt_number'),
-            recurring_frequency=data.get('recurring_frequency'),
+            expense_date=data.get('expense_date', timezone.now().date()),
+            payment_method=data.get('payment_method', 'Cash'),
+            receipt_number=data.get('receipt_number', ''),
+            recurring_frequency=data.get('recurring_frequency', 'once'),
             recurring_end_date=data.get('recurring_end_date'),
             business=branch.business,
             business_branch=branch,
-            created_by=user
+            created_by=user,
+            is_active=data.get('is_active', True)  # Added is_active field
         )
         expense.save()
         
@@ -695,7 +1158,7 @@ class FeaturesRegisterAPIView(APIView):
 
 class BusinessOrdersAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
 
     def get(self, request):
         user = request.user
@@ -711,7 +1174,14 @@ class BusinessOrdersAPIView(APIView):
 
 class BusinessOrdersRegisterAPIView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            # For creating orders, you might want to restrict to just sales roles
+            return [IsAuthenticated(), IsSales()]
+        # For other methods like GET
+        return [IsAuthenticated(), IsAuthenticatedEmployee()]
 
     def post(self, request):
         user = request.user

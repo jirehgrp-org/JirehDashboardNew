@@ -49,6 +49,8 @@ export interface PageInfo {
 }
 
 export interface User {
+  name: string;
+  contact_number: string;
   business: User;
   subscription: any;
   id: string;
@@ -75,6 +77,8 @@ export interface BusinessData {
   registration_number: string;
   owner?: string | null;
   admin?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface UseAuthReturn {

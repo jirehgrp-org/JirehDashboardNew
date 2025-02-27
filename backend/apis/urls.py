@@ -1,11 +1,11 @@
-# apis/urls.py - Fixed imports
+# apis/urls.py
 
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
 from .views import (
     BusinessAPIViewSet, BusinessRegisterAPIView, 
-    CustomUserRegisterAPIView, UserProfileView,
+    CustomUserRegisterAPIView, ExpenseOperationAPIView, ExpenseOperationDetailAPIView, ExpenseOperationRegisterAPIView, SubscriptionCancelAPIView, UserOperationAPIView, UserOperationDetailAPIView, UserOperationRegisterAPIView, UserProfileView,
     BusinessRelatedUsersView, BusinessListAPIView,
     BusinessBranchListAPIView, BusinessBranchRegisterAPIView,
     BusinessBranchDetailAPIView,
@@ -18,7 +18,6 @@ from .views import (
     PlansAPIView, PlansRegisterAPIView,
     ItemsDetailAPIView
 )  
-# Import subscription views - Fixed imports
 from subscriptions.views import (
     BusinessSubscriptionAPIView,
     SubscriptionRenewalAPIView
@@ -36,6 +35,11 @@ urlpatterns = [
     path('users/list/', BusinessRelatedUsersView.as_view(), name='business_related_users'),
     path('auth/user/', UserProfileView.as_view(), name='current_user'),
     path('user/<int:user_id>/', UserProfileView.as_view(), name='user-detail'),
+
+    # User Operations
+    path('users/list/', UserOperationAPIView.as_view(), name='users-list'),
+    path('users/register/', UserOperationRegisterAPIView.as_view(), name='user-register'),
+    path('users/<int:user_id>/', UserOperationDetailAPIView.as_view(), name='user-detail'),
     
     # Business Management
     path('business/list/', BusinessListAPIView.as_view(), name='business-list'),
@@ -61,6 +65,10 @@ urlpatterns = [
     path('business/expenses/register/', BusinessExpensesRegisterAPIView.as_view(), name='business-expenses-register'),
     path('business/expenses/<int:expense_id>/', BusinessExpensesAPIView.as_view(), name='expense-detail'),
     
+    path('expenses/list/', ExpenseOperationAPIView.as_view(), name='expenses-list'),
+    path('expenses/register/', ExpenseOperationRegisterAPIView.as_view(), name='expense-register'),
+    path('expenses/<int:expense_id>/', ExpenseOperationDetailAPIView.as_view(), name='expense-detail'),
+    
     # Order Management
     path('orders/list/', BusinessOrdersAPIView.as_view(), name='business-branch-orders-list'),
     path('order/register/', BusinessOrdersRegisterAPIView.as_view(), name='order-register'),
@@ -77,4 +85,5 @@ urlpatterns = [
     # Subscription Management
     path('subscription/status/', BusinessSubscriptionAPIView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewalAPIView.as_view(), name='subscription-renew'),
+    path('subscription/cancel/', SubscriptionCancelAPIView.as_view(), name='subscription-cancel'),
 ]

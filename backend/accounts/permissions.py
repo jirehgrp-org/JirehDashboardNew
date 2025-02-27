@@ -71,3 +71,9 @@ class IsWarehouse(BasePermission):
         return request.user.is_authenticated and request.user.role == 'warehouse'
 
 
+class IsAuthenticatedEmployee(BasePermission):
+    """
+    Allow access to any authenticated user with a valid role in the business.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ['owner', 'admin', 'manager', 'sales', 'warehouse']

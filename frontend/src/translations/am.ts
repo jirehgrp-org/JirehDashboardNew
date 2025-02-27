@@ -434,6 +434,8 @@ export const am = {
       emailPlaceholder: "ኢሜይል ይፃፉ",
       phone: "ስልክ",
       phonePlaceholder: "ስልክ ይፃፉ",
+      password: "የይልፍ ቃል",
+      passwordPlaceholder: "የይልፍ ቃል ይፃፉ",
       role: "ሚና",
       rolePlaceholder: "ሚና ይምረጡ",
       amount: "ብዛት",
@@ -525,6 +527,7 @@ export const am = {
         usernameIsRequired: "የተጠቃሚ ስም ይፃፉ",
         emailIsRequired: "ኢሜይል ይፃፉ",
         phoneIsRequired: "ስልክ ቁጥር ይፃፉ",
+        phoneMaxLength: "ስልክ ቁጥር ከ10 መብለጥ አይችልም",
         roleIsRequired: "ሚና ይምረጡ",
       },
       expenseSchema: {

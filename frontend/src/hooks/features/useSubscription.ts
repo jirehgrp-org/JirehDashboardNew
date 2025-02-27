@@ -82,6 +82,23 @@ export const useSubscription = () => {
     }
   };
 
+  const cancelSubscription = async (): Promise<SubscriptionResponse> => {
+    try {
+      setIsLoading(true);
+      const response = await api.post('/subscription/cancel/');
+      
+      setSubscription(response.data);
+      setError(null);
+      return { data: response.data };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Failed to cancel subscription';
+      setError(errorMessage);
+      return { data: null, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const activateTrial = async (): Promise<TrialResponse> => {
     try {
       setIsLoading(true);
@@ -118,6 +135,7 @@ export const useSubscription = () => {
     getSubscription,
     createSubscription,
     renewSubscription,
+    cancelSubscription,
     activateTrial,
     refreshSubscription
   };

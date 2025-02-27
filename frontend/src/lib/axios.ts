@@ -168,17 +168,19 @@ export const updateItemDetail = (itemId: number, data: any) =>
   api.put(`/item/${itemId}/`, data);
 export const deleteItem = (itemId: number) => api.delete(`/item/${itemId}/`);
 
-// EXPENSE MANAGEMENT
-export const getBusinessExpensesList = () =>
-  api.get("/business/expenses/list/");
-export const getExpenseDetail = (expenseId: number) =>
-  api.get(`/business/expenses/${expenseId}/`);
-export const registerBusinessExpense = (data: any) =>
-  api.post("/business/expenses/register/", data);
-export const updateExpenseDetail = (expenseId: number, data: any) =>
-  api.put(`/business/expenses/${expenseId}/`, data);
-export const deleteExpense = (expenseId: number) =>
-  api.delete(`/business/expenses/${expenseId}/`);
+// USER OPERATIONS API ENDPOINTS
+export const getUsersList = () => api.get("/users/list/");
+export const getUserOperationDetail = (userId: number) => api.get(`/users/${userId}/`);
+export const registerUserOperation = (data: any) => api.post("/users/register/", data);
+export const updateUserOperation = (userId: number, data: any) => api.put(`/users/${userId}/`, data);
+export const deleteUserOperation = (userId: number) => api.delete(`/users/${userId}/`);
+
+// EXPENSE OPERATIONS API ENDPOINTS
+export const getExpensesList = () => api.get("/expenses/list/");
+export const getExpenseOperationDetail = (expenseId: number) => api.get(`/expenses/${expenseId}/`);
+export const registerExpenseOperation = (data: any) => api.post("/expenses/register/", data);
+export const updateExpenseOperation = (expenseId: number, data: any) => api.put(`/expenses/${expenseId}/`, data);
+export const deleteExpenseOperation = (expenseId: number) => api.delete(`/expenses/${expenseId}/`);
 
 // ORDER MANAGEMENT
 export const getOrdersList = () => api.get("/orders/list/");
@@ -190,17 +192,6 @@ export const updateOrderDetail = (orderId: number, data: any) =>
 export const deleteOrder = (orderId: number) =>
   api.delete(`/order/${orderId}/`);
 
-// SUBSCRIPTION & FEATURES MANAGEMENT
-export const getFeaturesList = () => api.get("/features/list/");
-export const getFeatureDetail = (featureId: number) =>
-  api.get(`/feature/${featureId}/`);
-export const registerFeature = (data: any) =>
-  api.post("/feature/register/", data);
-export const updateFeatureDetail = (featureId: number, data: any) =>
-  api.put(`/feature/${featureId}/`, data);
-export const deleteFeature = (featureId: number) =>
-  api.delete(`/feature/${featureId}/`);
-
 // PLAN MANAGEMENT
 export const getPlansList = () => api.get("/plans/list/");
 export const getPlanDetail = (planId: number) => api.get(`/plan/${planId}/`);
@@ -208,5 +199,17 @@ export const registerPlan = (data: any) => api.post("/plan/register/", data);
 export const updatePlanDetail = (planId: number, data: any) =>
   api.put(`/plan/${planId}/`, data);
 export const deletePlan = (planId: number) => api.delete(`/plan/${planId}/`);
+
+// SUBSCRIPTION & FEATURES MANAGEMENT
+export const getFeaturesList = () => api.get("/features/list/");
+export const getFeatureDetail = (featureId: number) =>
+  api.get(`/feature/${featureId}/`);
+
+export const registerFeature = (data: any) =>
+  api.post("/feature/register/", data);
+export const updateFeatureDetail = (featureId: number, data: any) =>
+  api.put(`/feature/${featureId}/`, data);
+export const deleteFeature = (featureId: number) =>
+  api.delete(`/feature/${featureId}/`);
 
 export default api;

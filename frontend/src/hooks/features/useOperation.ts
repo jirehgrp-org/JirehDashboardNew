@@ -1,6 +1,6 @@
-// @/hooks/features/useOperation.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/shared/useToast";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
@@ -8,8 +8,9 @@ import type {
   OperationItem,
   UseOperationOptions,
 } from "@/types/features/operation";
+import { operationService } from "@/lib/services/operation";
 
-// Mock data for users
+// Mock data for fallback when API fails
 const mockUsers: OperationItem[] = [
   {
     id: "1",
@@ -19,6 +20,7 @@ const mockUsers: OperationItem[] = [
     phone: "911234567",
     role: "admin",
     branchId: "1",
+    branchName: "Main Branch",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
@@ -31,6 +33,7 @@ const mockUsers: OperationItem[] = [
     phone: "922345678",
     role: "sales",
     branchId: "2",
+    branchName: "Downtown Branch",
     active: true,
     createdAt: "2024-01-02T12:00:00Z",
     updatedAt: "2024-01-16T12:00:00Z",
@@ -45,6 +48,7 @@ const mockExpenses: OperationItem[] = [
     frequency: "monthly",
     description: "Monthly office space rental",
     branchId: "1",
+    branchName: "Main Branch",
     active: true,
     createdAt: "2024-01-01T12:00:00Z",
     updatedAt: "2024-01-15T12:00:00Z",
@@ -56,6 +60,7 @@ const mockExpenses: OperationItem[] = [
     frequency: "monthly",
     description: "Electricity and water bills",
     branchId: "2",
+    branchName: "Downtown Branch",
     active: true,
     createdAt: "2024-01-02T12:00:00Z",
     updatedAt: "2024-01-16T12:00:00Z",
@@ -67,13 +72,79 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const t = translations[language].dashboard.operation;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<OperationItem[]>(() => {
-    if (endpoint === "users") return mockUsers;
-    if (endpoint === "expenses") return mockExpenses;
-    return [];
-  });
-
+  const [data, setData] = useState<OperationItem[]>([]);
+  const [isMockData, setIsMockData] = useState(false);
+  const [passwordInfo, setPasswordInfo] = useState<string | null>(null);
+  
   const { toast } = useToast();
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      if (isMockData) {
+        // Return mock data based on endpoint
+        switch (endpoint) {
+          case "users":
+            setData(mockUsers);
+            break;
+          case "expenses":
+            setData(mockExpenses);
+            break;
+          default:
+            setData([]);
+        }
+      } else {
+        // Try to fetch real data
+        try {
+          let response: OperationItem[] = []; 
+          
+          switch (endpoint) {
+            case "users":
+              response = await operationService.fetchUsers();
+              break;
+            case "expenses":
+              response = await operationService.fetchExpenses();
+              break;
+          }
+          
+          setData(response);
+        } catch (error: any) {
+          console.error(`API error for ${endpoint}:`, error);
+          
+          // Fall back to mock data on any error
+          setIsMockData(true);
+          
+          switch (endpoint) {
+            case "users":
+              setData(mockUsers);
+              break;
+            case "expenses":
+              setData(mockExpenses);
+              break;
+            default:
+              setData([]);
+          }
+          
+          toast({
+            title: "Using Demo Data",
+            description: "Could not connect to the server. Using sample data instead.",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [endpoint, isMockData, toast]);
+
+  // Initial data loading
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getToastMessages = (variant: string) => {
     const commonMessages = {
@@ -95,48 +166,116 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
       },
     };
 
-    const selectedVariant =
-      variantMessages[variant as keyof typeof variantMessages] ||
-      variantMessages.users;
-
     return {
       ...commonMessages,
-      ...selectedVariant,
+      ...variantMessages[variant as keyof typeof variantMessages] || variantMessages.users
     };
   };
 
-  const handleCreate = async (newData: Partial<OperationItem>) => {
+  const handleCreate = async (newData: Partial<OperationItem>): Promise<OperationItem | null> => {
     setIsLoading(true);
     setError(null);
+    setPasswordInfo(null);
 
     try {
-      const result: OperationItem = {
-        ...newData,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      } as OperationItem;
-
-      // Validate the data based on the type
-      if (endpoint === "users" && !result.username) {
-        throw new Error("Invalid user data");
+      let result: OperationItem | null = null;
+      
+      if (isMockData) {
+        // Create mock item
+        result = {
+          ...newData,
+          active: newData.active !== undefined ? newData.active : true,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          branchName: "Mock Branch", // Add mock branch name
+        } as OperationItem;
+        
+        // Set mock password info for user creation
+        if (endpoint === "users") {
+          setPasswordInfo("Password in mock mode: mockpassword123");
+        }
+      } else {
+        try {
+          // Ensure we set active to true by default
+          const dataWithActive = {
+            ...newData,
+            active: newData.active !== undefined ? newData.active : true
+          };
+          
+          switch (endpoint) {
+            case "users":
+              result = await operationService.createUser(dataWithActive);
+              
+              // Check if password info was returned
+              if ((result as any).password_info) {
+                setPasswordInfo((result as any).password_info);
+                // Remove from the result object
+                delete (result as any).password_info;
+              } else if (dataWithActive.password) {
+                setPasswordInfo(`Password set to your specified password`);
+              }
+              
+              break;
+            case "expenses":
+              result = await operationService.createExpense(dataWithActive);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to create ${endpoint}:`, error);
+          setIsMockData(true);
+          
+          // Fall back to mock creation
+          result = {
+            ...newData,
+            active: newData.active !== undefined ? newData.active : true,
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            branchName: "Mock Branch", // Add mock branch name
+          } as OperationItem;
+          
+          if (endpoint === "users") {
+            setPasswordInfo("Password in mock mode: mockpassword123");
+          }
+          
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
       }
-      if (endpoint === "expenses" && !result.amount) {
-        throw new Error("Invalid expense data");
+
+      // Add the new item to the state
+      if (result) {
+        setData((prev) => [...prev, result as OperationItem]);
+
+        const messages = getToastMessages(endpoint);
+        toast({
+          title: messages.added,
+          description: `${result.name} ${messages.createdSuccess}`,
+        });
+
+        // Show password toast if there's password info
+        if (passwordInfo && endpoint === "users") {
+          toast({
+            title: "User Password Information",
+            description: passwordInfo,
+            variant: "default",
+            duration: 10000, // longer duration for password info
+          });
+        }
+
+        onSuccess?.();
       }
-
-      setData((prev) => [...prev, result]);
-
-      const messages = getToastMessages(endpoint);
-      toast({
-        title: messages.added,
-        description: `${result.name} ${messages.createdSuccess}`,
-      });
-
-      onSuccess?.();
+      
       return result;
     } catch (err) {
       handleError(err);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -145,35 +284,79 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const handleUpdate = async (
     id: string,
     updateData: Partial<OperationItem>
-  ) => {
+  ): Promise<OperationItem | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const existingItem = data.find((item) => item.id === id);
-      if (!existingItem) {
-        throw new Error("Item not found");
+      let result: OperationItem | null = null;
+      
+      if (isMockData) {
+        // Update mock item
+        const existingItem = data.find(item => item.id === id);
+        if (!existingItem) {
+          throw new Error(`Item with ID ${id} not found`);
+        }
+        
+        result = {
+          ...existingItem,
+          ...updateData,
+          updatedAt: new Date().toISOString(),
+        };
+      } else {
+        try {
+          switch (endpoint) {
+            case "users":
+              result = await operationService.updateUser(id, updateData);
+              break;
+            case "expenses":
+              result = await operationService.updateExpense(id, updateData);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to update ${endpoint}:`, error);
+          setIsMockData(true);
+          
+          const existingItem = data.find(item => item.id === id);
+          if (!existingItem) {
+            throw new Error(`Item with ID ${id} not found`);
+          }
+          
+          result = {
+            ...existingItem,
+            ...updateData,
+            updatedAt: new Date().toISOString(),
+          };
+          
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
       }
 
-      const result: OperationItem = {
-        ...existingItem,
-        ...updateData,
-        id,
-        updatedAt: new Date().toISOString(),
-      };
+      // Update item in state
+      if (result) {
+        setData((prev) =>
+          prev.map((item) => (item.id === id ? result as OperationItem : item))
+        );
 
-      setData((prev) => prev.map((item) => (item.id === id ? result : item)));
+        const messages = getToastMessages(endpoint);
+        toast({
+          title: messages.updated,
+          description: `${result.name} ${messages.updatedSuccess}`,
+        });
 
-      const messages = getToastMessages(endpoint);
-      toast({
-        title: messages.updated,
-        description: `${result.name} ${messages.updatedSuccess}`,
-      });
-
-      onSuccess?.();
+        onSuccess?.();
+      }
+      
       return result;
     } catch (err) {
       handleError(err);
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -182,17 +365,45 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const handleDelete = async (id: string) => {
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const itemToDelete = data.find((item) => item.id === id);
+      if (!itemToDelete) {
+        throw new Error(`Item with ID ${id} not found`);
+      }
+      
+      if (!isMockData) {
+        try {
+          switch (endpoint) {
+            case "users":
+              await operationService.deleteUser(id);
+              break;
+            case "expenses":
+              await operationService.deleteExpense(id);
+              break;
+            default:
+              throw new Error(`Unsupported endpoint: ${endpoint}`);
+          }
+        } catch (error) {
+          console.error(`Failed to delete ${endpoint}:`, error);
+          setIsMockData(true);
+          toast({
+            title: "Using Demo Mode",
+            description: "Your changes are saved locally only.",
+            variant: "destructive"
+          });
+        }
+      }
+  
+      // Remove from UI
       setData((prev) => prev.filter((item) => item.id !== id));
-
+  
       const messages = getToastMessages(endpoint);
       toast({
         title: messages.deleted,
-        description: `${itemToDelete?.name} ${messages.deletedSuccess}`,
+        description: `${itemToDelete.name} ${messages.deletedSuccess}`,
       });
-
+  
       onSuccess?.();
     } catch (err) {
       handleError(err);
@@ -202,29 +413,47 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   };
 
   const handleError = (err: unknown) => {
-    const message = err instanceof Error ? err.message : "An error occurred";
+    console.error('Error in useOperation:', err);
+    let message = "An error occurred";
+    
+    if (err instanceof Error) {
+      message = err.message;
+    }
+    
     setError(message);
+    
     toast({
       title: "Error",
       description: message,
-      variant: "destructive",
+      variant: "destructive"
     });
   };
 
-  const handleSubmit = async (data: Partial<OperationItem>, id?: string) => {
-    if (id) {
-      return handleUpdate(id, data);
+  const handleSubmit = async (data: Partial<OperationItem>, id?: string): Promise<OperationItem | null> => {
+    try {
+      return id 
+        ? await handleUpdate(id, data)
+        : await handleCreate(data);
+    } catch (err) {
+      console.error(`Error in handleSubmit for ${endpoint}:`, err);
+      return null;
     }
-    return handleCreate(data);
   };
 
   return {
     isLoading,
     error,
     data,
+    isMockData,
+    passwordInfo,
+    toggleMockData: () => {
+      setIsMockData(!isMockData);
+      fetchData();
+    },
     handleSubmit,
     handleCreate,
     handleUpdate,
     handleDelete,
+    refreshData: fetchData
   };
 }

@@ -32,7 +32,7 @@ export function PaymentDialog({
       ? currentPlan.yearlyPrice || 0
       : currentPlan.monthlyPrice || 0
     : 0;
-  const tot = subtotal * 0.15;
+  const tot = Math.round(subtotal * 0.15 * 100) / 100; // Round to 2 decimal places
   const total = subtotal + tot;
 
   const handleConfirm = () => {
@@ -156,12 +156,12 @@ export function PaymentDialog({
                       )
                     </span>
                     <span>
-                      {subtotal?.toLocaleString()} {t.paymentDialog.br}
+                      {subtotal.toLocaleString()} {t.paymentDialog.br}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-neutral-600">
-                      {t.paymentDialog.tot} (15%){" "}
+                      {t.paymentDialog.tot} (15%)
                     </span>
                     <span>
                       {tot.toLocaleString()} {t.paymentDialog.br}

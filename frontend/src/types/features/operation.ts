@@ -13,6 +13,7 @@ export interface OperationItem {
   createdAt: string;
   updatedAt: string;
   branchId: string;
+  branchName?: string;
 
   // User fields
   username?: string;

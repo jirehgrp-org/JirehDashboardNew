@@ -1,5 +1,3 @@
-// @/lib/schemas/operation.ts
-
 import * as z from "zod";
 import { translations } from "@/translations";
 
@@ -26,10 +24,16 @@ export const UserSchema = (language: SupportedLanguages = "en") => {
   const t = getSchemaTranslations(language);
 
   return BaseSchema(language).extend({
-    username: z.string().min(1, t.userSchema.usernameIsRequired),
-    email: z.string().min(1, t.userSchema.emailIsRequired),
-    phone: z.string().min(1, t.userSchema.phoneIsRequired),
-    role: z.string().min(1, t.userSchema.roleIsRequired),
+    username: z.string().min(1, t.userSchema?.usernameIsRequired || "Username is required"),
+    email: z.string().email(t.userSchema?.emailIsRequired || "Valid email is required"),
+    phone: z.string()
+      .min(9, t.userSchema?.phoneIsRequired || "Phone must be at least 9 digits")
+      .max(12, t.userSchema?.phoneMaxLength || "Phone must be less than 12 digits"),
+    role: z.string()
+      .refine(
+        val => ['manager', 'admin', 'sales', 'warehouse'].includes(val), 
+        t.userSchema?.roleIsRequired || "Invalid role selected"
+      ),
   });
 };
 
@@ -40,11 +44,15 @@ export const ExpenseSchema = (language: SupportedLanguages = "en") => {
     amount: z
       .number()
       .min(
-        0,
+        0.01,
         t.expenseSchema?.amountPositiveIsRequired || "Amount must be positive"
       ),
     description: z.string().optional(),
-    frequency: z.string().min(1, t.expenseSchema?.frequencyIsRequired),
+    frequency: z.string()
+      .refine(
+        val => ['once', 'daily', 'weekly', 'monthly', 'quarterly', 'halfYearly', 'yearly'].includes(val),
+        t.expenseSchema?.frequencyIsRequired || "Valid frequency is required"
+      ),
   });
 };
 

@@ -1,7 +1,6 @@
 # accounts/admin.py
 
 from django.contrib import admin
-
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import CustomUser
@@ -18,15 +17,13 @@ class CustomUserAdmin(UserAdmin):
         'is_staff'
     ]
 
-
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('fullname', 'email', 'phone')}),
+        ('Personal info', {'fields': ('fullname', 'email', 'phone', 'role')}),  # Added role here
         ('Business info', {'fields': ('business', 'business_branch')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        # ('Important dates', {'fields': ('', 'last_login'), 'classes': ('collapse',)}),
+        # ('Important dates', {'fields': ('last_login', 'date_joined'), 'classes': ('collapse',)}),
     )
-
     
     add_fieldsets = (
         (None, {

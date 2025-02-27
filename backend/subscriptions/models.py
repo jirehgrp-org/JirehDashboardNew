@@ -9,6 +9,7 @@ class Subscriptions(models.Model):
         ('ACTIVE', 'Active'),
         ('INACTIVE', 'Inactive'),
         ('EXPIRED', 'Expired'),
+        ('CANCELLED', 'Cancelled'),
         ('TRIAL', 'Trial')
     ]
 
@@ -74,8 +75,8 @@ class Subscriptions(models.Model):
                         )
                     )
         
-        # Check if subscription has expired
-        if timezone.now().date() > self.end_date:
+        # Check if subscription has expired (but don't change status if it's cancelled)
+        if self.subscription_status != 'CANCELLED' and timezone.now().date() > self.end_date:
             self.subscription_status = 'EXPIRED'
         
         super().save(*args, **kwargs)

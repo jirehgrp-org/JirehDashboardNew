@@ -104,6 +104,7 @@ export const am = {
         monthlyBilling: "ወራዊ ክፍያ",
         annualBilling: "አመታዊ ክፍያ",
         month: "በወር",
+        year: "በአመታዊ",
         features: "ባህሪያት",
         br: "ብር",
         subscribe: "አሁን ይመዝገቡ",

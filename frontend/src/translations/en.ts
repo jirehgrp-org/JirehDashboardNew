@@ -107,6 +107,7 @@ export const en = {
         monthlyBilling: "Monthly billing",
         annualBilling: "Annual billing",
         month: "month",
+        year: "year",
         features: "Features",
         br: "Br",
         subscribe: "Subscribe Now",

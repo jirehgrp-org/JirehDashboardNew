@@ -41,13 +41,13 @@ export function SubscriptionForm() {
           setCurrentSubscription(data.subscription);
         }
       } catch (error) {
-        console.error('Error fetching subscription:', error);
+        console.error("Error fetching subscription:", error);
         toast.error("Failed to load subscription data");
       } finally {
         setLoadingSubscription(false);
       }
     };
-  
+
     fetchSubscriptionData();
   }, [getSubscription]);
 
@@ -60,12 +60,19 @@ export function SubscriptionForm() {
   };
 
   const getPlanPrice = (plan: Plan) => {
-    if (!plan.monthlyPrice) return null;
+    if (!plan) return null;
     return isYearly ? plan.yearlyPrice : plan.monthlyPrice;
   };
 
+  const shouldShowContactSupport = (plan: Plan) => {
+    return (
+      (plan.monthlyPrice === 0 || !plan.monthlyPrice) &&
+      (plan.yearlyPrice === 0 || !plan.yearlyPrice)
+    );
+  };
+
   const handleSubscribe = (plan: Plan) => {
-    if (!plan.monthlyPrice) {
+    if (shouldShowContactSupport(plan)) {
       window.location.href = "/contact-support";
       return;
     }
@@ -78,18 +85,21 @@ export function SubscriptionForm() {
         toast.error("No plan selected");
         return;
       }
-      
+
       // Use the renewSubscription function correctly
-      const response = await renewSubscription(activePlan.id, paymentData.paymentMethod);
-      
+      const response = await renewSubscription(
+        activePlan.id,
+        paymentData.paymentMethod
+      );
+
       if (response.error) {
         throw new Error(response.error);
       }
-      
+
       toast.success("Subscription created successfully");
       setShowPaymentDialog(false);
       setActivePlan(null);
-      
+
       // Update the current subscription state
       if (response.data) {
         setCurrentSubscription(response.data);
@@ -105,7 +115,9 @@ export function SubscriptionForm() {
       <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-purple-500 border-r-transparent border-b-blue-500 border-l-transparent"></div>
-          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading subscription information...</p>
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">
+            Loading subscription information...
+          </p>
         </div>
       </div>
     );
@@ -116,7 +128,9 @@ export function SubscriptionForm() {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 dark:bg-red-900 p-6 rounded-lg text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-red-500 dark:text-red-300 mb-4" />
-          <h3 className="text-xl font-bold text-red-700 dark:text-red-300 mb-2">Error Loading Plans</h3>
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-300 mb-2">
+            Error Loading Plans
+          </h3>
           <p className="text-red-600 dark:text-red-200">{error}</p>
         </div>
       </div>
@@ -249,15 +263,15 @@ export function SubscriptionForm() {
                     layoutId={`price-${plan.id}-${id}`}
                     className="text-4xl font-bold text-black dark:text-white mb-4"
                   >
-                    {getPlanPrice(plan) ? (
+                    {shouldShowContactSupport(plan) ? (
+                      <span>{t.page.contactSupport}</span>
+                    ) : (
                       <>
                         {getPlanPrice(plan)?.toLocaleString()} {t.page.br}
                         <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
-                          /{t.page.month}
+                          /{isYearly ? t.page.year : t.page.month}
                         </span>
                       </>
-                    ) : (
-                      <span>{t.page.contactSupport}</span>
                     )}
                   </motion.div>
 
@@ -329,15 +343,15 @@ export function SubscriptionForm() {
                     layoutId={`price-${activePlan?.id}-${id}`}
                     className="text-4xl font-bold text-black dark:text-white mb-4"
                   >
-                    {getPlanPrice(activePlan) ? (
+                    {shouldShowContactSupport(activePlan) ? (
+                      <span>{t.page.contactSupport}</span>
+                    ) : (
                       <>
                         {getPlanPrice(activePlan)?.toLocaleString()} {t.page.br}
                         <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">
-                          /{t.page.month}
+                          /{isYearly ? t.page.year : t.page.month}
                         </span>
                       </>
-                    ) : (
-                      <span>{t.page.contactSupport}</span>
                     )}
                   </motion.div>
 
@@ -358,7 +372,7 @@ export function SubscriptionForm() {
                       {(language === "en"
                         ? activePlan.features_en
                         : activePlan.features_am
-                      ).map((feature, index) => (
+                      )?.map((feature, index) => (
                         <li key={index} className="flex items-center space-x-2">
                           {feature.included ? (
                             <svg
@@ -417,9 +431,9 @@ export function SubscriptionForm() {
                     id={id}
                   >
                     <span className="text-lg font-bold">
-                      {getPlanPrice(activePlan)
-                        ? t.page.subscribe
-                        : t.page.contactSupport}
+                      {shouldShowContactSupport(activePlan)
+                        ? t.page.contactSupport
+                        : t.page.subscribe}
                     </span>
                     <span className="font-bold bg-zinc-200 dark:bg-zinc-700 dark:text-white rounded-full px-4 py-2 text-s">
                       {activePlan.duration} {t.page.days}

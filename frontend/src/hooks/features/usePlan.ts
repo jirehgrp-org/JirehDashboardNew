@@ -1,110 +1,64 @@
-// @/hooks/features/usePlans.ts
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// @/hooks/features/usePlan.ts
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import api from "@/lib/axios";
 import { Plan, UsePlansReturn, GetPlansResponse } from "@/types/features/plan";
 
-// Mock Data
-const MOCK_PLANS: Plan[] = [
-  {
-    id: 1,
-    name_en: "Business",
-    name_am: "ለቢዝነስ",
-    monthlyPrice: 5000,
-    yearlyPrice: 50400,
-    duration: 30,
-    description_en:
-      "Perfect for businesses wanting advanced features, unlimited storage, and businesses support.",
-    description_am: "ለቢዝነሶች ተዘጋጅቶ የተጨመሩ ባህሪያት፣ ያልተገደበ ይዘት፣ እና የቢዝነስ ድጋፍ የያዘ።",
-    isActive: true,
-    isHidden: false,
-    features_en: [
-      { title: "Unlimited branches", included: true },
-      { title: "Unlimited accounts", included: true },
-      { title: "Real-time inventory sync", included: true },
-      { title: "businesses analytics dashboard", included: true },
-      { title: "Email support", included: true },
-      { title: "businesses reporting", included: true },
-      { title: "Unlimited storage", included: true },
-      { title: "businesses security features", included: true },
-      { title: "businesses employee management", included: true },
-      { title: "Manual operations", included: true },
-    ],
-    features_am: [
-      { title: "ያልተገደበ ቦታዎች", included: true },
-      { title: "ያልተገደበ አካውንቶች", included: true },
-      { title: "ፈጣን የክምችት ይዘት", included: true },
-      { title: "የቢዝነሶች ትንተና", included: true },
-      { title: "የኢሜይል ድጋፍ", included: true },
-      { title: "የቢዝነሶች ሪፖርት", included: true },
-      { title: "ያልተገደበ ቦታ", included: true },
-      { title: "የቢዝነሶች ደህንነት ባህሪ", included: true },
-      { title: "የቢዝነሶች የሰራተኛ አስተዳደር", included: true },
-      { title: "አካላዊ ሥራ ክዋኔዎች", included: true },
-    ],
-    createdAt: new Date("2024-01-01"),
-    updatedAt: new Date("2024-01-01"),
-  },
-  {
-    id: 2,
-    name_en: "Enterprise",
-    name_am: "ለኩባንያዎች",
-    duration: 30,
-    description_en:
-      "Full-featured solution for large enterprises with businesses support.",
-    description_am: "ማበርከት የምንችለውን ሙሉ ባህሪያት ይዞ ለትልቅ ኩባንያዎች ከፕሪሚየም ድጋፍ ጋር",
-    isActive: false,
-    isHidden: false,
-    features_en: [
-      { title: "Everything in Business", included: true },
-      { title: "Advanced employee management", included: true },
-      { title: "High level security", included: true },
-      { title: "Bulk operations", included: true },
-      { title: "Integration capabilities", included: true },
-      { title: "Automated notifications", included: true },
-    ],
-    features_am: [
-      { title: "በቢዝነስ ያለው ባህሪያት ሁሉ", included: true },
-      { title: "የላቀ የሰራተኛ አስተዳደር", included: true },
-      { title: "ከፍተኛ ደረጃ ደህንነት", included: true },
-      { title: "ጅምላ ክዋኔዎች", included: true },
-      { title: "የውህደት አቅም", included: true },
-      { title: "ራስ-ሰር ማሳወቂያዎች", included: true },
-    ],
-    createdAt: new Date("2024-01-01"),
-    updatedAt: new Date("2024-01-01"),
-  },
-];
-
 export const usePlans = (): UsePlansReturn => {
-  const [plans, setPlans] = useState<Plan[]>(MOCK_PLANS);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Transform the server plan format to client format
+  const transformPlan = (serverPlan: any): Plan => {
+    return {
+      id: serverPlan.id,
+      name_en: serverPlan.name_en,
+      name_am: serverPlan.name_am,
+      monthlyPrice: serverPlan.monthly_price,
+      yearlyPrice: serverPlan.yearly_price,
+      duration: serverPlan.duration,
+      description_en: serverPlan.description_en,
+      description_am: serverPlan.description_am,
+      isActive: serverPlan.is_active,
+      isHidden: serverPlan.is_hidden,
+      features_en: serverPlan.features?.filter((f: any) => f.title_en).map((f: any) => ({
+        title: f.title_en,
+        included: f.included
+      })) || [],
+      features_am: serverPlan.features?.filter((f: any) => f.title_am).map((f: any) => ({
+        title: f.title_am, 
+        included: f.included
+      })) || [],
+      createdAt: new Date(serverPlan.created_at),
+      updatedAt: new Date(serverPlan.updated_at)
+    };
+  };
+
+  // Fetch plans from Django backend
   const fetchPlans = async (): Promise<GetPlansResponse> => {
     try {
       setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Filter out hidden plans
-      const visiblePlans = MOCK_PLANS.filter((plan) => !plan.isHidden);
-      return { data: visiblePlans };
-    } catch (err) {
-      const error =
-        err instanceof Error ? err.message : "Failed to fetch plans";
-      return { data: [], error };
+      // Corrected endpoint - remove 'api/' prefix
+      const response = await api.get('/plans/list/');
+      
+      // Transform the server response to the client format
+      const transformedPlans = response.data.map(transformPlan);
+      
+      // Cache the plans in state
+      setPlans(transformedPlans);
+      setError(null);
+      
+      return { data: transformedPlans };
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Failed to fetch plans';
+      setError(errorMessage);
+      console.error('Error fetching plans:', err);
+      return { data: [], error: errorMessage };
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const refetchPlans = async () => {
-    const response = await fetchPlans();
-    if (response.error) {
-      setError(response.error);
-    } else {
-      setPlans(response.data);
-      setError(null);
     }
   };
 
@@ -114,6 +68,15 @@ export const usePlans = (): UsePlansReturn => {
     },
     [plans]
   );
+
+  const refetchPlans = async () => {
+    await fetchPlans();
+  };
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   return {
     plans,

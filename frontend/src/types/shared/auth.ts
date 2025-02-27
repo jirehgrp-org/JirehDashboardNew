@@ -49,6 +49,8 @@ export interface PageInfo {
 }
 
 export interface User {
+  business: User;
+  subscription: any;
   id: string;
   username: string;
   email: string;

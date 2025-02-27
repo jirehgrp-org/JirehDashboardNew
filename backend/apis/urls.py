@@ -1,4 +1,4 @@
-# apis/urls.py
+# apis/urls.py - Fixed imports
 
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
@@ -17,7 +17,12 @@ from .views import (
     BusinessOrdersAPIView, BusinessOrdersRegisterAPIView,
     PlansAPIView, PlansRegisterAPIView,
     ItemsDetailAPIView
-)             
+)  
+# Import subscription views - Fixed imports
+from subscriptions.views import (
+    BusinessSubscriptionAPIView,
+    SubscriptionRenewalAPIView
+)           
                 
 router = SimpleRouter()
 router.register('business', BusinessAPIViewSet, basename='business')
@@ -68,4 +73,8 @@ urlpatterns = [
     path('plans/list/', PlansAPIView.as_view(), name='plans'),
     path('plan/register/', PlansRegisterAPIView.as_view(), name='plan-register'),
     path('plan/<int:plan_id>/', PlansAPIView.as_view(), name='plan-detail'),
+    
+    # Subscription Management
+    path('subscription/status/', BusinessSubscriptionAPIView.as_view(), name='subscription-status'),
+    path('subscription/renew/', SubscriptionRenewalAPIView.as_view(), name='subscription-renew'),
 ]

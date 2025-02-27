@@ -52,7 +52,6 @@ export function RegisterBusinessForm() {
 
   React.useEffect(() => {
     const verifyAuth = async () => {
-      console.log("Starting verification in business form");
       const success = searchParams.get('success');
       
       // Try to get credentials from session storage
@@ -60,21 +59,23 @@ export function RegisterBusinessForm() {
       
       if (success && pendingSetupData) {
         try {
-          console.log("Found pending setup data, attempting auto-login");
           const setupData = JSON.parse(pendingSetupData);
           
           if (setupData.username && setupData.password && !isAuthenticated && !isAutoLoginComplete) {
             setIsLoading(true);
             try {
+              // CHANGE: Add delay before login attempt
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
               const loginResult = await login({
                 username: setupData.username,
                 password: setupData.password
               });
               
               if (loginResult.success) {
-                console.log("Auto-login successful");
                 setIsAutoLoginComplete(true);
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // CHANGE: Longer delay after successful login
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 await checkAuth();
               } else {
                 console.error("Auto-login failed:", loginResult.error);

@@ -88,7 +88,7 @@ export function RegisterUserForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
+  
     try {
       // Validate required fields for user registration
       if (

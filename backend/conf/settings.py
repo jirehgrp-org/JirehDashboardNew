@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'categories',
     'items',
     'orders',
+    'subscriptions',
 
     'rest_framework',
     'rest_framework.authtoken',

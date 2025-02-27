@@ -33,6 +33,7 @@ import { translations } from "@/translations";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useAuth } from "@/hooks/shared/useAuth";
 import api from "@/lib/axios";
+import { SubscriptionStatus } from "./SubscriptionStatus";
 
 interface EditableUser {
   name: string;
@@ -87,12 +88,14 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   const fetchBusinessData = async () => {
     try {
       setBusinessLoading(true);
-      const response = await api.get('/business/list');
+      // Make sure this URL matches exactly with your backend
+      const response = await api.get('/business/list/');
       if (response.data && response.data.length > 0) {
-        setBusinessInfo(response.data[0]); // Assuming the first business in the list is the user's
+        setBusinessInfo(response.data[0]);
       }
     } catch (error) {
       console.error("Error fetching business data:", error);
+      // Don't show an error toast here - just log it
     } finally {
       setBusinessLoading(false);
     }
@@ -242,6 +245,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
   return (
     <div className="flex h-12 items-center justify-end bg-gray-100 dark:bg-neutral-800 px-4 md:px-6">
       <div className="flex items-center space-x-2">
+      <SubscriptionStatus />
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors duration-200"

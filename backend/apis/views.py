@@ -47,7 +47,6 @@ class BusinessRegisterAPIView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Get the current user
         user = self.request.user
         print(f"Creating business for user: {user.username}")
         
@@ -63,6 +62,31 @@ class BusinessRegisterAPIView(generics.CreateAPIView):
         user_obj.business = business
         user_obj.save(update_fields=['business'])  # Force update specific field
         print(f"Updated user {user.username} business reference to: {business.name} (ID: {business.id})")
+        
+        # Create a trial subscription
+        try:
+            from subscriptions.models import Subscriptions
+            from plans.models import Plans
+            from django.utils import timezone
+            import datetime
+            
+            # Get the first active plan as the default trial plan
+            default_plan = Plans.objects.filter(is_active=True).first()
+            if default_plan:
+                today = timezone.now().date()
+                trial_end_date = today + datetime.timedelta(days=14)
+                
+                Subscriptions.objects.create(
+                    business=business,
+                    plan=default_plan,
+                    start_date=today,
+                    end_date=trial_end_date,
+                    subscription_status='TRIAL',
+                    is_trial=True
+                )
+                print(f"Trial subscription created for business: {business.name}")
+        except Exception as e:
+            print(f"Error creating trial subscription: {e}")
         
         # Return the created business
         return business
@@ -110,17 +134,49 @@ class UserProfileView(APIView):
                 raise Http404
         return self.request.user
 
+
     def get(self, request, user_id=None):
         user = self.get_object(user_id)
         
         # Business information
         business_info = None
+        subscription_info = None
+        
         if user.business:
             business_info = {
                 'id': user.business.id,
                 'name': user.business.name,
                 'contact_number': user.business.contact_number
             }
+            
+            # Get subscription status if business exists
+            try:
+                from subscriptions.models import Subscriptions
+                
+                # Get the most recent subscription
+                subscription = Subscriptions.objects.filter(
+                    business=user.business
+                ).order_by('-end_date').first()
+                
+                if subscription:
+                    # Calculate days remaining
+                    from django.utils import timezone
+                    today = timezone.now().date()
+                    days_remaining = (subscription.end_date - today).days if today <= subscription.end_date else 0
+                    
+                    subscription_info = {
+                        'id': subscription.id,
+                        'plan_id': subscription.plan.id,
+                        'plan_name': subscription.plan.name_en,
+                        'subscription_status': subscription.subscription_status,
+                        'payment_status': subscription.payment_status,
+                        'start_date': subscription.start_date,
+                        'end_date': subscription.end_date,
+                        'is_trial': subscription.is_trial,
+                        'days_remaining': days_remaining
+                    }
+            except Exception as e:
+                print(f"Error getting subscription info: {e}")
         
         data = {
             'id': user.id,
@@ -133,7 +189,8 @@ class UserProfileView(APIView):
             'created_at': user.created_at,
             'last_login': user.last_login,
             'updated_at': user.updated_at,
-            'business': business_info
+            'business': business_info,
+            'subscription': subscription_info
         }
         return Response(data, status=status.HTTP_200_OK)
 

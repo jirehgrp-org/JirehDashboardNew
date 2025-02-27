@@ -13,6 +13,10 @@ from branches.models import Branches
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from django.utils import timezone
+import datetime
+from subscriptions.models import Subscriptions
+from plans.models import Plans
 
 User = get_user_model()
 
@@ -54,6 +58,27 @@ class CustomUserRegisterSerializer(RegisterSerializer):
                 user_obj.save(update_fields=['business'])  # Force update specific field
                 print(f"Business created: {business.name}, ID: {business.id}")
                 print(f"Updated user {user.username} business reference to: {business.name} (ID: {business.id})")
+                
+                # Create a trial subscription
+                try:
+                    # Get the first active plan as the default trial plan
+                    default_plan = Plans.objects.filter(is_active=True).first()
+                    if default_plan:
+                        today = timezone.now().date()
+                        trial_end_date = today + datetime.timedelta(days=14)
+                        
+                        Subscriptions.objects.create(
+                            business=business,
+                            plan=default_plan,
+                            start_date=today,
+                            end_date=trial_end_date,
+                            subscription_status='TRIAL',
+                            is_trial=True
+                        )
+                        print(f"Trial subscription created for business: {business.name}")
+                except Exception as e:
+                    print(f"Error creating trial subscription: {e}")
+                    
             except Exception as e:
                 print(f"Error creating business during registration: {e}")
         

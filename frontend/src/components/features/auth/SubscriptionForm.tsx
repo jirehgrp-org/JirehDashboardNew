@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// @/components/features/auth/SubscriptionForm
+// src/components/features/auth/SubscriptionForm.tsx
 
 "use client";
-import React, { useId, useRef, useState } from "react";
+import React, { useId, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
@@ -12,22 +12,44 @@ import { usePlans } from "@/hooks/features/usePlan";
 import { Plan } from "@/types/features/plan";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
-import { Info } from "lucide-react";
+import { Info, AlertCircle } from "lucide-react";
 import { PaymentDialog } from "./PaymentDialog";
 import { MobileWrapper } from "@/components/common/MobileWrapper";
 
 export function SubscriptionForm() {
   const { language } = useLanguage();
   const t = translations[language].auth.subscription;
-  const { createSubscription } = useSubscription();
+  const { renewSubscription, getSubscription } = useSubscription();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { plans, isLoading, error } = usePlans();
   const [activePlan, setActivePlan] = useState<Plan | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
   const [isYearly, setIsYearly] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
   const id = useId();
 
   const visiblePlans = plans.filter((plan) => !plan.isHidden);
+
+  // Fetch current subscription status on load
+  useEffect(() => {
+    const fetchSubscriptionData = async () => {
+      try {
+        setLoadingSubscription(true);
+        // Use our hook's getSubscription method instead of direct fetch
+        const data = await getSubscription();
+        if (data.has_subscription) {
+          setCurrentSubscription(data.subscription);
+        }
+      } catch (error) {
+        console.error('Error fetching subscription:', error);
+        toast.error("Failed to load subscription data");
+      } finally {
+        setLoadingSubscription(false);
+      }
+    };
+  
+    fetchSubscriptionData();
+  }, [getSubscription]);
 
   const handlePlanClick = (plan: Plan) => {
     if (!plan.isActive) {
@@ -52,45 +74,64 @@ export function SubscriptionForm() {
 
   const handlePaymentConfirm = async (paymentData: any) => {
     try {
-      const data = {
-        ...paymentData,
-        businessId: 1,
-        planId: activePlan?.id,
-        startDate: new Date(),
-      };
-
-      const response = await createSubscription(data);
+      if (!activePlan) {
+        toast.error("No plan selected");
+        return;
+      }
+      
+      // Use the renewSubscription function correctly
+      const response = await renewSubscription(activePlan.id, paymentData.paymentMethod);
+      
       if (response.error) {
         throw new Error(response.error);
       }
+      
       toast.success("Subscription created successfully");
       setShowPaymentDialog(false);
       setActivePlan(null);
+      
+      // Update the current subscription state
+      if (response.data) {
+        setCurrentSubscription(response.data);
+      }
     } catch (err) {
       toast.error("Failed to create subscription");
       console.error(err);
     }
   };
 
-  if (isLoading) {
-    return <div>Loading plans...</div>;
+  if (isLoading || loadingSubscription) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-purple-500 border-r-transparent border-b-blue-500 border-l-transparent"></div>
+          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Loading subscription information...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error loading plans: {error}</div>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-100 dark:bg-red-900 p-6 rounded-lg text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500 dark:text-red-300 mb-4" />
+          <h3 className="text-xl font-bold text-red-700 dark:text-red-300 mb-2">Error Loading Plans</h3>
+          <p className="text-red-600 dark:text-red-200">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   const PlanButton = ({
     onClick,
     planId,
     id,
-    isPrimary,
     children,
   }: {
     onClick: () => void;
     planId: string;
     id: string;
-    isPrimary?: boolean;
     children: React.ReactNode;
   }) => {
     return (
@@ -124,6 +165,19 @@ export function SubscriptionForm() {
         <h2 className="text-2xl font-bold text-center mb-8 dark:text-white">
           {t.page.choose}
         </h2>
+
+        {/* Pricing disclaimer - moved above billing toggle */}
+        <div className="mb-8">
+          <div className="bg-neutral-200 dark:bg-neutral-800 rounded-lg p-4 max-w-2xl mx-auto">
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
+              <Info className="h-4 w-4 shrink-0" />
+              {t.page.allPrices}
+            </p>
+            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
+              {t.page.getFreeTrial}
+            </p>
+          </div>
+        </div>
 
         {/* Billing toggle */}
         <div className="flex justify-center items-center mb-10">
@@ -238,7 +292,6 @@ export function SubscriptionForm() {
               >
                 <motion.div
                   layoutId={`card-${activePlan.id}-${id}`}
-                  ref={ref}
                   onClick={(e) => e.stopPropagation()}
                   className="w-full max-w-[500px] bg-white dark:bg-zinc-900 rounded-3xl p-8 relative"
                 >
@@ -323,16 +376,11 @@ export function SubscriptionForm() {
                                   id="gradient"
                                   gradientTransform="rotate(45)"
                                 >
-                                  <stop offset="0%" stopColor="#8B5CF6" />{" "}
-                                  {/* Purple */}
-                                  <stop
-                                    offset="100%"
-                                    stopColor="#3B82F6"
-                                  />{" "}
-                                  {/* Blue */}
+                                  <stop offset="0%" stopColor="#8B5CF6" />
+                                  <stop offset="100%" stopColor="#3B82F6" />
                                 </linearGradient>
                               </defs>
-                              <path d="M20 6L9 17l-5-5" />{" "}
+                              <path d="M20 6L9 17l-5-5" />
                             </svg>
                           ) : (
                             <svg
@@ -391,19 +439,6 @@ export function SubscriptionForm() {
           onConfirm={handlePaymentConfirm}
           isTrial={!activePlan}
         />
-
-        {/* Pricing disclaimer - moved above billing toggle */}
-        <div className="mb-8">
-          <div className="bg-neutral-200 dark:bg-neutral-800 rounded-lg p-4 max-w-2xl mx-auto">
-            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
-              <Info className="h-4 w-4 shrink-0" />
-              {t.page.allPrices}
-            </p>
-            <p className="text-center text-neutral-600 dark:text-neutral-400 text-sm flex items-center justify-center gap-2">
-              {t.page.getFreeTrial}
-            </p>
-          </div>
-        </div>
       </div>
     </MobileWrapper>
   );

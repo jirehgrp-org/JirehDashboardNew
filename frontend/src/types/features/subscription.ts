@@ -76,5 +76,5 @@ export interface UseSubscriptionReturn {
   cancelSubscription: (id: number) => Promise<SubscriptionResponse>;
   getSubscription: (id: number) => Promise<SubscriptionResponse>;
   refreshSubscription: () => Promise<void>;
-  activateTrial: () => Promise<TrialResponse>; // Added trial activation
+  activateTrial: () => Promise<TrialResponse>;
 }

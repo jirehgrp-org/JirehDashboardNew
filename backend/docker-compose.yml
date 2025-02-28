@@ -3,6 +3,8 @@ services:
     build: .
     command: gunicorn conf.wsgi:application --bind 0.0.0.0:8000 --workers 4
     volumes:
+      - ./static:/backend/static
+      - ./media:/backend/media
       - .:/backend
     ports:
       - 8000:8000
@@ -14,7 +16,8 @@ services:
       - ROTATE_REFRESH_TOKENS=True
       - BLACKLIST_AFTER_ROTATION=True
       - UPDATE_LAST_LOGIN=True
-      - DATABASE_URL=postgres://postgres@db/postgres
+      - DATABASE_URL=postgres://postgres:secure-password-here@db/postgres
+      - ALLOWED_HOSTS=bms.jirehgrp.com,localhost,127.0.0.1
     working_dir: /backend
     restart: always
     healthcheck:
@@ -28,9 +31,8 @@ services:
     volumes:
       - jdb_postgres_data:/var/lib/postgresql/data/
     environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
-    # For production, use a password instead of trust
-    # - "POSTGRES_PASSWORD=secure-password-here"
+      - POSTGRES_PASSWORD=secure-password-here
+    restart: always
 
 volumes:
   jdb_postgres_data:

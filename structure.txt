@@ -127,6 +127,9 @@ JirehDashboardNew/
 │   │   └── views.py
 │   ├── static/
 │   │   └── .keep
+│   ├── staticfiles/
+│   │   ├── admin/
+│   │   └── rest_framework/
 │   ├── subscriptions
 │   │   └── migrations/
 │   │       └── __init__.py

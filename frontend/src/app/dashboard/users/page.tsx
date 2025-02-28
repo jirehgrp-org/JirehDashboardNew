@@ -33,10 +33,12 @@ import { useOperation } from "@/hooks/features/useOperation";
 import type { OperationItem } from "@/types/features/operation";
 import { ResponsiveWrapper } from "@/components/common/ResponsiveWrapper";
 import { useResponsive } from "@/hooks/shared/useResponsive";
+import { useAuth } from "@/hooks/shared/useAuth"; // Import your auth hook
 
 const UsersPage = () => {
   const { isMobile } = useResponsive();
   const { language } = useLanguage();
+  const { user: currentUser } = useAuth(); // Get the current logged-in user
   const t = translations[language].dashboard.operation.page;
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,17 +55,26 @@ const UsersPage = () => {
     endpoint: "users",
   });
 
-  // Filter users and apply search
+  // Filter users:
+  // 1. Apply search query
+  // 2. Exclude the current logged-in user
+  // 3. Exclude users with roles "owner" or "manager"
   const filteredUsers = users?.filter(
     (item) =>
       item.username && // Ensure it's a user
+      // Apply search filter
       (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.username.toLowerCase().includes(searchQuery.toLowerCase()))
+        item.username.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      // Exclude the current logged-in user
+      item.id !== currentUser?.id &&
+      // Exclude users with "owner" or "manager" roles
+      item.role !== "owner" &&
+      item.role !== "manager"
   );
 
   const downloadCSV = () => {
-    if (!users) return;
+    if (!filteredUsers) return;
 
     const date = new Date()
       .toLocaleDateString("en-US", {
@@ -74,7 +85,7 @@ const UsersPage = () => {
       .replace(/\//g, "-");
 
     const csv = Papa.unparse(
-      users
+      filteredUsers
         .filter((item) => item.username && item.email) // Only include users
         .map((user) => ({
           name: user.name,
@@ -110,6 +121,12 @@ const UsersPage = () => {
   };
 
   const handleDelete = async (user: OperationItem) => {
+    // Prevent deleting if the user is a manager or owner (extra safety)
+    if (user.role === "owner" || user.role === "manager") {
+      console.warn("Cannot delete users with role 'owner' or 'manager'");
+      return;
+    }
+    
     setUserToDelete(user);
     setDeleteDialogOpen(true);
   };

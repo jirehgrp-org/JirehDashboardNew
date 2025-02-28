@@ -133,24 +133,16 @@ class UserOperationAPIView(APIView):
         
         if business is None:
             return Response({'error': 'User is not registered with any business'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
         
         # Use select_related to efficiently load branch data
         users = User.objects.filter(business=business).select_related('business_branch')
         
-        # Enhanced debug logging to check branch data
-        print(f"Fetching users for business: {business.name} (ID: {business.id})")
-        for u in users:
-            branch_id = u.business_branch.id if u.business_branch else None
-            branch_name = u.business_branch.name if u.business_branch else None
-            print(f"User: {u.id} {u.username}, Branch ID: {branch_id}, Branch Name: {branch_name}")
+        # Explicitly create serializer context to ensure proper serialization
+        context = {'request': request}
+        serializer = UserOperationSerializer(users, many=True, context=context)
         
-        serializer = UserOperationSerializer(users, many=True)
-        
-        # Additional debug logging for serialized data
-        for user_data in serializer.data:
-            print(f"Serialized user {user_data.get('id')}: branch_id={user_data.get('business_branch')}, branch_name={user_data.get('branch_name')}")
-        
+        # Return the serialized data
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -295,6 +287,10 @@ class UserOperationDetailAPIView(APIView):
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = UserOperationSerializer(user_obj)
+        
+        # Add debug output to see what's being returned
+        print(f"Single user serialized data: {serializer.data}")
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     def put(self, request, user_id):

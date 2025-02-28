@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useState, useEffect, useCallback } from "react";
@@ -74,7 +75,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<OperationItem[]>([]);
   const [isMockData, setIsMockData] = useState(false);
-  const [passwordInfo, setPasswordInfo] = useState<string | null>(null);
   
   const { toast } = useToast();
 
@@ -96,13 +96,20 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
             setData([]);
         }
       } else {
-        // Try to fetch real data
         try {
           let response: OperationItem[] = []; 
           
           switch (endpoint) {
             case "users":
               response = await operationService.fetchUsers();
+              // Debug the response to check for branch data
+              console.log(`Got ${response.length} users from API`);
+              if (response.length > 0) {
+                console.log("Sample transformed user:", response[0]);
+                // Check if any users have branchName
+                const usersWithBranchName = response.filter(user => user.branchName);
+                console.log(`Users with branchName: ${usersWithBranchName.length}/${response.length}`);
+              }
               break;
             case "expenses":
               response = await operationService.fetchExpenses();
@@ -175,7 +182,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
   const handleCreate = async (newData: Partial<OperationItem>): Promise<OperationItem | null> => {
     setIsLoading(true);
     setError(null);
-    setPasswordInfo(null);
 
     try {
       let result: OperationItem | null = null;
@@ -190,11 +196,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
           updatedAt: new Date().toISOString(),
           branchName: "Mock Branch", // Add mock branch name
         } as OperationItem;
-        
-        // Set mock password info for user creation
-        if (endpoint === "users") {
-          setPasswordInfo("Password in mock mode: mockpassword123");
-        }
       } else {
         try {
           // Ensure we set active to true by default
@@ -206,16 +207,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
           switch (endpoint) {
             case "users":
               result = await operationService.createUser(dataWithActive);
-              
-              // Check if password info was returned
-              if ((result as any).password_info) {
-                setPasswordInfo((result as any).password_info);
-                // Remove from the result object
-                delete (result as any).password_info;
-              } else if (dataWithActive.password) {
-                setPasswordInfo(`Password set to your specified password`);
-              }
-              
               break;
             case "expenses":
               result = await operationService.createExpense(dataWithActive);
@@ -234,12 +225,8 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
             id: crypto.randomUUID(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            branchName: "Mock Branch", // Add mock branch name
+            branchName: "Mock Branch",
           } as OperationItem;
-          
-          if (endpoint === "users") {
-            setPasswordInfo("Password in mock mode: mockpassword123");
-          }
           
           toast({
             title: "Using Demo Mode",
@@ -258,17 +245,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
           title: messages.added,
           description: `${result.name} ${messages.createdSuccess}`,
         });
-
-        // Show password toast if there's password info
-        if (passwordInfo && endpoint === "users") {
-          toast({
-            title: "User Password Information",
-            description: passwordInfo,
-            variant: "default",
-            duration: 10000, // longer duration for password info
-          });
-        }
-
         onSuccess?.();
       }
       
@@ -412,7 +388,7 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
     }
   };
 
-  const handleError = (err: unknown) => {
+  const handleError = useCallback((err: unknown) => {
     console.error('Error in useOperation:', err);
     let message = "An error occurred";
     
@@ -427,7 +403,7 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
       description: message,
       variant: "destructive"
     });
-  };
+  }, [toast]);  
 
   const handleSubmit = async (data: Partial<OperationItem>, id?: string): Promise<OperationItem | null> => {
     try {
@@ -445,7 +421,6 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
     error,
     data,
     isMockData,
-    passwordInfo,
     toggleMockData: () => {
       setIsMockData(!isMockData);
       fetchData();

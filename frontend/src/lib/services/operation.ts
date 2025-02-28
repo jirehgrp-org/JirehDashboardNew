@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/lib/services/operation.ts
 
@@ -14,7 +15,21 @@ class OperationService {
         console.warn("Users response is not an array:", response.data);
         return [];
       }
-
+  
+      // Debug log to see what's coming from the API
+      console.log("API response for users:", response.data);
+      
+      // Check if business_branch and branch_name are in the response
+      if (response.data.length > 0) {
+        const sampleUser = response.data[0];
+        console.log("Sample user data:", {
+          id: sampleUser.id,
+          business_branch: sampleUser.business_branch,
+          branch_name: sampleUser.branch_name,
+          other_fields: Object.keys(sampleUser)
+        });
+      }
+  
       return this.transformUsersData(response.data);
     } catch (error: any) {
       this.handleApiError("fetchUsers", error);
@@ -43,7 +58,6 @@ class OperationService {
         username: userData.username,
         email: userData.email,
         phone: phone,
-        password: userData.password || undefined, // Add password to payload
         role: userData.role || "sales",
         business_branch: userData.branchId,
         is_active: userData.active === undefined ? true : userData.active
@@ -173,7 +187,6 @@ class OperationService {
     }
   }
 
-  // Helper methods
   private handleApiError(operation: string, error: any): void {
     console.error(`API Error (${operation}):`, 
       error?.response?.status,
@@ -222,26 +235,25 @@ class OperationService {
   }
 
   private transformUserData(data: any): OperationItem {
-    console.log("Transforming user data:", data); // Keep this debug log
+    console.log("Transforming user data:", data); 
     
-    // Check for branch data in the response
     let branchId = "";
     let branchName = "";
     
-    if (data.business_branch) {
+    if (data.business_branch !== null && data.business_branch !== undefined) {
       branchId = String(data.business_branch);
+      console.log(`Found business_branch ID: ${branchId}`);
     }
     
     if (data.branch_name) {
       branchName = data.branch_name;
-    } else if (data.business_branch_name) {
-      branchName = data.business_branch_name;
+      console.log(`Found branch_name: ${branchName}`);
     }
     
     // Add additional logging to debug branch data
     console.log(`User ${data.id} branch data:`, { 
       branchId: data.business_branch,
-      branchName: branchName,
+      branchName: data.branch_name,
       rawBranchData: data.business_branch 
     });
     

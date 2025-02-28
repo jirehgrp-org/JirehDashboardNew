@@ -194,7 +194,6 @@ class PlansSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
 class UserOperationSerializer(serializers.ModelSerializer):
     branch_name = serializers.SerializerMethodField()
     
@@ -212,6 +211,23 @@ class UserOperationSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(f"Error getting branch name for user {obj.id}: {e}")
             return None
+    
+    def to_representation(self, instance):
+        """Ensure all fields are properly included in the serialized output"""
+        representation = super().to_representation(instance)
+        
+        # Explicitly ensure business_branch is included
+        if hasattr(instance, 'business_branch') and instance.business_branch:
+            representation['business_branch'] = instance.business_branch.id
+            representation['branch_name'] = instance.business_branch.name
+        else:
+            representation['business_branch'] = None
+            representation['branch_name'] = None
+            
+        # Debug output
+        print(f"Serializing user {instance.id}, fields: {representation.keys()}")
+        
+        return representation
 
 class ExpenseOperationSerializer(serializers.ModelSerializer):
     branch_name = serializers.SerializerMethodField()

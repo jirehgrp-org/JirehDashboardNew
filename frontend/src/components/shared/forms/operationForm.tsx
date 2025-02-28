@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @/components/shared/forms/operationForm.tsx
 
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -10,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { useInventory } from "@/hooks/features/useInventory";
+import { useAuth } from "@/hooks/shared/useAuth"; // Import your auth hook
 import type { OperationFormProps } from "@/types/features/operation";
 import {
   Form,
@@ -28,7 +31,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getSchemaForVariant } from "@/lib/schemas/operation";
-import { Eye, EyeOff } from "lucide-react";
 
 const RequiredIndicator = () => <span className="text-red-500 ml-1">*</span>;
 
@@ -41,11 +43,14 @@ export function OperationForm({
   const { language } = useLanguage();
   const formT = translations[language].dashboard.form;
   const schema = getSchemaForVariant(variant, language);
+  const { user } = useAuth(); // Get current user info
 
   // Fetch branches for the branch select field
   const { data: branches } = useInventory({
     endpoint: "branches",
   });
+
+  const isAdmin = user?.role === "admin" || user?.role === "owner";
 
   const form = useForm({
     resolver: zodResolver(schema),
@@ -58,7 +63,7 @@ export function OperationForm({
         email: "",
         phone: "",
         role: "",
-        password: "", // Add password field
+        password: "",
       }),
       ...(variant === "expense" && {
         amount: 0,
@@ -85,16 +90,15 @@ export function OperationForm({
   };
 
   const handleFormSubmit = (data: any) => {
-    
     // Format phone number if needed
     if (variant === "user" && data.phone) {
-      data.phone = data.phone.startsWith("+251") 
-        ? data.phone 
-        : data.phone.startsWith("251") 
-          ? `+${data.phone}` 
-          : `+251${data.phone.replace(/^0+/, "")}`;
+      data.phone = data.phone.startsWith("+251")
+        ? data.phone
+        : data.phone.startsWith("251")
+        ? `+${data.phone}`
+        : `+251${data.phone.replace(/^0+/, "")}`;
     }
-    
+
     onSubmit(data);
   };
 
@@ -237,8 +241,10 @@ export function OperationForm({
                           <SelectValue placeholder={formT.rolePlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
+                          {/* Allow admin role for everyone */}
                           <SelectItem value="admin">{formT.admin}</SelectItem>
-                          <SelectItem value="manager">{formT.manager}</SelectItem>
+                          {/* Don't show manager and owner roles at all */}
+                          {/* <SelectItem value="manager">{formT.manager}</SelectItem> */}
                           <SelectItem value="sales">{formT.sales}</SelectItem>
                           <SelectItem value="warehouse">
                             {formT.warehouse}

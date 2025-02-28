@@ -1,26 +1,27 @@
 services:
-# web:
-  # container_name: jireh_web
   web:
     build: .
     command: python /backend/manage.py runserver 0.0.0.0:8000
     volumes:
-    - .:/backend
+      - .:/backend
     ports:
-    - 8000:8000
+      - 8000:8000
     depends_on:
-    - db
+      - db
     environment:
-    - DJANGO_SECRET_KEY=django-insecure-71%@ogk-j=d(x=rl^fry9yvwpy)ix&5k5@u8cec59a@1j+$4r!
-    - DJANGO_DEBUG=True
-    - ROTATE_REFRESH_TOKENS=False
-    - BLACKLIST_AFTER_ROTATION=False
-    - UPDATE_LAST_LOGIN=False
+      - DJANGO_SECRET_KEY=Rk5I*px~2X|}w!o<CR`]T&'t|9-zijE8*!^VR&3l9q(R"(.l@D
+      - DJANGO_DEBUG=False
+      - ROTATE_REFRESH_TOKENS=True
+      - BLACKLIST_AFTER_ROTATION=True
+      - UPDATE_LAST_LOGIN=True
+      - DATABASE_URL=postgres://postgres@db/postgres
   db:
     image: postgres:17
     volumes:
-    - jdb_postgres_data:/var/lib/postgresql/data/
+      - jdb_postgres_data:/var/lib/postgresql/data/
     environment:
-    - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    # For production, you should set a password instead of trust
+    # - "POSTGRES_PASSWORD=secure-password-here"
 volumes:
   jdb_postgres_data:

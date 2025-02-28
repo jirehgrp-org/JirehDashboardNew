@@ -12,9 +12,9 @@ export interface OrderItem {
 }
 
 export interface TransactionAction {
-  type: "mark_paid" | "complete" | "cancel"; // Add 'complete' to possible action types
+  type: "mark_paid" | "complete" | "cancel";
   timestamp: Date;
-  performedBy: UserRole; // Change this to UserRole instead of string
+  performedBy: UserRole;
 }
 
 export interface TransactionItem {

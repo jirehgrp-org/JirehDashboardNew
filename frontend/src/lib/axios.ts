@@ -212,4 +212,11 @@ export const updateFeatureDetail = (featureId: number, data: any) =>
 export const deleteFeature = (featureId: number) =>
   api.delete(`/feature/${featureId}/`);
 
+// TRANSACTION MANAGEMENT
+export const getTransactionsList = () => api.get("/transactions/list/");
+export const getTransactionDetail = (orderId: number) => api.get(`/transactions/${orderId}/`);
+export const registerTransaction = (data: any) => api.post("/transactions/register/", data);
+export const updateTransactionDetail = (orderId: number, data: any) => api.put(`/transactions/${orderId}/`, data);
+export const deleteTransaction = (orderId: number) => api.delete(`/transactions/${orderId}/`);
+
 export default api;

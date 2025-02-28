@@ -10,13 +10,17 @@ from orders.models import Orders
 from orders.models import Order_items
 from plans.models import Plans
 from branches.models import Branches
+from subscriptions.models import Subscriptions
+from orders.models import Orders, Order_items
+from items.models import Items 
+import datetime
+from plans.models import Plans
+
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.utils import timezone
-import datetime
-from subscriptions.models import Subscriptions
-from plans.models import Plans
+import uuid
 
 User = get_user_model()
 
@@ -196,6 +200,7 @@ class PlansSerializer(serializers.ModelSerializer):
 
 class UserOperationSerializer(serializers.ModelSerializer):
     branch_name = serializers.SerializerMethodField()
+    business_branch = serializers.PrimaryKeyRelatedField(read_only=True)
     
     class Meta:
         model = User
@@ -247,3 +252,37 @@ class ExpenseOperationSerializer(serializers.ModelSerializer):
         
     def get_created_by_name(self, obj):
         return obj.created_by.fullname if obj.created_by else None
+    
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    item_name = serializers.SerializerMethodField()
+    category_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Order_items
+        fields = ['id', 'quantity', 'unit_price', 'subtotal', 'item', 'item_name', 
+                  'category', 'category_name', 'created_at', 'updated_at']
+    
+    def get_item_name(self, obj):
+        return obj.item.name if obj.item else None
+        
+    def get_category_name(self, obj):
+        return obj.category.name if obj.category else None
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True, source='order_items_set')
+    created_by_name = serializers.SerializerMethodField()
+    branch_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Orders
+        fields = ['id', 'order_number', 'customer_name', 'customer_phone', 'customer_email',
+                  'order_date', 'status', 'total_amount', 'payment_status', 'payment_method',
+                  'paid_amount', 'remaining_amount', 'created_at', 'updated_at', 
+                  'business', 'business_branch', 'branch_name', 'user', 'created_by_name', 'items']
+    
+    def get_created_by_name(self, obj):
+        return obj.user.fullname if obj.user else None
+        
+    def get_branch_name(self, obj):
+        return obj.business_branch.name if obj.business_branch else None

@@ -5,7 +5,7 @@ from rest_framework.routers import SimpleRouter
 
 from .views import (
     BusinessAPIViewSet, BusinessRegisterAPIView, 
-    CustomUserRegisterAPIView, ExpenseOperationAPIView, ExpenseOperationDetailAPIView, ExpenseOperationRegisterAPIView, SubscriptionCancelAPIView, UserOperationAPIView, UserOperationDetailAPIView, UserOperationRegisterAPIView, UserProfileView,
+    CustomUserRegisterAPIView, ExpenseOperationAPIView, ExpenseOperationDetailAPIView, ExpenseOperationRegisterAPIView, SubscriptionCancelAPIView, UserOperationAPIView, UserOperationDebugView, UserOperationDetailAPIView, UserOperationRegisterAPIView, UserProfileView,
     BusinessRelatedUsersView, BusinessListAPIView,
     BusinessBranchListAPIView, BusinessBranchRegisterAPIView,
     BusinessBranchDetailAPIView,
@@ -16,7 +16,8 @@ from .views import (
     FeaturesAPIView, FeaturesRegisterAPIView,
     BusinessOrdersAPIView, BusinessOrdersRegisterAPIView,
     PlansAPIView, PlansRegisterAPIView,
-    ItemsDetailAPIView
+    ItemsDetailAPIView, TransactionOperationAPIView, TransactionOperationDetailAPIView, 
+    TransactionOperationRegisterAPIView
 )  
 from subscriptions.views import (
     BusinessSubscriptionAPIView,
@@ -40,6 +41,7 @@ urlpatterns = [
     path('users/list/', UserOperationAPIView.as_view(), name='users-list'),
     path('users/register/', UserOperationRegisterAPIView.as_view(), name='user-register'),
     path('users/<int:user_id>/', UserOperationDetailAPIView.as_view(), name='user-detail'),
+    path('user-operations/list/', UserOperationDebugView.as_view(), name='user-operations-list'),
     
     # Business Management
     path('business/list/', BusinessListAPIView.as_view(), name='business-list'),
@@ -86,4 +88,9 @@ urlpatterns = [
     path('subscription/status/', BusinessSubscriptionAPIView.as_view(), name='subscription-status'),
     path('subscription/renew/', SubscriptionRenewalAPIView.as_view(), name='subscription-renew'),
     path('subscription/cancel/', SubscriptionCancelAPIView.as_view(), name='subscription-cancel'),
+
+    # Transaction Management
+    path('transactions/list/', TransactionOperationAPIView.as_view(), name='transactions-list'),
+    path('transactions/register/', TransactionOperationRegisterAPIView.as_view(), name='transaction-register'),
+    path('transactions/<int:order_id>/', TransactionOperationDetailAPIView.as_view(), name='transaction-detail'),
 ]

@@ -210,6 +210,9 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
+    'http://157.90.126.193',
+    'http://157.90.126.193:3000',
+    'http://157.90.126.193:8000',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -233,7 +236,12 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://frontenddomainname.com']
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000', 
+    'https://frontenddomainname.com',
+    'http://157.90.126.193',
+    'http://157.90.126.193:3000',
+]
 
 
 SITE_ID = 1

@@ -15,7 +15,7 @@ from rest_framework import viewsets, status
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializers import (BusinessRegistrationSerializer, BusinessModelSerializer, 
-                          CustomUserRegisterSerializer, UserSerializer, 
+                          CustomUserRegisterSerializer, OrderSerializer, UserSerializer, 
                           BusinessBranchSerializer, ItemsBranchSerializer, 
                           BusinessExpensesSerializer, FeaturesSerializer,
                           BusinessBranchOrdersSerializer, PlansSerializer)
@@ -35,6 +35,8 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.conf import settings
 from subscriptions.models import Subscriptions
+from orders.models import Orders, Order_items
+from django.db import transaction as db_transaction
 User = get_user_model()
 
 
@@ -131,19 +133,96 @@ class UserOperationAPIView(APIView):
         user = request.user
         business = user.business
         
+        print(f"=== DEBUG: UserOperationAPIView GET request ===")
+        print(f"Requesting user: {user.id} ({user.username})")
+        print(f"Business: {getattr(business, 'id', None)} ({getattr(business, 'name', None)})")
+        
+        if business is None:
+            print("ERROR: User has no business")
+            return Response({'error': 'User is not registered with any business'}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get all users with their branch data
+        users = User.objects.filter(business=business).select_related('business_branch')
+        print(f"Found {users.count()} users")
+        
+        # Diagnostic for each user
+        for user_obj in users:
+            print(f"User {user_obj.id} ({user_obj.username})")
+            print(f"  - business_branch: {getattr(user_obj.business_branch, 'id', None)}")
+            print(f"  - branch_name: {getattr(user_obj.business_branch, 'name', None)}")
+        
+        # Manually construct response
+        result = []
+        for user_obj in users:
+            # Check explicitly if business_branch is not None
+            if user_obj.business_branch is not None:
+                branch_id = user_obj.business_branch.id
+                branch_name = user_obj.business_branch.name
+                print(f"User {user_obj.id}: Found branch data: {branch_id}, {branch_name}")
+            else:
+                branch_id = None
+                branch_name = None
+                print(f"User {user_obj.id}: No branch data available")
+            
+            user_data = {
+                'id': user_obj.id,
+                'username': user_obj.username,
+                'email': user_obj.email,
+                'fullname': user_obj.fullname,
+                'phone': user_obj.phone,
+                'role': user_obj.role,
+                'is_active': user_obj.is_active,
+                'created_at': user_obj.created_at,
+                'updated_at': user_obj.updated_at,
+                'business_branch': branch_id,
+                'branch_name': branch_name
+            }
+            result.append(user_data)
+        
+        # Print the final result
+        print("Final result sample (first user):")
+        if result:
+            first_user = result[0]
+            print(f"  - fields: {list(first_user.keys())}")
+            print(f"  - business_branch: {first_user.get('business_branch')}")
+            print(f"  - branch_name: {first_user.get('branch_name')}")
+        
+        return Response(result, status=status.HTTP_200_OK)
+    
+
+class UserOperationDebugView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        business = user.business
+        
         if business is None:
             return Response({'error': 'User is not registered with any business'}, 
                         status=status.HTTP_400_BAD_REQUEST)
         
-        # Use select_related to efficiently load branch data
-        users = User.objects.filter(business=business).select_related('business_branch')
+        # Direct database query
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    u.id, u.username, u.email, u.fullname, u.phone, u.role, u.is_active,
+                    u.created_at, u.updated_at,
+                    b.id as branch_id, b.name as branch_name
+                FROM 
+                    accounts_customuser u
+                LEFT JOIN
+                    branches_branches b ON u.business_branch_id = b.id
+                WHERE
+                    u.business_id = %s
+            """, [business.id])
+            
+            columns = [col[0] for col in cursor.description]
+            users_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
         
-        # Explicitly create serializer context to ensure proper serialization
-        context = {'request': request}
-        serializer = UserOperationSerializer(users, many=True, context=context)
-        
-        # Return the serialized data
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(users_data, status=status.HTTP_200_OK)
 
 
 class UserOperationRegisterAPIView(APIView):
@@ -1292,3 +1371,216 @@ class PlansRegisterAPIView(APIView):
 
         serializer = PlansSerializer(plan)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class TransactionOperationAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
+
+    def get(self, request):
+        user = request.user
+        business = user.business
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # If user has a specific branch, filter orders by that branch
+        if user.business_branch and user.role not in ['owner', 'admin']:
+            orders = Orders.objects.filter(business=business, business_branch=user.business_branch)
+        else:
+            orders = Orders.objects.filter(business=business)
+            
+        # Get order items for each order
+        orders = orders.prefetch_related('order_items_set', 'order_items_set__item', 'order_items_set__category')
+        
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class TransactionOperationRegisterAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
+    
+    def post(self, request):
+        user = request.user
+        business = user.business
+        branch = user.business_branch
+        
+        if business is None:
+            return Response({'error': 'User is not registered with any business'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+                          
+        if branch is None:
+            return Response({'error': 'User is not registered with any branch'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        data = request.data
+        
+        # Validate required fields
+        if not data.get('customer_name'):
+            return Response({'error': 'Customer name is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        if not data.get('customer_phone'):
+            return Response({'error': 'Customer phone is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        if not data.get('items') or not isinstance(data.get('items'), list) or len(data.get('items')) == 0:
+            return Response({'error': 'At least one item is required'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            with db_transaction.atomic():
+                # Generate a unique order number
+                order_number = f"ORD-{int(timezone.now().timestamp())}"
+                
+                # Create the order
+                order = Orders.objects.create(
+                    order_number=order_number,
+                    customer_name=data.get('customer_name'),
+                    customer_phone=data.get('customer_phone'),
+                    customer_email=data.get('customer_email'),
+                    order_date=data.get('order_date', timezone.now()),
+                    status=data.get('status', 'pending'),
+                    total_amount=data.get('total_amount', 0),
+                    payment_status=data.get('payment_status', 'pending'),
+                    payment_method=data.get('payment_method', 'Cash'),
+                    paid_amount=data.get('paid_amount', 0),
+                    business=business,
+                    business_branch=branch,
+                    user=user
+                )
+                
+                # Create order items and update inventory
+                total_amount = 0
+                for item_data in data.get('items', []):
+                    item_id = item_data.get('item_id')
+                    quantity = int(item_data.get('quantity', 0))
+                    unit_price = float(item_data.get('price', 0))
+                    
+                    if not item_id or quantity <= 0:
+                        continue
+                    
+                    try:
+                        item = Items.objects.get(id=item_id)
+                        
+                        # Check if there is enough stock
+                        if item.quantity < quantity:
+                            raise Exception(f"Insufficient stock for item {item.name}")
+                        
+                        # Update inventory quantity
+                        item.quantity -= quantity
+                        item.save()
+                        
+                        # Create order item
+                        subtotal = unit_price * quantity
+                        total_amount += subtotal
+                        
+                        Order_items.objects.create(
+                            order_id=order,
+                            item=item,
+                            category=item.category,
+                            quantity=quantity,
+                            unit_price=unit_price,
+                            subtotal=subtotal
+                        )
+                    except Items.DoesNotExist:
+                        return Response({'error': f'Item with id {item_id} not found'}, 
+                                      status=status.HTTP_400_BAD_REQUEST)
+                
+                # Update order total
+                order.total_amount = total_amount
+                order.save()
+                
+                # Return the created order with items
+                serializer = OrderSerializer(order)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class TransactionOperationDetailAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAuthenticatedEmployee]
+    
+    def get_object(self, order_id):
+        try:
+            return Orders.objects.get(id=order_id)
+        except Orders.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, order_id):
+        order = self.get_object(order_id)
+        
+        # Check if user has permission to access this order
+        if request.user.business != order.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Get order with related items
+        order = Orders.objects.prefetch_related(
+            'order_items_set', 
+            'order_items_set__item', 
+            'order_items_set__category'
+        ).get(id=order_id)
+        
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, order_id):
+        order = self.get_object(order_id)
+        
+        # Check if user has permission to update this order
+        if request.user.business != order.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        data = request.data
+        
+        try:
+            # Update order fields
+            if 'customer_name' in data:
+                order.customer_name = data.get('customer_name')
+            if 'customer_phone' in data:
+                order.customer_phone = data.get('customer_phone')
+            if 'customer_email' in data:
+                order.customer_email = data.get('customer_email')
+            if 'status' in data:
+                order.status = data.get('status')
+            if 'payment_status' in data:
+                order.payment_status = data.get('payment_status')
+            if 'payment_method' in data:
+                order.payment_method = data.get('payment_method')
+            if 'paid_amount' in data:
+                order.paid_amount = data.get('paid_amount')
+            
+            order.save()
+            
+            # Return updated order
+            serializer = OrderSerializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, order_id):
+        order = self.get_object(order_id)
+        
+        # Check if user has permission to delete this order
+        if request.user.business != order.business:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+            
+        try:
+            # Return items to inventory
+            order_items = Order_items.objects.filter(order_id=order)
+            
+            for order_item in order_items:
+                item = order_item.item
+                item.quantity += order_item.quantity
+                item.save()
+            
+            # Delete the order
+            order.delete()
+            
+            return Response({"message": "Order deleted successfully and inventory restored"}, 
+                          status=status.HTTP_204_NO_CONTENT)
+                          
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

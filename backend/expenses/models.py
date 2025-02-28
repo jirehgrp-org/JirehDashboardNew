@@ -1,3 +1,5 @@
+# expenses/models.py
+
 from django.db import models
 
 class Expenses(models.Model):
@@ -9,17 +11,17 @@ class Expenses(models.Model):
     ]
 
     RECURRING_FREQUENCY_CHOICES = [
-        ('once', 'One Time'),  # Added to match frontend
+        ('once', 'One Time'),
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),
         ('quarterly', 'Quarterly'),
-        ('halfYearly', 'Half Yearly'),  # Added to match frontend
+        ('halfYearly', 'Half Yearly'),
         ('yearly', 'Yearly')
     ]
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    name = models.CharField(max_length=100, default="Expense")  # Add name field to match frontend
+    name = models.CharField(max_length=100, default="Expense")
     description = models.TextField(null=True, blank=True)
     expense_date = models.DateField()
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)

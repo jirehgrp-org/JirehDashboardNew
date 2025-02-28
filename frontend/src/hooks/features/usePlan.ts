@@ -11,17 +11,6 @@ export const usePlans = (): UsePlansReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch features for a specific plan
-  const fetchFeaturesForPlan = async (planId: number) => {
-    try {
-      const response = await api.get(`/features/list/?plan_id=${planId}`);
-      return response.data || [];
-    } catch (err) {
-      console.error(`Error fetching features for plan ${planId}:`, err);
-      return [];
-    }
-  };
-
   // Transform the server plan format to client format
   const transformPlan = async (serverPlan: any): Promise<Plan> => {
     try {

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/hooks/features/useTransaction.ts
 
@@ -93,7 +94,7 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [isMockData, toast, handleError]);
+  }, [isMockData, toast]);
 
   // Initial data loading
   useEffect(() => {

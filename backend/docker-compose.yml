@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    command: python /backend/manage.py runserver 0.0.0.0:8000
+    command: gunicorn conf.wsgi:application --bind 0.0.0.0:8000 --workers 4
     volumes:
       - .:/backend
     ports:
@@ -15,13 +15,22 @@ services:
       - BLACKLIST_AFTER_ROTATION=True
       - UPDATE_LAST_LOGIN=True
       - DATABASE_URL=postgres://postgres@db/postgres
+    working_dir: /backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   db:
     image: postgres:17
     volumes:
       - jdb_postgres_data:/var/lib/postgresql/data/
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
-    # For production, you should set a password instead of trust
+    # For production, use a password instead of trust
     # - "POSTGRES_PASSWORD=secure-password-here"
+
 volumes:
   jdb_postgres_data:

@@ -32,6 +32,7 @@ from .serializers import CategoriesSerializer
 from django.utils import timezone
 from .serializers import (UserOperationSerializer, ExpenseOperationSerializer)
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 from django.conf import settings
 from subscriptions.models import Subscriptions
 User = get_user_model()
@@ -160,23 +161,23 @@ class UserOperationRegisterAPIView(APIView):
     def post(self, request):
         user = request.user
         business = user.business
-        
+
         if business is None:
             return Response({'error': 'User is not registered with any business'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
+                        status=status.HTTP_400_BAD_REQUEST)
+
         data = request.data
-        
+
         # Check if username already exists
         if User.objects.filter(username=data.get('username')).exists():
             return Response({'error': 'Username already exists'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
+                        status=status.HTTP_400_BAD_REQUEST)
+
         # Check if email already exists
         if User.objects.filter(email=data.get('email')).exists():
             return Response({'error': 'Email already exists'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
+                        status=status.HTTP_400_BAD_REQUEST)
+
         # Get branch if provided
         branch = None
         try:
@@ -187,11 +188,11 @@ class UserOperationRegisterAPIView(APIView):
                 
             if not branch:
                 return Response({'error': 'Branch is required'}, 
-                              status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
         except Branches.DoesNotExist:
             return Response({'error': f'Branch with id {data.get("business_branch")} does not exist'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-        
+                        status=status.HTTP_400_BAD_REQUEST)
+
         # Format phone number if needed
         phone = data.get('phone', '')
         if phone:
@@ -200,12 +201,12 @@ class UserOperationRegisterAPIView(APIView):
             if not phone.startswith('+251'):
                 # If it starts with 0, remove it before adding +251
                 phone = f"+251{phone.lstrip('0')}"
-        
+
         # Always generate a password
         import string
         import random
         password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-        
+
         try:
             # Use fullname instead of name
             fullname = data.get('fullname', data.get('name', ''))
@@ -227,6 +228,51 @@ class UserOperationRegisterAPIView(APIView):
             # Add the generated password to the response data
             response_data = serializer.data
             response_data['password_info'] = f'Password has been generated: {password}'
+            
+            # Send password email
+            try:
+                subject = f"Your Account Has Been Created for {business.name}"
+                message = f"""
+        Hello {fullname},
+
+        An account has been created for you on {business.name}'s business management system.
+
+        Here are your login credentials:
+        Username: {data.get('username')}
+        Password: {password}
+
+        Please log in and change your password as soon as possible.
+
+        Thank you,
+        {business.name} Team
+                """
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [data.get('email')]
+                
+                print(f"Attempting to send email to {recipient_list} from {from_email}")
+                print(f"Email settings: HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, USER={settings.EMAIL_HOST_USER}")
+                
+                # Test SMTP connection
+                try:
+                    import smtplib
+                    server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                    server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                    print("SMTP connection successful")
+                    server.quit()
+                except Exception as smtp_err:
+                    print(f"SMTP connection test failed: {str(smtp_err)}")
+                
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+                
+                # Add a note in the response
+                response_data['email_sent'] = True
+                print("Email sent successfully!")
+            except Exception as e:
+                import traceback
+                print(f"Error sending email: {str(e)}")
+                print(traceback.format_exc())
+                response_data['email_sent'] = False
+                response_data['email_error'] = str(e)
             
             return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -744,10 +790,20 @@ class BusinessBranchListAPIView(APIView):
         
         if business is None:
             return Response({'error': 'User is not registered with any business'}, 
-                          status=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_400_BAD_REQUEST)
         
         branches = Branches.objects.filter(business=business)
+        
+        # Debug log
+        print(f"Fetching branches for business: {business.name} (ID: {business.id})")
+        for branch in branches:
+            print(f"Branch: {branch.id} {branch.name}, Is active: {branch.is_active}")
+        
         serializer = BusinessBranchSerializer(branches, many=True)
+        
+        # Debug log serialized data
+        print(f"Serialized branches: {serializer.data}")
+        
         return Response(serializer.data, status=status.HTTP_200_OK)
         # if business is None:
         #     return Response({'error': 'User is not registered with any business'}, status=status.HTTP_400_BAD_REQUEST)

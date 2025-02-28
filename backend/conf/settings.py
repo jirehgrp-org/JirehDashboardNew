@@ -34,6 +34,16 @@ DEBUG = env.bool('DJANGO_DEBUG')
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '157.90.126.193']
 
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env("EMAIL_HOST", default="bms.jirehgrp.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=465)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="support@bms.jirehgrp.com")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="w.Tws;pNaL[i")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="support@bms.jirehgrp.com")
+
 
 # Application definition
 
@@ -225,8 +235,6 @@ CORS_ALLOW_HEADERS = [
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://frontenddomainname.com']
 
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 SITE_ID = 1
 

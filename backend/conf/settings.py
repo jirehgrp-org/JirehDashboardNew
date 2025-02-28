@@ -32,7 +32,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '157.90.126.193']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '157.90.126.193', 'bms.jirehgrp.com']
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -213,6 +213,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://157.90.126.193',
     'http://157.90.126.193:3000',
     'http://157.90.126.193:8000',
+    'https://bms.jirehgrp.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -241,6 +242,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://frontenddomainname.com',
     'http://157.90.126.193',
     'http://157.90.126.193:3000',
+    'https://bms.jirehgrp.com',
 ]
 
 
@@ -252,3 +254,11 @@ AUTHENTICATION_BACKENDS = [
 
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True

@@ -1292,12 +1292,21 @@ class BusinessExpensesRegisterAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class FeaturesAPIView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminOrOwnerOrManager]
+    # Temporarily remove authentication for testing
+    permission_classes = [AllowAny]
 
     def get(self, request):
         expenses = Features.objects.all()
         serializer = FeaturesSerializer(expenses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class PlansAPIView(APIView):
+    # Temporarily remove authentication for testing
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        expenses = Plans.objects.all()
+        serializer = PlansSerializer(expenses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class FeaturesRegisterAPIView(APIView):

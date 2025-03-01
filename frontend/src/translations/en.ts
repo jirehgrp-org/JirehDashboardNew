@@ -502,6 +502,8 @@ export const en = {
       yearly: "Yearly",
       active: "Active",
       create: "Create",
+      creatingUser: "Creating User...",
+      creating: "Creating...",
       update: "Update",
       cancel: "Cancel",
     },

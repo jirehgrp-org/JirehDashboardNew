@@ -244,8 +244,9 @@ class UserOperationRegisterAPIView(APIView):
             return Response({'error': 'Username already exists'}, 
                         status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if email already exists
-        if User.objects.filter(email=data.get('email')).exists():
+        # Check if email already exists (only if email is provided)
+        email = data.get('email')
+        if email and User.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, 
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -284,7 +285,7 @@ class UserOperationRegisterAPIView(APIView):
             
             new_user = User.objects.create_user(
                 username=data.get('username'),
-                email=data.get('email'),
+                email=data.get('email') or None,  # Allow empty email
                 password=password,
                 fullname=fullname,
                 phone=phone,
@@ -300,50 +301,55 @@ class UserOperationRegisterAPIView(APIView):
             response_data = serializer.data
             response_data['password_info'] = f'Password has been generated: {password}'
             
-            # Send password email
-            try:
-                subject = f"Your Account Has Been Created for {business.name}"
-                message = f"""
-        Hello {fullname},
-
-        An account has been created for you on {business.name}'s business management system.
-
-        Here are your login credentials:
-        Username: {data.get('username')}
-        Password: {password}
-
-        Please log in and change your password as soon as possible.
-
-        Thank you,
-        {business.name} Team
-                """
-                from_email = settings.DEFAULT_FROM_EMAIL
-                recipient_list = [data.get('email')]
-                
-                print(f"Attempting to send email to {recipient_list} from {from_email}")
-                print(f"Email settings: HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, USER={settings.EMAIL_HOST_USER}")
-                
-                # Test SMTP connection
+            # Send password email only if email is provided
+            if data.get('email'):
                 try:
-                    import smtplib
-                    server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
-                    server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-                    print("SMTP connection successful")
-                    server.quit()
-                except Exception as smtp_err:
-                    print(f"SMTP connection test failed: {str(smtp_err)}")
-                
-                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-                
-                # Add a note in the response
-                response_data['email_sent'] = True
-                print("Email sent successfully!")
-            except Exception as e:
-                import traceback
-                print(f"Error sending email: {str(e)}")
-                print(traceback.format_exc())
+                    subject = f"Your Account Has Been Created for {business.name}"
+                    message = f"""
+            Hello {fullname},
+
+            An account has been created for you on {business.name}'s business management system.
+
+            Here are your login credentials:
+            Username: {data.get('username')}
+            Password: {password}
+
+            Please log in and change your password as soon as possible.
+
+            Thank you,
+            {business.name} Team
+                    """
+                    from_email = settings.DEFAULT_FROM_EMAIL
+                    recipient_list = [data.get('email')]
+                    
+                    print(f"Attempting to send email to {recipient_list} from {from_email}")
+                    print(f"Email settings: HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, USER={settings.EMAIL_HOST_USER}")
+                    
+                    # Test SMTP connection
+                    try:
+                        import smtplib
+                        server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT)
+                        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                        print("SMTP connection successful")
+                        server.quit()
+                    except Exception as smtp_err:
+                        print(f"SMTP connection test failed: {str(smtp_err)}")
+                    
+                    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+                    
+                    # Add a note in the response
+                    response_data['email_sent'] = True
+                    print("Email sent successfully!")
+                except Exception as e:
+                    import traceback
+                    print(f"Error sending email: {str(e)}")
+                    print(traceback.format_exc())
+                    response_data['email_sent'] = False
+                    response_data['email_error'] = str(e)
+            else:
+                # No email provided, so no email was sent
                 response_data['email_sent'] = False
-                response_data['email_error'] = str(e)
+                response_data['email_message'] = "No email provided, credentials were not sent"
             
             return Response(response_data, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -689,6 +695,16 @@ class UserProfileView(APIView):
         # Business information
         business_info = None
         subscription_info = None
+        branch_info = None
+
+        if user.business_branch:
+            branch_info = {
+                'id': user.business_branch.id,
+                'name': user.business_branch.name,
+                'address': user.business_branch.address,
+                'contact_number': user.business_branch.contact_number,
+                'is_active': user.business_branch.is_active
+            }
         
         if user.business:
             business_info = {
@@ -738,6 +754,7 @@ class UserProfileView(APIView):
             'last_login': user.last_login,
             'updated_at': user.updated_at,
             'business': business_info,
+            'business_branch': branch_info,  # Add branch info to response
             'subscription': subscription_info
         }
         return Response(data, status=status.HTTP_200_OK)
@@ -764,11 +781,23 @@ class UserProfileView(APIView):
         
         # Business information
         business_info = None
+        branch_info = None
+        
         if user.business:
             business_info = {
                 'id': user.business.id,
                 'name': user.business.name,
                 'contact_number': user.business.contact_number
+            }
+        
+        # Add branch information
+        if user.business_branch:
+            branch_info = {
+                'id': user.business_branch.id,
+                'name': user.business_branch.name,
+                'address': user.business_branch.address,
+                'contact_number': user.business_branch.contact_number,
+                'is_active': user.business_branch.is_active
             }
         
         response_data = {
@@ -782,7 +811,8 @@ class UserProfileView(APIView):
             'created_at': user.created_at,
             'last_login': user.last_login,
             'updated_at': user.updated_at,
-            'business': business_info
+            'business': business_info,
+            'business_branch': branch_info  # Add branch info to response
         }
         return Response(response_data, status=status.HTTP_200_OK)
     

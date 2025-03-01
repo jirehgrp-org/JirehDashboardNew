@@ -214,6 +214,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://157.90.126.193:3000',
     'http://157.90.126.193:8000',
     'https://bms.jirehgrp.com',
+    'https://www.bms.jirehgrp.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True

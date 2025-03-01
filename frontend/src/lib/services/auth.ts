@@ -462,17 +462,17 @@ class AuthService {
       maxAge: 30 * 24 * 60 * 60, // 30 days
       path: "/",
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      httpOnly: false, // Must be false for browser-side JavaScript
+      sameSite: "lax", // Changed from "strict"
+      httpOnly: false,
     });
 
     if (refreshToken) {
-      setCookie(null, "refreshToken", refreshToken, {
-        maxAge: 90 * 24 * 60 * 60, // 90 days
+      setCookie(null, "refreshToken", refreshToken, {  // Fixed name and value
+        maxAge: 90 * 24 * 60 * 60, // 90 days (longer lifetime for refresh)
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        httpOnly: false, // Must be false for browser access
+        sameSite: "lax",
+        httpOnly: false,
       });
     }
 

@@ -207,6 +207,7 @@ class UserOperationSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'fullname', 'phone', 'role', 
                   'business_branch', 'branch_name', 'is_active', 
                   'created_at', 'updated_at']
+        
     
     def get_branch_name(self, obj):
         try:

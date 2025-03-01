@@ -500,6 +500,8 @@ export const am = {
       active: "በስራ ላይ",
       create: "ይፍጠሩ",
       update: "ያስተካክሉ",
+      creatingUser: "ተጠቃሚ እየተፈጠረ...",
+      creating: "እየተፈጠረ...",
       cancel: "ይቅር",
     },
     schemas: {

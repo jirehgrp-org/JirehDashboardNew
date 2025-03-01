@@ -1,3 +1,5 @@
+// @/lib/schemas/operation.tsx
+
 import * as z from "zod";
 import { translations } from "@/translations";
 
@@ -25,7 +27,10 @@ export const UserSchema = (language: SupportedLanguages = "en") => {
 
   return BaseSchema(language).extend({
     username: z.string().min(1, t.userSchema?.usernameIsRequired || "Username is required"),
-    email: z.string().email(t.userSchema?.emailIsRequired || "Valid email is required"),
+    email: z.union([
+      z.string().email(t.userSchema?.emailIsRequired || "Valid email is required"),
+      z.string().max(0)  // Allow empty string
+    ]).optional(),  // Make the field completely optional
     phone: z.string()
       .min(9, t.userSchema?.phoneIsRequired || "Phone must be at least 9 digits")
       .max(12, t.userSchema?.phoneMaxLength || "Phone must be less than 12 digits"),

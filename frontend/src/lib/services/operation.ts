@@ -41,22 +41,19 @@ class OperationService {
     try {
       console.log("Creating user with data:", userData);
       
-      // Format phone number if needed
       let phone = userData.phone || "";
       if (phone) {
-        // Remove any spaces and dashes
         phone = phone.replace(/\s/g, '').replace(/-/g, '');
         if (!phone.startsWith('+251')) {
-          // If it starts with 0, remove it before adding +251
           phone = `+251${phone.replace(/^0+/, '')}`;
         }
       }
 
       const payload = {
-        fullname: userData.name, // Map to fullname for backend
-        name: userData.name,  // Keep name for compatibility
+        fullname: userData.name,
+        name: userData.name,
         username: userData.username,
-        email: userData.email,
+        email: userData.email || "",
         phone: phone,
         role: userData.role || "sales",
         business_branch: userData.branchId,
@@ -240,22 +237,20 @@ class OperationService {
     let branchId = "";
     let branchName = "";
     
+    // Handle flat structure (from /users/{id}/ endpoint)
     if (data.business_branch !== null && data.business_branch !== undefined) {
-      branchId = String(data.business_branch);
-      console.log(`Found business_branch ID: ${branchId}`);
+      if (typeof data.business_branch === 'object' && data.business_branch !== null) {
+        // Nested structure (from /user/ or /auth/user/ endpoints)
+        branchId = String(data.business_branch.id || "");
+        branchName = data.business_branch.name || "";
+      } else {
+        // Flat structure (from /users/{id}/ endpoint)
+        branchId = String(data.business_branch);
+        branchName = data.branch_name || "";
+      }
     }
     
-    if (data.branch_name) {
-      branchName = data.branch_name;
-      console.log(`Found branch_name: ${branchName}`);
-    }
-    
-    // Add additional logging to debug branch data
-    console.log(`User ${data.id} branch data:`, { 
-      branchId: data.business_branch,
-      branchName: data.branch_name,
-      rawBranchData: data.business_branch 
-    });
+    console.log(`Extracted branch data: ID=${branchId}, Name=${branchName}`);
     
     return {
       id: String(data.id || ""),
@@ -264,8 +259,8 @@ class OperationService {
       email: data.email || "",
       phone: (data.phone || "").replace(/^\+251/, ""),
       role: data.role || "",
-      branchId: data.business_branch || "0",
-      branchName: data.branch_name || "Main Branch",
+      branchId: branchId || "0",
+      branchName: branchName || "Main Branch",
       active: data.is_active !== undefined ? Boolean(data.is_active) : true,
       createdAt: data.created_at || new Date().toISOString(),
       updatedAt: data.updated_at || data.created_at || new Date().toISOString(),

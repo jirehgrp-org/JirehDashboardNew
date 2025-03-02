@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/backend
+      - ./staticfiles:/backend/staticfiles
+      - ./media:/backend/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SECRET_KEY=Rk5I*px~2X|}w!o<CR`]T&'t|9-zijE8*!^VR&3l9q(R"(.l@D
+      - DJANGO_DEBUG=True
+      - ROTATE_REFRESH_TOKENS=True
+      - BLACKLIST_AFTER_ROTATION=True
+      - UPDATE_LAST_LOGIN=True
+      - DATABASE_URL=postgres://postgres:dev-password@db/postgres
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    restart: unless-stopped
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ../frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    restart: unless-stopped
+
+  db:
+    image: postgres:17
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=dev-password
+    ports:
+      - "5433:5432"
+    restart: unless-stopped
+
+volumes:
+  dev_postgres_data:

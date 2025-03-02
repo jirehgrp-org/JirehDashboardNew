@@ -40,7 +40,7 @@ const OrdersPage = () => {
 
   // Get user role from localStorage
   const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
-  const canAddOrders = ["owner", "manager", "admin"].includes(userRole);
+  const canAddOrders = ["sales"].includes(userRole);
 
   const {
     isLoading,

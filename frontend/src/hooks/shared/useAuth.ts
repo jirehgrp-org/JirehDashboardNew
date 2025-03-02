@@ -12,6 +12,7 @@ import type {
   AuthResponse,
 } from "@/types/shared/auth";
 
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,22 +22,17 @@ export function useAuth() {
   const checkAuth = useCallback(async () => {
     setIsLoading(true);
     try {
-      // First check if we have a token
       const isAuth = authService.isAuthenticated();
 
       if (isAuth) {
-        // First try to get cached user
         let userData = authService.getUser();
 
-        // If no cached user, fetch from backend
         if (!userData) {
           userData = await authService.fetchUserData();
         }
 
         if (userData) {
-          // Store subscription info if available in the user data response
           if (userData.subscription) {
-            // The subscription info is available directly in the user data
             console.log(
               "Subscription data found in user data",
               userData.subscription
@@ -44,6 +40,11 @@ export function useAuth() {
           }
 
           setUser(userData);
+          
+          if (userData.role) {
+            localStorage.setItem("userRole", userData.role);
+            console.log("User role saved to localStorage:", userData.role);
+          }
         } else {
           setUser(null);
         }
@@ -94,6 +95,7 @@ export function useAuth() {
   // Logout function
   const logout = useCallback(() => {
     authService.logout();
+    localStorage.removeItem("userRole"); // Add this line
     setUser(null);
     router.push("/auth/login");
   }, [router]);

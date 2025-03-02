@@ -1,5 +1,6 @@
-"use client";
+// @/app/dashboard/orders/page.tsx
 
+"use client";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,8 @@ const OrdersPage = () => {
 
   // Get user role from localStorage
   const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
-  const canAddOrders = ["owner", "manager", "admin"].includes(userRole);
+  console.log("Current user role in OrdersPage:", userRole);
+  const canAddOrders = ["sales"].includes(userRole);
 
   const {
     isLoading,

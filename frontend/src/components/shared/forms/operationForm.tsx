@@ -85,20 +85,15 @@ export function OperationForm({
   });
 
   const generateUsername = (fullName: string) => {
-    const formattedName = fullName
-      .toLowerCase()
-      .replace(/[^a-z\s]/g, "")
-      .trim()
-      .split(/\s+/)
-      .filter((part) => part.length > 0);
-
-    if (formattedName.length >= 2) {
-      return `${formattedName[0]}.${formattedName[formattedName.length - 1]}`;
-    } else if (formattedName.length === 1) {
-      return formattedName[0];
-    }
-    return "";
+    const firstName = fullName.split(" ")[0]; // Extract the first name
+    const formattedName = firstName.toLowerCase().replace(/[^a-z]/g, ""); // Keep only letters
+  
+    if (!formattedName) return "";
+  
+    const suffix = Math.floor(100 + Math.random() * 900); // Generate a three-digit number
+    return `${formattedName}${suffix}`;
   };
+  
 
   const handleFormSubmit = async (data: any) => {
     setIsSubmitting(true);

@@ -64,8 +64,8 @@ export function InventoryForm({
         description: "",
       }),
       ...(variant === "item" && {
-        price: 0,
-        quantity: 0,
+        price: undefined,
+        quantity: undefined,
         categoryId: "",
         branchId: "",
         unitOfMeasure: "",

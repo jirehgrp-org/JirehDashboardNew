@@ -33,10 +33,7 @@ import { Button } from "@/components/ui/button";
 import { translations } from "@/translations";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useAuth } from "@/hooks/shared/useAuth";
-import axios from 'axios';
-import { AxiosError } from 'axios';
-import api from '@/lib/axios';
-import { authService } from '@/lib/services/auth';
+// import api from '@/lib/axios';
 import { SubscriptionStatus } from "./SubscriptionStatus";
 
 interface EditableUser {
@@ -89,45 +86,45 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
     phone: "",
   });
 
-  const fetchBusinessData = async () => {
-    try {
-      setBusinessLoading(true);
+  // const fetchBusinessData = async () => {
+  //   try {
+  //     setBusinessLoading(true);
       
-      // A simpler approach - since we already have the business info in the user object
-      if (user && user.business) {
-        console.log("Setting business info from user object:", user.business);
-        setBusinessInfo({
-          name: user.business.name,
-          contact_number: user.business.contact_number,
-          created_at: "", // These fields aren't in the user.business object
-          updated_at: ""  // but are required by your BusinessInfo interface
-        });
-        return;
-      }
+  //     if (user && user.business) {
+  //       console.log("Setting business info from user object:", user.business);
+  //       setBusinessInfo({
+  //         name: user.business.name,
+  //         contact_number: user.business.contact_number,
+  //         created_at: "", // These fields aren't in the user.business object
+  //         updated_at: ""  // but are required by your BusinessInfo interface
+  //       });
+  //       return;
+  //     }
       
-      // If we need to fetch more business details, we can still try the API
-      console.log("Attempting to fetch business data from API");
-      const response = await api.get('/business/list/');
-      console.log("Business data response:", response.data);
+  //     // If we need to fetch more business details, we can still try the API
+  //     console.log("Attempting to fetch business data from API");
+  //     const response = await api.get('/business/list/');
+  //     console.log("Business data response:", response.data);
       
-      if (response.data && response.data.length > 0) {
-        setBusinessInfo(response.data[0]);
-      } else {
-        console.log("No business data found");
-      }
-    } catch (error: unknown) {
-      console.error("Error fetching business data:", error);
+  //     if (response.data && response.data.length > 0) {
+  //       setBusinessInfo(response.data[0]);
+  //     } else {
+  //       console.log("No business data found");
+  //     }
+  //   } catch (error: unknown) {
+  //     console.error("Error fetching business data:", error);
       
-      // Handle Axios errors
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        console.error("Error response status:", axiosError.response?.status);
-        console.error("Error response data:", axiosError.response?.data);
-      }
-    } finally {
-      setBusinessLoading(false);
-    }
-  };
+  //     // Handle Axios errors
+  //     if (error && typeof error === 'object' && 'response' in error) {
+  //       const axiosError = error as any;
+  //       console.error("Error response status:", axiosError.response?.status);
+  //       console.error("Error response data:", axiosError.response?.data);
+  //     }
+  //   } finally {
+  //     setBusinessLoading(false);
+  //   }
+  // };
+
   useEffect(() => {
     console.log("Full user object:", user);
     console.log("Username field:", user?.username);
@@ -145,7 +142,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
       setUserProfile(profileData);
       setEditableUser(profileData);
 
-      fetchBusinessData();
+      // fetchBusinessData();
     }
     setMounted(true);
   }, [user]);
@@ -398,7 +395,7 @@ const DashboardHeader: React.FC<HeaderProps> = ({ variant = "auth" }) => {
             )}
 
             {/* Debug Panel */}
-            <DebugPanel />
+            {/* <DebugPanel /> */}
 
             {/* Footer with Save Confirmation */}
             {isEditing && (

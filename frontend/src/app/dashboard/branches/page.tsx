@@ -15,6 +15,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -46,6 +52,12 @@ const BranchesPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [branchToDelete, setBranchToDelete] =
     useState<InventoryItem | null>(null);
+
+  const handleAddBranchClick = () => {
+    if (!filteredBranches || filteredBranches.length < 1) {
+      setOpen(true);
+    }
+  };
 
   const {
     isLoading,
@@ -155,14 +167,29 @@ const BranchesPage = () => {
             </Button>
 
             <Dialog open={open} onOpenChange={setOpen}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button
+                        disabled={isLoading || (filteredBranches && filteredBranches.length >= 1)}
+                        className={cn(isMobile && "w-full")}
+                        onClick={handleAddBranchClick}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        {t.addBranch}
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  {filteredBranches && filteredBranches.length >= 1 && (
+                    <TooltipContent>
+                      <p>Can only add one branch on this plan</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <DialogTrigger asChild>
-                <Button
-                  disabled={isLoading}
-                  className={cn(isMobile && "w-full")}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t.addBranch}
-                </Button>
+                <span className="hidden">Trigger</span>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>

@@ -402,6 +402,7 @@ export const en = {
         customerPhone: "Customer Phone",
         customerEmail: "Customer Email",
         item: "Item",
+        user: "User",
         paymentStatus: "Payment Status",
         orderDate: "Order Date",
         status: "Status",

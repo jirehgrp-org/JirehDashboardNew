@@ -168,6 +168,7 @@ class TransactionService {
       paymentMethod: data.payment_method || "Cash",
       total: parseFloat(data.total_amount) || 0,
       items: items,
+      user: data.user || 0,
       createdAt: data.created_at || new Date().toISOString(),
       updatedAt: data.updated_at || data.created_at || new Date().toISOString(),
       actions: []

@@ -1,5 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// @/components/shared/tables/TableHeader.tsx 
+
 import type { InventoryItem } from "@/types/features/inventory";
 import type { OperationItem } from "@/types/features/operation";
 import type { Column } from "@/types/shared/table";
@@ -8,6 +10,7 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCalendar } from "@/hooks/shared/useCalendar";
 import { useInventory } from "@/hooks/features/useInventory";
+import { useOperation } from "@/hooks/features/useOperation";
 
 interface HeaderProps {
   column: Column<any>;
@@ -124,6 +127,7 @@ export const getColumns = (
   const { data: branches } = useInventory({ endpoint: "branches" });
   const { data: categories } = useInventory({ endpoint: "categories" });
   const { data: items } = useInventory({ endpoint: "items" });
+  const { data: users } = useOperation({ endpoint: "users" });
 
   const baseColumns: { [key: string]: Column<any>[] } = {
     branch: [
@@ -579,6 +583,40 @@ export const getColumns = (
               })}
             </div>
           );
+        },
+      },
+      {
+        accessorKey: "user",
+        header: ({ onSort }: HeaderProps) => (
+          <SortableHeader
+            label={t.transaction.table.user || "User" /* Fallback text */}
+            sortKey="user"
+            onSort={onSort}
+          />
+        ),
+        cell: ({ row }: CellProps) => {
+          const userId = row.original.user;
+          const user = users?.find((u) => u.id === userId.toString());
+          
+          // First try to get the name from the found user
+          if (user?.name) {
+            return user.name;
+          }
+          
+          // If not found, return the ID with a prefix
+          return `User #${userId}`;
+        },
+      },
+      {
+        accessorKey: "customerPhone",
+        header: t.transaction.table.customerPhone,
+        cell: ({ row }: CellProps) => {
+          const phone = row.original.customerPhone;
+          return phone.startsWith("0")
+            ? `+251${phone.slice(1)}`
+            : phone.startsWith("9")
+            ? `+251${phone}`
+            : phone;
         },
       },
       {

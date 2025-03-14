@@ -5,6 +5,7 @@
 import { useLanguage } from "@/components/context/LanguageContext";
 import { useCalendar } from "@/hooks/shared/useCalendar";
 import { useInventory } from "@/hooks/features/useInventory";
+import { useOperation } from "@/hooks/features/useOperation"
 import { translations } from "@/translations";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export function useColumns(
   const { data: branches } = useInventory({ endpoint: "branches" });
   const { data: categories } = useInventory({ endpoint: "categories" });
   const { data: items } = useInventory({ endpoint: "items" });
+  const { data: users } = useOperation({ endpoint: "users" });
 
   const SortableHeader = ({
     label,
@@ -37,7 +39,7 @@ export function useColumns(
       <ArrowUpDown className="ml-2 h-4 w-4" />
     </Button>
   );
-  
+
 
   const columns = React.useMemo(() => {
     const baseColumns: { [key: string]: Column<any>[] } = {
@@ -60,8 +62,8 @@ export function useColumns(
             return phone.startsWith("0")
               ? `+251${phone.slice(1)}`
               : phone.startsWith("9")
-              ? `+251${phone}`
-              : phone;
+                ? `+251${phone}`
+                : phone;
           },
         },
         {
@@ -95,6 +97,23 @@ export function useColumns(
                 })}
               </div>
             );
+          },
+        },
+        {
+          accessorKey: "user",
+          header: ({ onSort }) => (
+            <SortableHeader
+              label={t.transaction.table.user || "User"}
+              sortKey="user"
+              onSort={onSort}
+            />
+          ),
+          cell: ({ row }) => {
+            const userId = row.original.user;
+            const user = users?.find((u) => u.id === userId.toString());
+
+            // Return the name or fallback to user ID
+            return user?.name || `User #${userId}`;
           },
         },
         {
@@ -152,7 +171,7 @@ export function useColumns(
         },
       ],
     };
-      
+
 
     return baseColumns[variant] || [];
   }, [variant, language, items, toEthiopian, t]);

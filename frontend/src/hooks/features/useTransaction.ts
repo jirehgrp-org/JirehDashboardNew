@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @/hooks/features/useTransaction.ts
 
@@ -18,6 +17,7 @@ const mockOrders: TransactionItem[] = [
     customerPhone: "911234567",
     customerEmail: "john@example.com",
     items: [{ itemId: "1", quantity: 2, price: 1500 }],
+    user: 10,
     total: 3000,
     status: "pending",
     paymentStatus: "pending",
@@ -34,6 +34,7 @@ const mockOrders: TransactionItem[] = [
     customerPhone: "922345678",
     customerEmail: "jane@example.com",
     items: [{ itemId: "2", quantity: 1, price: 500 }],
+    user: 10,
     total: 500,
     status: "completed",
     paymentStatus: "paid",
@@ -66,35 +67,30 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      if (isMockData) {
-        // Return mock data
+        if (isMockData) {
+            setData(mockOrders);
+        } else {
+            const response = await transactionService.fetchOrders();
+            if (response.length > 0 && !response[0].user) {
+                throw new Error("User data missing in response");
+            }
+            setData(response);
+        }
+    } catch (error: any) {
+        console.error("API error for transactions:", error);
+        setIsMockData(true);
         setData(mockOrders);
-      } else {
-        try {
-          const response = await transactionService.fetchOrders();
-          setData(response);
-        } catch (error: any) {
-          console.error("API error for transactions:", error);
-          
-          // Fall back to mock data on any error
-          setIsMockData(true);
-          setData(mockOrders);
-          
-          toast({
+        toast({
             title: "Using Demo Data",
             description: "Could not connect to the server. Using sample data instead.",
             variant: "destructive"
-          });
-        }
-      }
-    } catch (err) {
-      handleError(err);
+        });
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  }, [isMockData, toast]);
+}, [isMockData, toast]);
 
   // Initial data loading
   useEffect(() => {
@@ -175,6 +171,7 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
             customerPhone: newData.customerPhone!,
             customerEmail: newData.customerEmail,
             items: newData.items,
+            user: newData.user ?? 0,  // Defaults to 0 if newData.user is undefined
             total,
             orderNumber: generateOrderNumber(),
             orderDate: new Date().toISOString(),
@@ -183,8 +180,9 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
             status: "pending",
             paymentStatus: "pending",
             paymentMethod: newData.paymentMethod || "Cash",
-            actions: []
+            actions: [],
           };
+          
           
           // Update inventory quantities in mock data
           for (const orderItem of newData.items) {
@@ -218,6 +216,7 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
           customerPhone: newData.customerPhone!,
           customerEmail: newData.customerEmail,
           items: newData.items,
+          user: newData.user ?? 0,  // Defaults to 0 if newData.user is undefined
           total,
           orderNumber: generateOrderNumber(),
           orderDate: new Date().toISOString(),
@@ -226,8 +225,9 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
           status: "pending",
           paymentStatus: "pending",
           paymentMethod: newData.paymentMethod || "Cash",
-          actions: []
+          actions: [],
         };
+        
         
         // Update inventory quantities in mock data
         for (const orderItem of newData.items) {

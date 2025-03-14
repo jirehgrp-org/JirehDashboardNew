@@ -398,6 +398,7 @@ export const am = {
         customerPhone: "የደንበኛ ስልክ",
         customerEmail: "የደንበኛ ኢሜይል",
         item: "እቃ",
+        user: "ተተቃሚ",
         paymentStatus: "የክፍያ ሁኔታ",
         orderDate: "የትዕዛዝ ቀን",
         status: "ሁኔታ",

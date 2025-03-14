@@ -23,6 +23,7 @@ export interface TransactionItem {
   customerPhone: string;
   customerEmail?: string;
   items: OrderItem[];
+  user: number;
   total: number;
   status: "pending" | "completed" | "cancelled";
   paymentStatus: "pending" | "paid" | "cancelled";

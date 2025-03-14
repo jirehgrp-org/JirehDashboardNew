@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, Download } from "lucide-react";
+import { Plus, Download, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Papa from "papaparse";
 import {
@@ -14,6 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/components/context/LanguageContext";
 import { translations } from "@/translations";
 import { DataTable } from "@/components/shared/tables/DataTable";
@@ -37,7 +45,8 @@ const OrdersPage = () => {
   );
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Get user role from localStorage
   const userRole = (localStorage.getItem("userRole") as UserRole) || "manager";
@@ -59,15 +68,22 @@ const OrdersPage = () => {
 
   // Filter orders based on search query
   const filteredOrders = React.useMemo(() => {
-    return orders?.filter((order) => {
+    const filtered = orders?.filter((order) => {
       const searchTerm = searchQuery.toLowerCase();
       return (
         order.customerName.toLowerCase().includes(searchTerm) ||
         order.orderNumber.toLowerCase().includes(searchTerm) ||
         order.customerPhone.toLowerCase().includes(searchTerm)
       );
+    }) || [];
+
+    // Sort by orderDate
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.orderDate).getTime();
+      const dateB = new Date(b.orderDate).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
-  }, [orders, searchQuery]);
+  }, [orders, searchQuery, sortOrder]);
 
   const downloadCSV = () => {
     if (!orders?.length) return;
@@ -93,8 +109,9 @@ const OrdersPage = () => {
         paymentStatus: order.paymentStatus,
         orderDate: new Date(order.orderDate).toLocaleDateString(),
         total: order.total,
+        userId: order.user, // User ID based on the TransactionItem interface
       }))
-    );
+    );      
 
     const csv = Papa.unparse(flattenedOrders);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -119,14 +136,14 @@ const OrdersPage = () => {
         action === "cancel"
           ? "cancelled"
           : action === "complete"
-          ? "completed"
-          : order.status,
+            ? "completed"
+            : order.status,
       paymentStatus:
         action === "cancel"
           ? "cancelled"
           : action === "mark_paid"
-          ? "paid"
-          : order.paymentStatus,
+            ? "paid"
+            : order.paymentStatus,
       actions: [
         ...(order.actions || []),
         {
@@ -216,18 +233,51 @@ const OrdersPage = () => {
             isMobile ? "flex-col gap-4" : "flex-row"
           )}
         >
-          <div className={cn("w-full", !isMobile && "max-w-sm")}>
+          <div className={cn("w-full flex items-center gap-2", !isMobile && "max-w-sm")}>
             <Input
               placeholder={t.searchOrders}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full"
             />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  disabled={isLoading || !orders?.length}
+                  className="flex items-center justify-center h-10 w-10"
+                >
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setSortOrder("desc")}>
+                  Newest First
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortOrder("asc")}>
+                  Oldest First
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>View Options</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => setItemsPerPage(10)}>
+                  Show 10 per page
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setItemsPerPage(25)}>
+                  Show 25 per page
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setItemsPerPage(50)}>
+                  Show 50 per page
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="text-sm text-zinc-600 dark:text-zinc-400">
             {t.totalOrders}: {filteredOrders?.length || 0}
           </div>
         </div>
+
 
         <div className="flex-1">
           <DataTable

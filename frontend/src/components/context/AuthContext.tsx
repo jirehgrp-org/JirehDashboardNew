@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// @/components/context/AuthContext.tsx
+
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { 
@@ -83,6 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (userData) {
           setUser(userData);
           setIsAuthenticated(true);
+          
+          // Store user role in a cookie for middleware access
+          document.cookie = `userRole=${userData.role}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
         } else {
           return { success: false, error: "Could not fetch user data" };
         }
@@ -152,6 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authService.logout();
     setUser(null);
     setIsAuthenticated(false);
+    document.cookie = "userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
   };
 
   const value = {

@@ -82,15 +82,15 @@ export function useTransaction({ onSuccess }: UseTransactionOptions = {}) {
         console.error("API error for transactions:", error);
         setIsMockData(true);
         setData(mockOrders);
-        toast({
-            title: "Using Demo Data",
-            description: "Could not connect to the server. Using sample data instead.",
-            variant: "destructive"
-        });
+        // toast({
+        //     title: "Using Demo Data",
+        //     description: "Could not connect to the server. Using sample data instead.",
+        //     variant: "destructive"
+        // });
     } finally {
         setIsLoading(false);
     }
-}, [isMockData, toast]);
+}, [isMockData, /* toast */ ]);
 
   // Initial data loading
   useEffect(() => {

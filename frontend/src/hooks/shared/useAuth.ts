@@ -32,18 +32,14 @@ export function useAuth() {
         }
 
         if (userData) {
-          if (userData.subscription) {
-            console.log(
-              "Subscription data found in user data",
-              userData.subscription
-            );
-          }
-
           setUser(userData);
           
           if (userData.role) {
+            // Set both localStorage and cookie for the role
             localStorage.setItem("userRole", userData.role);
-            console.log("User role saved to localStorage:", userData.role);
+            // Set cookie for middleware access
+            document.cookie = `userRole=${userData.role}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+            console.log("User role saved:", userData.role);
           }
         } else {
           setUser(null);
@@ -95,7 +91,8 @@ export function useAuth() {
   // Logout function
   const logout = useCallback(() => {
     authService.logout();
-    localStorage.removeItem("userRole"); // Add this line
+    localStorage.removeItem("userRole");
+    document.cookie = "userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     setUser(null);
     router.push("/auth/login");
   }, [router]);

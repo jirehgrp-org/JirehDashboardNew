@@ -40,6 +40,10 @@ export function useColumns(
     </Button>
   );
 
+  const getUserById = React.useCallback(
+    (id: string) => users?.find((u) => u.id === id.toString()),
+    [users]
+  );
 
   const columns = React.useMemo(() => {
     const baseColumns: { [key: string]: Column<any>[] } = {
@@ -110,12 +114,10 @@ export function useColumns(
           ),
           cell: ({ row }) => {
             const userId = row.original.user;
-            const user = users?.find((u) => u.id === userId.toString());
-
-            // Return the name or fallback to user ID
+            const user = getUserById(userId);
             return user?.name || `User ${userId}`;
           },
-        },
+        },       
         {
           accessorKey: "status",
           header: ({ onSort }) => (
@@ -174,7 +176,7 @@ export function useColumns(
 
 
     return baseColumns[variant] || [];
-  }, [variant, language, items, toEthiopian, t]);
+  }, [variant, language, items, toEthiopian, t, users, getUserById]);
 
   return columns;
 }

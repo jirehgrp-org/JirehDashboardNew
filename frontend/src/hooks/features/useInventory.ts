@@ -116,11 +116,11 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
               setData([]);
           }
           
-          toast({
-            title: "Using Demo Data",
-            description: "Could not connect to the server. Using sample data instead.",
-            variant: "destructive"
-          });
+          // toast({
+          //   title: "Using Demo Data",
+          //   description: "Could not connect to the server. Using sample data instead.",
+          //   variant: "destructive"
+          // });
         }
       }
     } catch (err) {

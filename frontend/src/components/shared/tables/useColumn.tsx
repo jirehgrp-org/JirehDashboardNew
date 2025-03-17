@@ -113,7 +113,7 @@ export function useColumns(
             const user = users?.find((u) => u.id === userId.toString());
 
             // Return the name or fallback to user ID
-            return user?.name || `User #${userId}`;
+            return user?.name || `User ${userId}`;
           },
         },
         {

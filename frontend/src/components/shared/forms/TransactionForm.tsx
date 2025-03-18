@@ -86,9 +86,9 @@ export function TransactionForm({
         return prev.map((i) =>
           i.id === item.id
             ? {
-                ...i,
-                orderQuantity: Math.min(i.orderQuantity + 1, i.quantity!),
-              }
+              ...i,
+              orderQuantity: Math.min(i.orderQuantity + 1, i.quantity!),
+            }
             : i
         );
       }
@@ -102,12 +102,12 @@ export function TransactionForm({
         .map((item) =>
           item.id === itemId
             ? {
-                ...item,
-                orderQuantity: Math.min(
-                  Math.max(item.orderQuantity + change, 0),
-                  item.quantity!
-                ),
-              }
+              ...item,
+              orderQuantity: Math.min(
+                Math.max(item.orderQuantity + change, 0),
+                item.quantity!
+              ),
+            }
             : item
         )
         .filter((item) => item.orderQuantity > 0)
@@ -162,7 +162,7 @@ export function TransactionForm({
                 <AccordionTrigger className="text-left">
                   {category.name}
                 </AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="max-h-64 overflow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {(itemsByCategory[category.id] || []).map(
                       (item: InventoryItem) => (
@@ -191,9 +191,9 @@ export function TransactionForm({
       {/* Right Column - Order Summary and Customer Info */}
       <div className="w-1/2 space-y-6">
         {/* Order Summary */}
-        <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4 space-y-4">
+        <div className="bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4 space-y-4 flex flex-col">
           <h3 className="text-lg font-medium">{formT.orderSummary}</h3>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[150px] overflow-y-auto pr-2">
             {cartItems.map((item) => (
               <div
                 key={item.id}
@@ -214,7 +214,24 @@ export function TransactionForm({
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-8 text-center">{item.orderQuantity}</span>
+                  <Input
+                    type="number"
+                    className="w-16 text-center h-9"
+                    value={item.orderQuantity}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value)) {
+                        setCartItems(prev =>
+                          prev.map(i => i.id === item.id
+                            ? { ...i, orderQuantity: Math.min(Math.max(value, 0), i.quantity!) }
+                            : i
+                          ).filter(i => i.orderQuantity > 0)
+                        );
+                      }
+                    }}
+                    min="1"
+                    max={item.quantity}
+                  />
                   <Button
                     type="button"
                     variant="outline"
@@ -236,7 +253,7 @@ export function TransactionForm({
               </div>
             ))}
           </div>
-          <div className="flex justify-between pt-4 border-t font-medium">
+          <div className="flex justify-between pt-4 border-t font-medium mt-auto">
             <span>{formT.total}:</span>
             <span>
               {formT.birr} {calculateTotal().toFixed(2)}

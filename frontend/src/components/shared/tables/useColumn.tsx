@@ -176,7 +176,7 @@ export function useColumns(
 
 
     return baseColumns[variant] || [];
-  }, [variant, language, items, toEthiopian, t, users, getUserById]);
+  }, [variant, language, items, toEthiopian, t, getUserById]);
 
   return columns;
 }

@@ -77,22 +77,22 @@ export function TransactionForm({
     },
   });
 
-  const handleAddToCart = (item: InventoryItem) => {
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.id === item.id
-            ? {
-              ...i,
-              orderQuantity: Math.min(i.orderQuantity + 1, i.quantity!),
-            }
-            : i
-        );
-      }
-      return [...prev, { ...item, orderQuantity: 1 }];
-    });
-  };
+  // const handleAddToCart = (item: InventoryItem) => {
+  //   setCartItems((prev) => {
+  //     const existing = prev.find((i) => i.id === item.id);
+  //     if (existing) {
+  //       return prev.map((i) =>
+  //         i.id === item.id
+  //           ? {
+  //             ...i,
+  //             orderQuantity: Math.min(i.orderQuantity + 1, i.quantity!),
+  //           }
+  //           : i
+  //       );
+  //     }
+  //     return [...prev, { ...item, orderQuantity: 1 }];
+  //   });
+  // };
 
   const handleUpdateQuantity = (itemId: string, change: number) => {
     setCartItems((prev) =>

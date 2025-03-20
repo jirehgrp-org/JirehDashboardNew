@@ -30,7 +30,7 @@ const CategorySelectionDialog = ({
   onItemsSelected,
 }: CategorySelectionDialogProps) => {
   const { language } = useLanguage();
-  const t = translations[language].dashboard.transaction.form;
+  const t = translations[language].dashboard.form;
   const [selectedItems, setSelectedItems] = useState<InventoryItem[]>([]);
 
   const handleItemToggle = (item: InventoryItem) => {

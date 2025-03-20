@@ -49,13 +49,13 @@ export function RegisterUserForm() {
   const generateUsername = (fullName: string) => {
     const firstName = fullName.split(" ")[0]; // Extract the first name
     const formattedName = firstName.toLowerCase().replace(/[^a-z]/g, ""); // Keep only letters
-  
+
     if (!formattedName) return "";
-  
+
     const suffix = Math.floor(100 + Math.random() * 900); // Generate a three-digit number
     return `${formattedName}${suffix}`;
   };
-  
+
 
   useEffect(() => {
     if (formData.fullname) {
@@ -83,7 +83,7 @@ export function RegisterUserForm() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-  
+
     try {
       // Validate required fields for user registration
       if (
@@ -117,8 +117,8 @@ export function RegisterUserForm() {
       const formattedPhone = formData.phone.startsWith("+251")
         ? formData.phone
         : formData.phone.startsWith("251")
-        ? `+${formData.phone}`
-        : `+251${formData.phone}`;
+          ? `+${formData.phone}`
+          : `+251${formData.phone}`;
 
       // Prepare registration data
       const registrationData = {
@@ -142,7 +142,7 @@ export function RegisterUserForm() {
           description: "Now let's set up your business profile...",
           variant: "default",
         });
-      
+
         sessionStorage.setItem(
           "pendingBusinessSetup",
           JSON.stringify({
@@ -155,7 +155,7 @@ export function RegisterUserForm() {
             timestamp: Date.now()
           })
         );
-      
+
         setTimeout(() => {
           router.replace("/auth/registerBusiness?success=true");
         }, 2000);
@@ -239,11 +239,18 @@ export function RegisterUserForm() {
                   placeholder={t.usernamePlaceholder}
                   type="text"
                   value={username}
-                  readOnly
-                  className="bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700 dark:text-neutral-300"
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setFormData((prev) => ({
+                      ...prev,
+                      username: e.target.value,
+                    }));
+                  }}
+                  className="border-neutral-200 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
                   disabled={isLoading}
                 />
               </LabelInputContainer>
+
             </div>
             <LabelInputContainer className="mb-4">
               <Label

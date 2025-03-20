@@ -26,7 +26,6 @@ function show_help() {
     echo "  restart        - Restart development environment"
     echo "  prod           - Start production environment"
     echo "  logs           - View logs from backend container"
-    echo "  frontend-logs  - View logs from frontend container"
     echo "  db-logs        - View logs from database container"
     echo "  shell          - Open a shell in the backend container"
     echo "  psql           - Connect to the database with psql"
@@ -39,15 +38,6 @@ function show_help() {
     echo ""
 }
 
-# Function to check if containers are running
-function is_running() {
-    if [ -z "$(docker-compose -f $COMPOSE_FILE ps -q $SERVICE_NAME 2>/dev/null)" ]; then
-        return 1
-    else
-        return 0
-    fi
-}
-
 # Main logic
 case "$1" in
     start)
@@ -55,7 +45,6 @@ case "$1" in
         docker-compose -f $COMPOSE_FILE up -d
         echo -e "${GREEN}Development environment started!${NC}"
         echo -e "${YELLOW}Backend:  ${NC}http://localhost:8000"
-        echo -e "${YELLOW}Frontend: ${NC}http://localhost:3000"
         ;;
     
     stop)
@@ -80,11 +69,6 @@ case "$1" in
     logs)
         echo -e "${GREEN}Showing logs from backend container...${NC}"
         docker-compose -f $COMPOSE_FILE logs -f $SERVICE_NAME
-        ;;
-    
-    frontend-logs)
-        echo -e "${GREEN}Showing logs from frontend container...${NC}"
-        docker-compose -f $COMPOSE_FILE logs -f frontend
         ;;
     
     db-logs)

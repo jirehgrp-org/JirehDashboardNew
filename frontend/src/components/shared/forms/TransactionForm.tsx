@@ -3,7 +3,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OrderSchema } from "@/lib/schemas/transaction";
@@ -11,14 +11,9 @@ import { useLanguage } from "@/components/context/LanguageContext";
 import { useInventory } from "@/hooks/features/useInventory";
 import { translations } from "@/translations";
 import type { TransactionFormProps } from "@/types/features/transaction";
-import type { InventoryItem } from "@/types/features/inventory";
+import type { CategoryItem, InventoryItem } from "@/types/features/inventory";
+import CategorySelectionDialog from "@/components/features/dashboard/CategorySelectionDialog";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   Select,
   SelectContent,
@@ -59,6 +54,9 @@ export function TransactionForm({
 
   // Cart state
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
+
+  const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
 
   // Group items by category
   const itemsByCategory = React.useMemo(() => {
@@ -114,6 +112,28 @@ export function TransactionForm({
     );
   };
 
+  const handleItemsSelected = (items: InventoryItem[]) => {
+    // Add selected items to the order
+    const newCartItems = [...cartItems];
+
+    items.forEach(item => {
+      // Check if item already exists in order
+      const existingIndex = newCartItems.findIndex(i => i.id === item.id);
+      if (existingIndex >= 0) {
+        // Item already in cart, don't add it again
+        return;
+      }
+
+      // Add new item with quantity 1
+      newCartItems.push({
+        ...item,
+        orderQuantity: 1
+      });
+    });
+
+    setCartItems(newCartItems);
+  };
+
   const handleRemoveFromCart = (itemId: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== itemId));
   };
@@ -154,38 +174,26 @@ export function TransactionForm({
       {/* Left Column - Categories and Items */}
       <div className="w-1/2 space-y-4">
         <h3 className="text-lg font-medium mb-4">{formT.itemSelection}</h3>
-        <Accordion type="single" collapsible className="w-full">
-          {categories
-            ?.filter((cat) => cat.active)
-            .map((category) => (
-              <AccordionItem key={category.id} value={category.id}>
-                <AccordionTrigger className="text-left">
-                  {category.name}
-                </AccordionTrigger>
-                <AccordionContent className="max-h-64 overflow-y-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(itemsByCategory[category.id] || []).map(
-                      (item: InventoryItem) => (
-                        <div
-                          key={item.id}
-                          className="p-4 rounded-lg border hover:border-primary cursor-pointer"
-                          onClick={() => handleAddToCart(item)}
-                        >
-                          <div className="font-medium">{item.name}</div>
-                          <div className="text-sm text-neutral-500">
-                            {formT.price}: {formT.birr} {item.price}
-                          </div>
-                          <div className="text-sm text-neutral-500">
-                            {formT.inStock}: {item.quantity}
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
+        <div className="space-y-4">
+          <div className="font-medium">{formT.selectCategories || "Select Categories"}</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {categories?.filter(cat => cat.active).map((category) => (
+              <div
+                key={category.id}
+                className="border rounded-md p-4 cursor-pointer hover:border-primary transition-all flex flex-col items-center justify-center text-center"
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setCategoryDialogOpen(true);
+                }}
+              >
+                <div className="font-medium">{category.name}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {(itemsByCategory[category.id] || []).length} {formT.items || "items"}
+                </div>
+              </div>
             ))}
-        </Accordion>
+          </div>
+        </div>
       </div>
 
       {/* Right Column - Order Summary and Customer Info */}
@@ -379,6 +387,13 @@ export function TransactionForm({
           </form>
         </Form>
       </div>
+      <CategorySelectionDialog
+        open={categoryDialogOpen}
+        onOpenChange={setCategoryDialogOpen}
+        category={selectedCategory}
+        items={selectedCategory ? itemsByCategory[selectedCategory.id] || [] : []}
+        onItemsSelected={handleItemsSelected}
+      />
     </div>
   );
 }

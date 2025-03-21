@@ -90,7 +90,6 @@ export function SubscriptionGuard({ children }: { children: React.ReactNode }) {
     };
   }, [user, router, pathname, isLoading, checkAuth]);
 
-  // Show a loading spinner while checking
   // but don't redirect immediately
   if (isChecking || isLoading) {
     return <LoadingSpinner />;

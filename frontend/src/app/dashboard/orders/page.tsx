@@ -111,7 +111,7 @@ const OrdersPage = () => {
         total: order.total,
         userId: order.user, // User ID based on the TransactionItem interface
       }))
-    );      
+    );
 
     const csv = Papa.unparse(flattenedOrders);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });

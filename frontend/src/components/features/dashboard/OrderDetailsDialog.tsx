@@ -46,7 +46,7 @@ const OrderDetailsDialog = ({
   const canMarkPaid = ["admin", "manager", "sales"].includes(userRole);
   const canComplete = ["admin", "manager", "warehouse"].includes(userRole);
 
-  if (!order) return null;
+  if (!order) return null; 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

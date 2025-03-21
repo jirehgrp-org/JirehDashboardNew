@@ -14,6 +14,7 @@ import type { TransactionFormProps } from "@/types/features/transaction";
 import type { CategoryItem, InventoryItem } from "@/types/features/inventory";
 import CategorySelectionDialog from "@/components/features/dashboard/CategorySelectionDialog";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Select,
   SelectContent,
@@ -52,8 +53,11 @@ export function TransactionForm({
   const { data: items } = useInventory({ endpoint: "items" });
   const { data: categories } = useInventory({ endpoint: "categories" });
 
+  const [serviceType, setServiceType] = useState<"retail" | "foodService">("retail");
+
   // Cart state
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
@@ -77,22 +81,14 @@ export function TransactionForm({
     },
   });
 
-  // const handleAddToCart = (item: InventoryItem) => {
-  //   setCartItems((prev) => {
-  //     const existing = prev.find((i) => i.id === item.id);
-  //     if (existing) {
-  //       return prev.map((i) =>
-  //         i.id === item.id
-  //           ? {
-  //             ...i,
-  //             orderQuantity: Math.min(i.orderQuantity + 1, i.quantity!),
-  //           }
-  //           : i
-  //       );
-  //     }
-  //     return [...prev, { ...item, orderQuantity: 1 }];
-  //   });
-  // };
+  const getFoodServiceCustomerInfo = () => {
+    return {
+      customerName: "Guest",
+      customerPhone: "912345678",
+      customerEmail: "guest@example.com",
+      paymentMethod: "Cash"
+    };
+  };
 
   const handleUpdateQuantity = (itemId: string, change: number) => {
     setCartItems((prev) =>
@@ -113,18 +109,14 @@ export function TransactionForm({
   };
 
   const handleItemsSelected = (items: InventoryItem[]) => {
-    // Add selected items to the order
     const newCartItems = [...cartItems];
 
     items.forEach(item => {
-      // Check if item already exists in order
       const existingIndex = newCartItems.findIndex(i => i.id === item.id);
       if (existingIndex >= 0) {
-        // Item already in cart, don't add it again
         return;
       }
 
-      // Add new item with quantity 1
       newCartItems.push({
         ...item,
         orderQuantity: 1
@@ -133,6 +125,13 @@ export function TransactionForm({
 
     setCartItems(newCartItems);
   };
+
+
+  const filteredCategories = categories?.filter(
+    (cat) =>
+      cat.active &&
+      cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleRemoveFromCart = (itemId: string) => {
     setCartItems((prev) => prev.filter((item) => item.id !== itemId));
@@ -154,15 +153,20 @@ export function TransactionForm({
       price: item.price || 0,
     }));
 
+    // Use food service defaults if in food service mode
+    const customerInfo = serviceType === "foodService"
+      ? getFoodServiceCustomerInfo()
+      : formData;
+
     const orderData = {
-      ...formData,
+      ...customerInfo,
       items,
       total: calculateTotal(),
       orderDate: new Date().toISOString(),
     };
 
-    // Remove empty email
-    if (!formData.customerEmail) {
+    // Remove empty email for retail mode
+    if (serviceType === "retail" && !formData.customerEmail) {
       delete orderData.customerEmail;
     }
 
@@ -171,13 +175,58 @@ export function TransactionForm({
 
   return (
     <div className="flex gap-6">
+      {/* Service Type Toggle */}
+      <div className="w-full mb-6">
+        <div className="flex justify-center items-center mb-4">
+          <ToggleGroup
+            type="single"
+            value={serviceType}
+            onValueChange={(value) => {
+              if (value) setServiceType(value as "retail" | "foodService");
+            }}
+            className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center rounded-full p-1 shadow-inner"
+          >
+            {/* Retail */}
+            <ToggleGroupItem
+              value="retail"
+              className={`rounded-full px-6 py-2 text-sm transition-colors ${serviceType === "foodService"
+                ? "bg-transparent text-neutral-600 dark:text-neutral-200"
+                : "bg-white text-black dark:bg-neutral-900 dark:text-white"
+                }`}
+            >
+              Retail
+            </ToggleGroupItem>
+
+            {/* Food Service */}
+            <ToggleGroupItem
+              value="foodService"
+              className={`rounded-full px-6 py-2 text-sm transition-colors ${serviceType === "foodService"
+                ? "bg-white text-black dark:bg-neutral-900 dark:text-white"
+                : "bg-transparent text-neutral-600 dark:text-neutral-200"
+                }`}
+            >
+              Food Service
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </div>
+
       {/* Left Column - Categories and Items */}
       <div className="w-1/2 space-y-4">
         <h3 className="text-lg font-medium mb-4">{formT.itemSelection}</h3>
+        <div className="mb-4">
+          <Input
+            type="text"
+            placeholder="Search categories..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full"
+          />
+        </div>
         <div className="space-y-4">
           <div className="font-medium">{formT.selectCategories || "Select Categories"}</div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {categories?.filter(cat => cat.active).map((category) => (
+            {filteredCategories?.filter(cat => cat.active).map((category) => (
               <div
                 key={category.id}
                 className="border rounded-md p-4 cursor-pointer hover:border-primary transition-all flex flex-col items-center justify-center text-center"
@@ -270,122 +319,142 @@ export function TransactionForm({
         </div>
 
         {/* Customer Information */}
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleFormSubmit)}
-            className="space-y-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4"
-          >
-            <h3 className="text-lg font-medium">{formT.customerInfo}</h3>
+        {serviceType === "retail" ? (
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleFormSubmit)}
+              className="space-y-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4"
+            >
+              <h3 className="text-lg font-medium">{formT.customerInfo}</h3>
 
-            <FormField
-              control={form.control}
-              name="customerName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {formT.customerName}
-                    <RequiredIndicator />
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder={formT.customerNamePlaceholder}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="customerPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {formT.customerPhone}
-                    <RequiredIndicator />
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex">
-                      <div className="flex items-center justify-center px-3 h-10 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
-                        +251
-                      </div>
+              <FormField
+                control={form.control}
+                name="customerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {formT.customerName}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl>
                       <Input
                         {...field}
-                        type="tel"
-                        placeholder={formT.customerPhonePlaceholder}
-                        className="rounded-l-none"
-                        maxLength={9}
-                        minLength={9}
+                        placeholder={formT.customerNamePlaceholder}
                       />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="customerEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{formT.customerEmail}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="email"
-                      placeholder={formT.customerEmailPlaceholder}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="paymentMethod"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    {formT.paymentMethod}
-                    <RequiredIndicator />
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={formT.selectPaymentMethod} />
-                      </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Cash">{formT.cash}</SelectItem>
-                      <SelectItem value="Telebirr">{formT.telebirr}</SelectItem>
-                      <SelectItem value="Bank Transfer">
-                        {formT.bankTransfer}
-                      </SelectItem>
-                      <SelectItem value="Credit">{formT.credit}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <FormField
+                control={form.control}
+                name="customerPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {formT.customerPhone}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <FormControl>
+                      <div className="flex">
+                        <div className="flex items-center justify-center px-3 h-10 border border-r-0 rounded-l-md border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                          +251
+                        </div>
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder={formT.customerPhonePlaceholder}
+                          className="rounded-l-none"
+                          maxLength={9}
+                          minLength={9}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customerEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{formT.customerEmail}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder={formT.customerEmailPlaceholder}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="paymentMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {formT.paymentMethod}
+                      <RequiredIndicator />
+                    </FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={formT.selectPaymentMethod} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Cash">{formT.cash}</SelectItem>
+                        <SelectItem value="Telebirr">{formT.telebirr}</SelectItem>
+                        <SelectItem value="Bank Transfer">
+                          {formT.bankTransfer}
+                        </SelectItem>
+                        <SelectItem value="Credit">{formT.credit}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  {formT.cancel}
+                </Button>
+                <Button type="submit" disabled={cartItems.length === 0}>
+                  {initialData ? formT.update : formT.create}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        ) : (
+          <div className="space-y-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg p-4">
+            <h3 className="text-lg font-medium">Food Service Mode</h3>
+            <p className="text-neutral-600 dark:text-neutral-400">
+              Customer information will be automatically filled.
+            </p>
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={onCancel}>
                 {formT.cancel}
               </Button>
-              <Button type="submit" disabled={cartItems.length === 0}>
+              <Button
+                onClick={() => handleFormSubmit(getFoodServiceCustomerInfo())}
+                disabled={cartItems.length === 0}
+              >
                 {initialData ? formT.update : formT.create}
               </Button>
             </div>
-          </form>
-        </Form>
+          </div>
+        )}
       </div>
       <CategorySelectionDialog
         open={categoryDialogOpen}

@@ -1,5 +1,7 @@
 // @/components/shared/dialogs/CategorySelectionDialog.tsx
+
 import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +34,17 @@ const CategorySelectionDialog = ({
   const { language } = useLanguage();
   const t = translations[language].dashboard.form;
   const [selectedItems, setSelectedItems] = useState<InventoryItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  if (!category) return null;
+
+  // Define categoryItems here, before using it
+  const categoryItems = items.filter(item => item.categoryId === category.id);
+
+  // Now use categoryItems after it's defined
+  const filteredItems = categoryItems.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleItemToggle = (item: InventoryItem) => {
     const isSelected = selectedItems.some((i) => i.id === item.id);
@@ -47,53 +60,60 @@ const CategorySelectionDialog = ({
     onOpenChange(false);
   };
 
-  if (!category) return null;
-
-  const categoryItems = items.filter(item => item.categoryId === category.id);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {category.name} - {t.selectItems}
           </DialogTitle>
+
+          <div className="mt-2">
+            <Input
+              type="text"
+              placeholder="Search items..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
-          {categoryItems.map((item) => {
-            const isSelected = selectedItems.some((i) => i.id === item.id);
-            return (
-              <div
-                key={item.id}
-                className={`border rounded-md p-3 cursor-pointer transition-all ${
-                  isSelected ? "border-primary bg-primary/10" : "hover:border-gray-400"
-                }`}
-                onClick={() => handleItemToggle(item)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="text-sm font-medium">{item.name}</div>
-                  {isSelected && (
-                    <div className="bg-primary text-primary-foreground rounded-full p-1">
-                      <Check className="h-3 w-3" />
+        <div className="max-h-[60vh] overflow-y-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-4">
+            {filteredItems.map((item) => {
+              const isSelected = selectedItems.some((i) => i.id === item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`border rounded-md p-3 cursor-pointer transition-all ${isSelected ? "border-primary bg-primary/10" : "hover:border-gray-400"
+                    }`}
+                  onClick={() => handleItemToggle(item)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="text-sm font-medium">{item.name}</div>
+                    {isSelected && (
+                      <div className="bg-primary text-primary-foreground rounded-full p-1">
+                        <Check className="h-3 w-3" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {t.price}: {(item.price ?? 0).toLocaleString()}
+                  </div>
+                  {(item.quantity ?? 0) > 0 ? (
+                    <div className="text-xs text-muted-foreground">
+                      {t.stock}: {item.quantity}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-destructive">
+                      {t.outOfStock}
                     </div>
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {t.price}: {(item.price ?? 0).toLocaleString()}
-                </div>
-                {(item.quantity ?? 0) > 0 ? (
-                  <div className="text-xs text-muted-foreground">
-                    {t.stock}: {item.quantity}
-                  </div>
-                ) : (
-                  <div className="text-xs text-destructive">
-                    {t.outOfStock}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         <DialogFooter>
@@ -105,7 +125,7 @@ const CategorySelectionDialog = ({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog >
   );
 };
 

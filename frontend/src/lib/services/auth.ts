@@ -459,7 +459,7 @@ class AuthService {
 
     // Set cookies with strict options
     setCookie(null, "token", accessToken, {
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 2 * 60 * 60, // 2 hours
       path: "/",
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax", // Changed from "strict"
@@ -468,7 +468,7 @@ class AuthService {
 
     if (refreshToken) {
       setCookie(null, "refreshToken", refreshToken, {  // Fixed name and value
-        maxAge: 90 * 24 * 60 * 60, // 90 days (longer lifetime for refresh)
+        maxAge: 2 * 60 * 60, // 2 hours
         path: "/",
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",

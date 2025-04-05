@@ -173,44 +173,43 @@ export function TransactionForm({
     onSubmit(orderData);
   };
 
+  const ServiceTypeToggle = () => (
+    <div className="fixed z-50 left-1/2 transform -translate-x-1/2" style={{ top: "80px" }}>
+      <ToggleGroup
+        type="single"
+        value={serviceType}
+        onValueChange={(value) => {
+          if (value) setServiceType(value as "retail" | "foodService");
+        }}
+        className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center rounded-full p-1 shadow-lg"
+      >
+        <ToggleGroupItem
+          value="retail"
+          className={`rounded-full px-6 py-2 text-sm transition-colors ${
+            serviceType === "foodService"
+              ? "bg-transparent text-neutral-600 dark:text-neutral-200"
+              : "bg-white text-black dark:bg-neutral-900 dark:text-white"
+          }`}
+        >
+          Retail
+        </ToggleGroupItem>
+  
+        <ToggleGroupItem
+          value="foodService"
+          className={`rounded-full px-6 py-2 text-sm transition-colors ${
+            serviceType === "foodService"
+              ? "bg-white text-black dark:bg-neutral-900 dark:text-white"
+              : "bg-transparent text-neutral-600 dark:text-neutral-200"
+          }`}
+        >
+          Food Service
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
+  );
+
   return (
     <div className="flex gap-6">
-      {/* Service Type Toggle */}
-      <div className="w-full mb-6">
-        <div className="flex justify-center items-center mb-4">
-          <ToggleGroup
-            type="single"
-            value={serviceType}
-            onValueChange={(value) => {
-              if (value) setServiceType(value as "retail" | "foodService");
-            }}
-            className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center rounded-full p-1 shadow-inner"
-          >
-            {/* Retail */}
-            <ToggleGroupItem
-              value="retail"
-              className={`rounded-full px-6 py-2 text-sm transition-colors ${serviceType === "foodService"
-                ? "bg-transparent text-neutral-600 dark:text-neutral-200"
-                : "bg-white text-black dark:bg-neutral-900 dark:text-white"
-                }`}
-            >
-              Retail
-            </ToggleGroupItem>
-
-            {/* Food Service */}
-            <ToggleGroupItem
-              value="foodService"
-              className={`rounded-full px-6 py-2 text-sm transition-colors ${serviceType === "foodService"
-                ? "bg-white text-black dark:bg-neutral-900 dark:text-white"
-                : "bg-transparent text-neutral-600 dark:text-neutral-200"
-                }`}
-            >
-              Food Service
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-      </div>
-
       {/* Left Column - Categories and Items */}
       <div className="w-1/2 space-y-4">
         <h3 className="text-lg font-medium mb-4">{formT.itemSelection}</h3>
@@ -456,6 +455,8 @@ export function TransactionForm({
           </div>
         )}
       </div>
+      <ServiceTypeToggle />
+
       <CategorySelectionDialog
         open={categoryDialogOpen}
         onOpenChange={setCategoryDialogOpen}

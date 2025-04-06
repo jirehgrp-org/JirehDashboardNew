@@ -146,7 +146,10 @@ const ReportsPage = () => {
           (order): SalesReportItem => ({
             Customer: order.customerName,
             Items_Ordered: Array.isArray(order.items)
-              ? order.items.map((item) => item.name).join(", ")
+              ? order.items
+                .filter(item => item && item.name) // Filter out null/undefined items or items without a name
+                .map((item) => item.name)
+                .join(", ")
               : "",
             Total: order.total,
             Status: order.status,

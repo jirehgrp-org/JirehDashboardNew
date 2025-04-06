@@ -7,6 +7,7 @@ import { UserRole } from "../shared/auth";
 
 export interface OrderItem {
   itemId: string;
+  name: string;
   quantity: number;
   price: number;
 }

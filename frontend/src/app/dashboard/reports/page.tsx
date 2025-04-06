@@ -50,7 +50,7 @@ import Papa from "papaparse";
 import { DateRange } from "react-day-picker";
 
 interface SalesReportItem {
-  Order_Number: string;
+  Items_Ordered: string;
   Customer: string;
   Total: number;
   Status: string;
@@ -144,15 +144,15 @@ const ReportsPage = () => {
       case "sales": {
         const data = orders.map(
           (order): SalesReportItem => ({
-            Order_Number: order.orderNumber,
             Customer: order.customerName,
+            Items_Ordered: order.items?.map((item: any) => item.name).join(", ") || "",
             Total: order.total,
             Status: order.status,
             Payment_Status: order.paymentStatus,
             Payment_Method: order.paymentMethod,
             Date: new Date(order.orderDate).toLocaleDateString(),
           })
-        );
+        );        
         return filterDataByDateRange(data);
       }
       case "inventory": {

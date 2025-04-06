@@ -77,10 +77,11 @@ const OrdersPage = () => {
       return (
         order.customerName.toLowerCase().includes(searchTerm) ||
         order.orderNumber.toLowerCase().includes(searchTerm) ||
-        order.customerPhone.toLowerCase().includes(searchTerm)
+        order.customerPhone.toLowerCase().includes(searchTerm) ||
+        order.items.some((item) => item.name.toLowerCase().includes(searchTerm))
       );
     }) || [];
-
+  
     // Sort by orderDate
     return [...filtered].sort((a, b) => {
       const dateA = new Date(a.orderDate).getTime();
@@ -88,6 +89,7 @@ const OrdersPage = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
   }, [orders, searchQuery, sortOrder]);
+  
 
   const downloadCSV = () => {
     if (!orders?.length) return;

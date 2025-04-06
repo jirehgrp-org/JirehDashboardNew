@@ -2,7 +2,6 @@
 // @/components/shared/forms/TransactionForm
 
 "use client";
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,6 @@ import type { TransactionFormProps } from "@/types/features/transaction";
 import type { CategoryItem, InventoryItem } from "@/types/features/inventory";
 import CategorySelectionDialog from "@/components/features/dashboard/CategorySelectionDialog";
 import { Minus, Plus, Trash2 } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Select,
   SelectContent,
@@ -44,6 +42,7 @@ export function TransactionForm({
   initialData,
   onSubmit,
   onCancel,
+  serviceType,
 }: TransactionFormProps) {
   const { language } = useLanguage();
   const formT = translations[language].dashboard.form;
@@ -52,9 +51,7 @@ export function TransactionForm({
   // Get inventory items and categories
   const { data: items } = useInventory({ endpoint: "items" });
   const { data: categories } = useInventory({ endpoint: "categories" });
-
-  const [serviceType, setServiceType] = useState<"retail" | "foodService">("retail");
-
+  
   // Cart state
   const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,41 +169,6 @@ export function TransactionForm({
 
     onSubmit(orderData);
   };
-
-  const ServiceTypeToggle = () => (
-    <div className="fixed z-50 left-1/2 transform -translate-x-1/2" style={{ top: "80px" }}>
-      <ToggleGroup
-        type="single"
-        value={serviceType}
-        onValueChange={(value) => {
-          if (value) setServiceType(value as "retail" | "foodService");
-        }}
-        className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center rounded-full p-1 shadow-lg"
-      >
-        <ToggleGroupItem
-          value="retail"
-          className={`rounded-full px-6 py-2 text-sm transition-colors ${
-            serviceType === "foodService"
-              ? "bg-transparent text-neutral-600 dark:text-neutral-200"
-              : "bg-white text-black dark:bg-neutral-900 dark:text-white"
-          }`}
-        >
-          Retail
-        </ToggleGroupItem>
-  
-        <ToggleGroupItem
-          value="foodService"
-          className={`rounded-full px-6 py-2 text-sm transition-colors ${
-            serviceType === "foodService"
-              ? "bg-white text-black dark:bg-neutral-900 dark:text-white"
-              : "bg-transparent text-neutral-600 dark:text-neutral-200"
-          }`}
-        >
-          Food Service
-        </ToggleGroupItem>
-      </ToggleGroup>
-    </div>
-  );
 
   return (
     <div className="flex gap-6">
@@ -455,7 +417,6 @@ export function TransactionForm({
           </div>
         )}
       </div>
-      <ServiceTypeToggle />
 
       <CategorySelectionDialog
         open={categoryDialogOpen}

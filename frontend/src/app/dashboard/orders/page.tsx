@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Settings2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Bold } from "lucide-react"
+import { Toggle } from "@/components/ui/toggle"
 import Papa from "papaparse";
 import {
   Dialog,
@@ -44,6 +46,8 @@ const OrdersPage = () => {
     null
   );
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [serviceType, setServiceType] = useState<"retail" | "foodService">("retail");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -109,7 +113,7 @@ const OrdersPage = () => {
         paymentStatus: order.paymentStatus,
         orderDate: new Date(order.orderDate).toLocaleDateString(),
         total: order.total,
-        userId: order.user, // User ID based on the TransactionItem interface
+        userId: order.user,
       }))
     );
 
@@ -193,6 +197,7 @@ const OrdersPage = () => {
               isMobile ? "w-full flex-col" : "flex-row"
             )}
           >
+
             <Button
               variant="outline"
               onClick={downloadCSV}
@@ -201,6 +206,18 @@ const OrdersPage = () => {
             >
               <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
             </Button>
+            
+            {/* ServiceType Toggle placed next to the buttons */}
+            <Toggle
+              aria-label="Toggle service type"
+              pressed={serviceType === "foodService"}
+              onPressedChange={(pressed) => {
+                setServiceType(pressed ? "foodService" : "retail");
+              }}
+              className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center p-1 rounded-full shadow-lg"
+            >
+              <Bold className="h-4 w-4" />
+            </Toggle>
 
             {canAddOrders && (
               <Dialog open={open} onOpenChange={setOpen}>
@@ -218,8 +235,13 @@ const OrdersPage = () => {
                     <DialogTitle>{t.addOrder}</DialogTitle>
                   </DialogHeader>
                   <TransactionForm
+                    initialData={selectedOrder}
                     onSubmit={onSubmit}
-                    onCancel={() => setOpen(false)}
+                    onCancel={() => {
+                      setOpen(false);
+                      setSelectedOrder(null);
+                    }}
+                    serviceType={serviceType}
                   />
                 </DialogContent>
               </Dialog>
@@ -277,7 +299,6 @@ const OrdersPage = () => {
             {t.totalOrders}: {filteredOrders?.length || 0}
           </div>
         </div>
-
 
         <div className="flex-1">
           <DataTable

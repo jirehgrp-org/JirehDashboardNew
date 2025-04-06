@@ -39,6 +39,7 @@ export interface TransactionFormProps {
   initialData?: Partial<TransactionItem> | null;
   onSubmit: (data: Partial<TransactionItem>) => void;
   onCancel: () => void;
+  serviceType: "retail" | "foodService";
 }
 
 export type TransactionColumn = Column<TransactionItem>;

@@ -50,8 +50,8 @@ import Papa from "papaparse";
 import { DateRange } from "react-day-picker";
 
 interface SalesReportItem {
-  Items_Ordered: string;
   Customer: string;
+  Items_Ordered: string;
   Total: number;
   Status: string;
   Payment_Status: string;
@@ -145,14 +145,16 @@ const ReportsPage = () => {
         const data = orders.map(
           (order): SalesReportItem => ({
             Customer: order.customerName,
-            Items_Ordered: order.items?.map((item: any) => item.name).join(", ") || "",
+            Items_Ordered: Array.isArray(order.items)
+              ? order.items.map((item) => item.name).join(", ")
+              : "",
             Total: order.total,
             Status: order.status,
             Payment_Status: order.paymentStatus,
             Payment_Method: order.paymentMethod,
             Date: new Date(order.orderDate).toLocaleDateString(),
           })
-        );        
+        );
         return filterDataByDateRange(data);
       }
       case "inventory": {
@@ -191,9 +193,8 @@ const ReportsPage = () => {
     link.href = URL.createObjectURL(blob);
     const dateStr =
       timeframe === "custom" && date?.from
-        ? `${format(date.from, "yyyy-MM-dd")}_to_${
-            date.to ? format(date.to, "yyyy-MM-dd") : "now"
-          }`
+        ? `${format(date.from, "yyyy-MM-dd")}_to_${date.to ? format(date.to, "yyyy-MM-dd") : "now"
+        }`
         : timeframe;
     link.download = `${reportType}_report_${dateStr}.csv`;
     link.click();
@@ -206,9 +207,8 @@ const ReportsPage = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${
-          reportType.charAt(0).toUpperCase() + reportType.slice(1)
-        } Report</title>
+        <title>${reportType.charAt(0).toUpperCase() + reportType.slice(1)
+      } Report</title>
         <style>
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -218,9 +218,8 @@ const ReportsPage = () => {
         </style>
       </head>
       <body>
-        <h1>${
-          reportType.charAt(0).toUpperCase() + reportType.slice(1)
-        } Report</h1>
+        <h1>${reportType.charAt(0).toUpperCase() + reportType.slice(1)
+      } Report</h1>
         <div class="meta">
           Generated on: ${new Date().toLocaleString()}<br>
           ${timeframe !== "all" ? `Period: ${timeframe}` : ""}
@@ -228,23 +227,23 @@ const ReportsPage = () => {
         <table>
           <thead>
             <tr>${headers
-              .map((h) => `<th>${h.replace(/_/g, " ")}</th>`)
-              .join("")}</tr>
+        .map((h) => `<th>${h.replace(/_/g, " ")}</th>`)
+        .join("")}</tr>
           </thead>
           <tbody>
             ${data
-              .map(
-                (row) => `
+        .map(
+          (row) => `
               <tr>
                 ${headers
-                  .map(
-                    (header) => `<td>${row[header as keyof typeof row]}</td>`
-                  )
-                  .join("")}
-              </tr>
-            `
+              .map(
+                (header) => `<td>${row[header as keyof typeof row]}</td>`
               )
               .join("")}
+              </tr>
+            `
+        )
+        .join("")}
           </tbody>
         </table>
       </body>

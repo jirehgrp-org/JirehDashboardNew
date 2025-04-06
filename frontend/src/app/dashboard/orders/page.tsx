@@ -81,7 +81,7 @@ const OrdersPage = () => {
         order.items.some((item) => item.name.toLowerCase().includes(searchTerm))
       );
     }) || [];
-  
+
     // Sort by orderDate
     return [...filtered].sort((a, b) => {
       const dateA = new Date(a.orderDate).getTime();
@@ -89,7 +89,7 @@ const OrdersPage = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
   }, [orders, searchQuery, sortOrder]);
-  
+
 
   const downloadCSV = () => {
     if (!orders?.length) return;
@@ -208,18 +208,19 @@ const OrdersPage = () => {
             >
               <Download className={cn(isMobile ? "mr-2 h-4 w-4" : "h-4 w-4")} />
             </Button>
-            
+
             {/* ServiceType Toggle placed next to the buttons */}
             <Toggle
               aria-label="Toggle service type"
               pressed={serviceType === "foodService"}
-              onPressedChange={(pressed) => {
+              onPressedChange={(pressed: boolean) => {
                 setServiceType(pressed ? "foodService" : "retail");
               }}
               className="bg-neutral-200 dark:bg-neutral-700 inline-flex items-center p-1 rounded-full shadow-lg"
             >
               <Bold className="h-4 w-4" />
             </Toggle>
+
 
             {canAddOrders && (
               <Dialog open={open} onOpenChange={setOpen}>

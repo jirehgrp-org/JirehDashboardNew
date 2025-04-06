@@ -49,7 +49,7 @@ export function useOperation({ endpoint, onSuccess }: UseOperationOptions) {
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, toast]);
+  }, [endpoint]);
 
   // Initial data loading
   useEffect(() => {

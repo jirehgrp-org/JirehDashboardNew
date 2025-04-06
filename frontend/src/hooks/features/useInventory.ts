@@ -45,7 +45,7 @@ export function useInventory({ endpoint, onSuccess }: UseInventoryOptions) {
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, toast]);
+  }, [endpoint]);
 
   // Initial data loading
   useEffect(() => {

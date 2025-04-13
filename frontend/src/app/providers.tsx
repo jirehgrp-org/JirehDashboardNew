@@ -1,9 +1,8 @@
 // @/app/providers.tsx
-"use client";
 
+"use client";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { LanguageProvider } from "@/components/context/LanguageContext";
-import { AuthProvider } from "@/components/context/AuthContext";
 import { type ThemeProviderProps } from "next-themes";
 import { Toaster as SonnerToaster } from 'sonner';
 
@@ -24,15 +23,13 @@ export function Providers({ children, ...props }: ThemeProviderProps) {
       {...props}
     >
       <LanguageProvider>
-        <AuthProvider>
-          {children}
-          <SonnerToaster 
-            position="bottom-right"
-            expand={false}
-            richColors
-            closeButton
-          />
-        </AuthProvider>
+        {children}
+        <SonnerToaster 
+          position="bottom-right"
+          expand={false}
+          richColors
+          closeButton
+        />
       </LanguageProvider>
     </NextThemesProvider>
   );

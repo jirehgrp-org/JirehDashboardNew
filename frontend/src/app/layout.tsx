@@ -1,11 +1,12 @@
 // @/app/layout.tsx
+
+import { ClerkProvider } from "@clerk/nextjs";
 import { Providers } from "./providers";
 import { Geist, Geist_Mono, Roboto_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
-import { ToastHandler } from "@/components/common/ToastHandler";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,11 +57,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -83,12 +80,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${robotoMono.variable} ${entoto.variable} font-mono antialiased`}
         suppressHydrationWarning
       >
-        <Providers>
-          <div className="min-h-screen bg-background transition-colors duration-300">
-            {children}
-            <ToastHandler />
-          </div>
-        </Providers>
+        <ClerkProvider>
+          <Providers>
+            <div className="min-h-screen bg-background transition-colors duration-300">
+              {children}
+            </div>
+          </Providers>
+        </ClerkProvider>
         <Toaster />
       </body>
     </html>

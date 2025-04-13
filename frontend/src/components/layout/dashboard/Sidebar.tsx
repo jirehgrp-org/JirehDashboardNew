@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/components/context/LanguageContext";
 import type { UserRole, UserRoleInfo, Section } from "@/types/shared/auth";
 import { roleIcons, roleAccess } from "@/constants/shared/roleConstants";
-import DashboardHeader from "@/components/common/DashboardHeader";
+import Header from "@/components/common/Header";
 import { useAuth } from "@/hooks/shared/useAuth";
 
 interface SidebarDashboardProps {
@@ -137,7 +137,7 @@ export function SidebarDashboard({ children }: SidebarDashboardProps) {
         </SidebarBody>
       </Sidebar>
       <div className="flex flex-1 h-full flex-col">
-        <DashboardHeader variant="dashboard" />
+        <Header variant="dashboard" />
         {children}
       </div>
     </div>

@@ -147,6 +147,7 @@ JirehDashboardNew/
 │   ├── Dockerfile
 │   ├── manage.py
 │   └── requirements.txt
+│
 ├── frontend/
     ├── next/
     ├── node_modules/
@@ -160,18 +161,12 @@ JirehDashboardNew/
     ├── src/
     │   ├── app/
     │   │   ├── auth/
-    │   │   │   ├── forgotPassword/
-    │   │   │   │   └── page.tsx
     │   │   │   ├── login/
-    │   │   │   │   └── page.tsx
-    │   │   │   ├── registerBusiness/
-    │   │   │   │   └── page.tsx
-    │   │   │   ├── registerUser/
-    │   │   │   │   └── page.tsx
-    │   │   │   ├── resetPassword/
-    │   │   │   │   └── page.tsx
-    │   │   │   ├── subscription/
-    │   │   │   │   └── page.tsx
+    │   │   │   │   └── [[...rest]]/
+    │   │   │   │       └── page.tsx
+    │   │   │   ├── signUp/
+    │   │   │   │   └── [[...rest]]/
+    │   │   │   │       └── page.tsx
     │   │   │   └── layout.tsx
     │   │   │
     │   │   ├── dashboard/
@@ -215,15 +210,12 @@ JirehDashboardNew/
     │   │   ├── auth/
     │   │   │   └── RouteGuard.tsx
     │   │   ├── common/
-    │   │   │   ├── ApiErrorAlert.tsx
-    │   │   │   ├── DashboardHeader.tsx
     │   │   │   ├── Header.tsx
     │   │   │   ├── LanguageToggle.tsx
     │   │   │   ├── LoadingSpinner.tsx
     │   │   │   ├── MobileWrapper.tsx
     │   │   │   ├── ResponsiveWrapper.tsx
-    │   │   │   ├── ThemeToggle.tsx
-    │   │   │   └── ToastHandler.tsx
+    │   │   │   └── ThemeToggle.tsx
     │   │   │
     │   │   ├── context/
     │   │   │   ├── AuthContext.tsx
@@ -231,15 +223,8 @@ JirehDashboardNew/
     │   │   │   └── ThemeContext.tsx
     │   │   │
     │   │   ├── features/
-    │   │   │   ├── auth/
-    │   │   │   │   ├── ForgotPasswordForm.tsx
-    │   │   │   │   ├── LoginForm.tsx
-    │   │   │   │   ├── PaymentDialog.tsx
-    │   │   │   │   ├── RegisterBusinessForm.tsx
-    │   │   │   │   ├── RegisterUserForm.tsx
-    │   │   │   │   ├── ResetPasswordForm.tsx
-    │   │   │   │   └── SubscriptionForm.tsx
     │   │   │   └── dashboard/
+    │   │   │       ├── CategorySelectionDialog.tsx
     │   │   │       └── OrderDetailsDialog.tsx
     │   │   │
     │   │   ├── layout/

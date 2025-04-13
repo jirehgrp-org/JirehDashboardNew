@@ -42,3 +42,5 @@ next-env.d.ts
 
 # ignore Google Cloud credentials
 /src/api/sheets/*.json
+# clerk configuration (can include secrets)
+/.clerk/

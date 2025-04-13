@@ -10,18 +10,6 @@ import {
   SidebarLink,
 } from "@/components/ui/aceternity/Sidebar";
 import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { LogOut } from "lucide-react";
 import { translations } from "@/translations";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -39,15 +27,14 @@ interface SidebarDashboardProps {
 export function SidebarDashboard({ children }: SidebarDashboardProps) {
   const [open, setOpen] = useState(false);
   const { language } = useLanguage();
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
   const t: Record<string, string> = translations[language].dashboard.sidebar;
 
   // Default to 'manager' if no user role
   const userRole = (user?.role || 'manager') as keyof typeof roleAccess;
-  
 
   const filteredSections = useMemo(() => {
-    const pages = roleAccess[userRole] || roleAccess.manager; // Fallback to manager access
+    const pages = roleAccess[userRole] || roleAccess.manager;
     const groupedBySection = Object.entries(pages).reduce(
       (acc, [key, page]) => {
         const section = acc[page.section] || {
@@ -70,9 +57,6 @@ export function SidebarDashboard({ children }: SidebarDashboardProps) {
     return Object.values(groupedBySection);
   }, [userRole, t]);
 
-  const handleLogout = () => {
-    logout();
-  };
 
   return (
     <div
@@ -98,41 +82,6 @@ export function SidebarDashboard({ children }: SidebarDashboardProps) {
                 </React.Fragment>
               ))}
             </div>
-          </div>
-          <div>
-            <Separator className="my-1.5 h-1 bg-gradient-to-r from-neutral-300 via-neutral-400 to-neutral-300 dark:from-neutral-600 dark:via-neutral-700 dark:to-neutral-600 rounded" />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <SidebarLink
-                  link={{
-                    label: t.logout,
-                    href: "#",
-                    icon: (
-                      <LogOut className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-                    ),
-                  }}
-                />
-              </AlertDialogTrigger>
-              <AlertDialogContent className="z-[1050]">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t.logoutConfirmation}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t.logoutDescription}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => {
-                      setOpen(false);
-                      handleLogout();
-                    }}
-                  >
-                    {t.logout}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </SidebarBody>
       </Sidebar>

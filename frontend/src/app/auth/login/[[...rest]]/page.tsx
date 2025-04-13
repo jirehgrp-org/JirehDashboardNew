@@ -16,7 +16,7 @@ export default function LoginPage() {
         <SignIn
           path="/auth/login"
           routing="path"
-          signUpUrl="/auth/signUp"
+          signUpUrl="/auth/signup"
           forceRedirectUrl="/dashboard"
         />
       </div>

@@ -5,7 +5,7 @@ import { SignUp } from "@clerk/nextjs";
 import Header from "@/components/common/Header";
 
 export const metadata: Metadata = {
-  title: "Sign Up | Latika Bakery",
+  title: "Sign Up | JirehDashboard",
 };
 
 export default function SignUpPage() {
@@ -17,7 +17,7 @@ export default function SignUpPage() {
           path="/auth/signup"
           routing="path"
           signInUrl="/auth/login"
-          forceRedirectUrl="/dashboard"
+          forceRedirectUrl="/auth/registerBusiness"
         />
       </div>
     </>

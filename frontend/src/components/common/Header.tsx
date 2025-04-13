@@ -1,13 +1,9 @@
+// @/components/common/Header.tsx
+
 "use client";
 import React from "react";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { MoveLeft } from "lucide-react";
-import Link from "next/link";
 import { LanguageToggle } from "@/components/common/LanguageToggle";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
-import { useLanguage } from "@/components/context/LanguageContext";
-import { translations } from "@/translations";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 
 interface HeaderProps {
@@ -15,15 +11,13 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ variant = "auth" }) => {
-  const pathname = usePathname();
-  const { language } = useLanguage();
-  const t = translations[language];
-  const isSubscriptionPage = pathname === "/auth/subscription";
-
   const commonRightSection = (
     <div className="flex items-center space-x-2">
       <ThemeToggle />
       <LanguageToggle />
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
     </div>
   );
 
@@ -42,14 +36,6 @@ const Header: React.FC<HeaderProps> = ({ variant = "auth" }) => {
 
   return (
     <div className="fixed top-4 w-full px-4 flex items-center justify-between z-50">
-      {isSubscriptionPage && (
-        <Link href="/auth/signup">
-          <Button variant="ghost" className="gap-2">
-            <MoveLeft className="h-5 w-5" />
-            {t.auth.subscription.page.back}
-          </Button>
-        </Link>
-      )}
       <div className="ml-auto">{commonRightSection}</div>
     </div>
   );

@@ -52,13 +52,13 @@ api.interceptors.response.use(
 );
 
 // AUTHENTICATION & USER MANAGEMENT
-export const registerUser = (data: any) => api.post("/register/user/", data);
-export const getUserProfile = () => api.get("/user/");
-export const getCurrentUser = () => api.get("/auth/user/");
-export const getUserDetail = (userId: number) => api.get(`/user/${userId}/`);
-export const updateUserProfile = (userId: number, data: any) =>
-  api.put(`/user/${userId}/`, data);
-export const deleteUser = (userId: number) => api.delete(`/user/${userId}/`);
+// export const registerUser = (data: any) => api.post("/register/user/", data);
+// export const getUserProfile = () => api.get("/user/");
+// export const getCurrentUser = () => api.get("/auth/user/");
+// export const getUserDetail = (userId: number) => api.get(`/user/${userId}/`);
+// export const updateUserProfile = (userId: number, data: any) =>
+//   api.put(`/user/${userId}/`, data);
+// export const deleteUser = (userId: number) => api.delete(`/user/${userId}/`);
 
 // BUSINESS MANAGEMENT
 export const registerBusiness = async (data: any) => {

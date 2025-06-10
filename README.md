@@ -43,7 +43,7 @@ This system provides a complete solution for businesses to manage their operatio
 - Python
 
 ## License
-This project is proprietary software owned by Jireh-Group. See [LICENSE.md](LICENSE.md) for details.
+This project is proprietary software owned by JirehGroup. See [LICENSE.md](LICENSE.md) for details.
 Jireh-Group, Ethiopia
 
 ## Acknowledgments
